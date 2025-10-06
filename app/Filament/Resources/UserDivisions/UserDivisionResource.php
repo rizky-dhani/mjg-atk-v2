@@ -9,7 +9,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -29,14 +28,6 @@ class UserDivisionResource extends Resource
             ]);
     }
 
-    public static function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                //
-            ]);
-    }
-
     public static function table(Table $table): Table
     {
         return $table
@@ -47,7 +38,6 @@ class UserDivisionResource extends Resource
                 //
             ])
             ->recordActions([
-                ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
