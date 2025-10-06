@@ -7,14 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class AtkStockRequest extends Model
 {
     protected $fillable = [
-        'user_id',
+        'request_number',
+        'requester_id',
         'division_id',
         'notes'
     ];
 
-    public function user()
+    public function requester()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'requester_id');
     }
 
     public function division()
