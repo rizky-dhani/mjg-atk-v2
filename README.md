@@ -1,61 +1,158 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MJG ATK Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
 
-## About Laravel
+The MJG ATK Management System is a comprehensive inventory management solution for office stationery (Alat Tulis Kantor/ATK) built with Laravel and Filament v4. This system enables organizations to efficiently manage their office supplies inventory across multiple divisions with a robust approval workflow.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. User Management
+- Role-based access control (RBAC) with Spatie Permissions
+- Support for multiple user roles: Super Admin, Admin, Head, and Staff
+- Division-based organization structure
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Inventory Management
+- **ATK Categories**: Organize items by category
+- **ATK Items**: Manage individual office supply items
+- **Division Stocks**: Track inventory levels per division
+- **Stock Requests**: Request additional inventory
+- **Stock Usages**: Record consumption of inventory
 
-## Learning Laravel
+### 3. Approval Workflow
+- Configurable multi-step approval processes
+- Role and division-based approval steps
+- Comprehensive audit trail
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 4. Reporting & Analytics
+- Real-time inventory tracking
+- Usage analytics
+- Approval status monitoring
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## System Requirements
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP 8.2+
+- Laravel 12+
+- MySQL 5.7+ or MariaDB 10.2+
+- Composer
+- Node.js and NPM
 
-## Laravel Sponsors
+## Installation
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-username/mjg-atk-v2.git
+   cd mjg-atk-v2
+   ```
 
-### Premium Partners
+2. Install PHP dependencies:
+   ```bash
+   composer install
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. Install Node dependencies:
+   ```bash
+   npm install
+   npm run build
+   ```
+
+4. Copy and configure the environment file:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. Configure your database settings in `.env`
+
+6. Run database migrations and seeders:
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+7. Start the development server:
+   ```bash
+   php artisan serve
+   ```
+
+## Roles and Permissions
+
+### Super Admin
+- Full system access
+- User management
+- Role and permission management
+- All administrative functions
+
+### Admin
+- Manage ATK categories and items
+- View and manage all divisions
+- Approve/reject stock requests and usages
+- Manage approval workflows
+
+### Head
+- View division inventory
+- Request stock for their division
+- Approve/reject stock requests and usages within their authority
+
+### Staff
+- View available inventory
+- Request stock for their division
+
+## Core Components
+
+### 1. Divisions
+Organizational units that hold and consume inventory.
+
+### 2. ATK Categories
+Classification system for organizing office supplies.
+
+### 3. ATK Items
+Individual office supply items with details like name, description, and unit of measure.
+
+### 4. Division Stocks
+Current inventory levels for each item in each division.
+
+### 5. Stock Requests
+Formal requests for additional inventory submitted by divisions.
+
+### 6. Stock Usages
+Records of inventory consumption by divisions.
+
+### 7. Approval Flows
+Configurable workflows that define the approval process for requests and usages.
+
+## API Endpoints
+
+The system provides RESTful APIs for integration with external systems. All endpoints are protected by authentication.
+
+## Testing
+
+Run the test suite with:
+```bash
+php artisan test
+```
+
+## Deployment
+
+For production deployment:
+
+1. Set `APP_ENV=production` in `.env`
+2. Run `php artisan config:cache`
+3. Run `php artisan route:cache`
+4. Run `php artisan view:cache`
+5. Configure your web server (Apache/Nginx) to point to the `public` directory
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please contact the development team or open an issue on GitHub.
