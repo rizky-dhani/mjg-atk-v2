@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('atk_division_stocks', function (Blueprint $table) {
+        Schema::create('atk_division_inventory_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('division_id')->constrained('user_divisions')->onDelete('cascade');
             $table->foreignId('item_id')->constrained('atk_items')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('atk_categories')->onDelete('cascade');
-            $table->integer('current_stock')->default(0);
+            $table->integer('max_limit')->default(0);
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('division_stocks');
+        Schema::dropIfExists('atk_division_inventory_settings');
     }
 };

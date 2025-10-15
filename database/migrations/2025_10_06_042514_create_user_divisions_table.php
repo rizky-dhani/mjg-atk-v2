@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('divisions', function (Blueprint $table) {
+        Schema::create('user_divisions', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('initial', 10);
             $table->text('description')->nullable();
             $table->timestamps();
+        });
+
+        Schema::table('users', function (Blueprint $table){
+            $table->foreignId('division_id')->after('initial')->nullable()->constrained('user_divisions')->cascadeOnDelete();
         });
     }
 
