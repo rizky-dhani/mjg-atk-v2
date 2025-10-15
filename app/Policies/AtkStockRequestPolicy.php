@@ -13,7 +13,7 @@ class AtkStockRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view stock-requests');
+        return $user->can('view atk-stock-request');
     }
 
     /**
@@ -22,7 +22,7 @@ class AtkStockRequestPolicy
     public function view(User $user, AtkStockRequest $atkStockRequest): bool
     {
         // Users can view their own requests or if they have the permission
-        return $user->id === $atkStockRequest->requester_id || $user->can('view stock-requests');
+        return $user->id === $atkStockRequest->requester_id || $user->can('view atk-stock-request');
     }
 
     /**
@@ -30,7 +30,7 @@ class AtkStockRequestPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create stock-requests');
+        return $user->can('create atk-stock-request');
     }
 
     /**
@@ -39,8 +39,8 @@ class AtkStockRequestPolicy
     public function update(User $user, AtkStockRequest $atkStockRequest): bool
     {
         // Users can update their own pending requests
-        return $user->id === $atkStockRequest->requester_id && 
-               $atkStockRequest->approval && 
+        return $user->id === $atkStockRequest->requester_id &&
+               $atkStockRequest->approval &&
                $atkStockRequest->approval->status === 'pending';
     }
 
@@ -50,8 +50,8 @@ class AtkStockRequestPolicy
     public function delete(User $user, AtkStockRequest $atkStockRequest): bool
     {
         // Users can delete their own pending requests
-        return $user->id === $atkStockRequest->requester_id && 
-               $atkStockRequest->approval && 
+        return $user->id === $atkStockRequest->requester_id &&
+               $atkStockRequest->approval &&
                $atkStockRequest->approval->status === 'pending';
     }
 
@@ -60,27 +60,8 @@ class AtkStockRequestPolicy
      */
     public function approve(User $user, AtkStockRequest $atkStockRequest): bool
     {
-        // Check if user has permission to approve stock requests
-        if (!$user->can('approve stock-requests')) {
-            return false;
-        }
-
-        // Check if there's an approval for this request
-        if (!$atkStockRequest->approval) {
-            return false;
-        }
-
-        // Get the current approval step
-        $currentStep = $atkStockRequest->approval->approvalFlow->approvalFlowSteps()
-            ->where('step_number', $atkStockRequest->approval->current_step)
-            ->first();
-
-        if (!$currentStep) {
-            return false;
-        }
-
-        // Check if user is authorized for this step
+        // Use the ApprovalService to check if user can approve this specific request
         $approvalService = app(\App\Services\ApprovalService::class);
-        return $approvalService->isUserAuthorizedForStep($user, $currentStep, $atkStockRequest->division_id);
+        return $approvalService->canUserApproveStockRequest($atkStockRequest, $user);
     }
 }

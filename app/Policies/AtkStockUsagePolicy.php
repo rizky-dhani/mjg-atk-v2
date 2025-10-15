@@ -13,7 +13,7 @@ class AtkStockUsagePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view stock-usages');
+        return $user->can('view atk-stock-usage');
     }
 
     /**
@@ -22,7 +22,7 @@ class AtkStockUsagePolicy
     public function view(User $user, AtkStockUsage $atkStockUsage): bool
     {
         // Users can view their own usages or if they have the permission
-        return $user->id === $atkStockUsage->requester_id || $user->can('view stock-usages');
+        return $user->id === $atkStockUsage->requester_id || $user->can('view atk-stock-usage');
     }
 
     /**
@@ -30,7 +30,7 @@ class AtkStockUsagePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create stock-usages');
+        return $user->can('create atk-stock-usage');
     }
 
     /**

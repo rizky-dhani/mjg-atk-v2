@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\Role;
+use App\Models\User;
+use App\Models\Permission;
+use App\Policies\RolePolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::before(function (User $user, string $ability) {
+            return $user->isSuperAdmin() ? true: null;
+        });
+        Gate::policies([
+            Role::class => RolePolicy::class,
+            Permission::class => PermissionPolicy::class,
+        ]);
     }
 }
