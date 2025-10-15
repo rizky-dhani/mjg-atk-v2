@@ -14,9 +14,10 @@ return new class extends Migration
         Schema::create('approval_flow_steps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('flow_id')->constrained('approval_flows')->onDelete('cascade');
+            $table->string('step_name');
             $table->integer('step_number');
             $table->foreignId('role_id')->constrained('roles')->onDelete('cascade'); // Using spatie roles
-            $table->foreignId('division_id')->nullable()->constrained('divisions')->onDelete('set null');
+            $table->foreignId('division_id')->nullable()->constrained('user_divisions')->onDelete('set null');
             $table->string('description')->nullable();
             $table->timestamps();
         });

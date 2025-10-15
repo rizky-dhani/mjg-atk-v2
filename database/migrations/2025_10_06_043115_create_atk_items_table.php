@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('atk_items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->text('description')->nullable();
+            $table->string('slug');
+            $table->string('unit_of_measure');
             $table->foreignId('category_id')->constrained('atk_categories')->onDelete('cascade');
-            $table->string('unit'); // e.g., 'pcs', 'box', 'rim'
             $table->timestamps();
         });
     }
