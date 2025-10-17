@@ -13,7 +13,7 @@ class AtkStockRequestPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view atk-stock-request');
+        return $user->can("view-any atk-stock-request");
     }
 
     /**
@@ -21,8 +21,8 @@ class AtkStockRequestPolicy
      */
     public function view(User $user, AtkStockRequest $atkStockRequest): bool
     {
-        // Users can view their own requests or if they have the permission
-        return $user->id === $atkStockRequest->requester_id || $user->can('view atk-stock-request');
+        // Users can only view their own requests (where requester_id matches logged in user id)
+        return $user->can("view atk-stock-request");
     }
 
     /**
@@ -30,7 +30,7 @@ class AtkStockRequestPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create atk-stock-request');
+        return $user->can("create atk-stock-request");
     }
 
     /**
@@ -40,8 +40,8 @@ class AtkStockRequestPolicy
     {
         // Users can update their own pending requests
         return $user->id === $atkStockRequest->requester_id &&
-               $atkStockRequest->approval &&
-               $atkStockRequest->approval->status === 'pending';
+            $atkStockRequest->approval &&
+            $atkStockRequest->approval->status === "pending";
     }
 
     /**
@@ -51,8 +51,8 @@ class AtkStockRequestPolicy
     {
         // Users can delete their own pending requests
         return $user->id === $atkStockRequest->requester_id &&
-               $atkStockRequest->approval &&
-               $atkStockRequest->approval->status === 'pending';
+            $atkStockRequest->approval &&
+            $atkStockRequest->approval->status === "pending";
     }
 
     /**
@@ -62,6 +62,20 @@ class AtkStockRequestPolicy
     {
         // Use the ApprovalService to check if user can approve this specific request
         $approvalService = app(\App\Services\ApprovalService::class);
-        return $approvalService->canUserApproveStockRequest($atkStockRequest, $user);
+        return $approvalService->canUserApproveStockRequest(
+            $atkStockRequest,
+            $user,
+        );
+    }
+
+    /**
+     * Determine whether the user can resubmit the model after rejected.
+     */
+    public function resubmit(User $user, AtkStockRequest $atkStockRequest): bool
+    {
+        // Users can delete their own pending requests
+        return $user->id === $atkStockRequest->requester_id &&
+            $atkStockRequest->approval &&
+            $atkStockRequest->approval->status === "rejected";
     }
 }

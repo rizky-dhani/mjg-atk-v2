@@ -4,6 +4,9 @@ namespace App\Filament\Resources\ApprovalFlows;
 
 use App\Filament\Resources\ApprovalFlows\Pages\ViewApprovalFlow;
 use BackedEnum;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use UnitEnum;
 use Filament\Forms;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Tables\Table;
@@ -30,9 +33,8 @@ use App\Filament\Resources\ApprovalFlows\Pages\ManageApprovalFlows;
 class ApprovalFlowResource extends Resource
 {
     protected static ?string $model = ApprovalFlow::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::NumberedList;
+    protected static string | UnitEnum | null $navigationGroup = 'Approval Management';
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -83,15 +85,21 @@ class ApprovalFlowResource extends Resource
     public static function infolist(Schema $schema): Schema
     {
         return $schema
-            ->columns(3)
             ->components([
-                TextEntry::make('name'),
-                TextEntry::make('model_type'),
-                IconEntry::make('is_active')
-                ->trueIcon('heroicon-o-check-circle')
-                ->trueColor('success')
-                ->falseIcon('heroicon-o-x-circle')
-                ->falseColor('danger')
+                Section::make('Approval Flow')
+                    ->schema([
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('name'),
+                                TextEntry::make('model_type'),
+                                IconEntry::make('is_active')
+                                    ->trueIcon('heroicon-o-check-circle')
+                                    ->trueColor('success')
+                                    ->falseIcon('heroicon-o-x-circle')
+                                    ->falseColor('danger')
+                            ])
+                    ])
+                    ->columnSpanFull()
             ]);
     }
     public static function getPages(): array

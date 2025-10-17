@@ -617,17 +617,6 @@ class ApprovalService
                 'current_step' => $step->step_number,
             ]);
 
-            // Log rejection to history
-            $this->logApprovalAction(
-                $approvable,
-                $user,
-                'submitted', // Final submission/rejection
-                null, // document_id will be auto-generated
-                $notes ?? 'No reason provided', // rejection_reason
-                'Request rejected at step ' . $step->step_number . ': ' . $step->step_name,
-                null // No specific step for final rejection
-            );
-
             // Synchronize approval status
             $this->syncApprovalStatus($approvable);
 
@@ -749,5 +738,35 @@ class ApprovalService
 
         // Synchronize approval status
         $this->syncApprovalStatus($approval->approvable);
+    }
+
+    /**
+     * Resubmit a rejected approval to restart the approval flow from the beginning
+     *
+     * @param \App\Models\Approval $approval The approval to resubmit
+     * @param \App\Models\User $user The user resubmitting the approval
+     * @return void
+     */
+    public function resubmitApproval(Approval $approval, User $user): void
+    {
+        // Reset the approval to the first step
+        $approval->update([
+            'status' => 'pending',
+            'current_step' => 1,
+        ]);
+
+        // Clear all previous step approvals for this approval
+        $approval->approvalStepApprovals()->delete();
+
+        // Log the resubmission to history
+        $this->logApprovalAction(
+            $approval->approvable,
+            $user,
+            'submitted', // Action type for resubmission
+            null, // document_id will be auto-generated
+            null, // rejection_reason
+            'Request resubmitted for approval',
+            null // No specific step for resubmission
+        );
     }
 }

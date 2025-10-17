@@ -2,20 +2,23 @@
 
 namespace App\Filament\Resources\ApprovalFlows\RelationManagers;
 
-use Filament\Actions\AssociateAction;
-use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Table;
+use App\Models\UserDivision;
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Forms\Components\TextInput;
+use Filament\Actions\DissociateBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class ApprovalFlowStepsRelationManager extends RelationManager
 {
@@ -27,17 +30,32 @@ class ApprovalFlowStepsRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->components([
+                TextInput::make('step_name')
+                    ->label('Step Name')
+                    ->required()
+                    ->columnSpanFull(),
                 TextInput::make('step_number')
                     ->required()
                     ->numeric(),
-                TextInput::make('role_id')
-                    ->required()
-                    ->numeric(),
+                Select::make('role_id')
+                    ->label('Role')
+                    ->relationship('role', 'name')
+                    ->required(),
                 Select::make('division_id')
-                    ->relationship('division', 'name'),
+                    ->label('Division')
+                    ->relationship('division', 'name')
+                    ->columnSpanFull()
+                    ->nullable()
+                    ->helperText('Leave empty to make this step available to all divisions'),
                 TextInput::make('description')
-                    ->default(null),
+                    ->default(null)
+                    ->columnSpanFull(),
+                Toggle::make('allow_resubmission')
+                    ->label('Allow Resubmission')
+                    ->helperText('Allow this step to resubmit the approval after rejection')
+                    ->default(false),
             ]);
     }
 
@@ -46,17 +64,24 @@ class ApprovalFlowStepsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('name')
             ->columns([
+                TextColumn::make('step_name')
+                    ->label('Step Name')
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('step_number')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('role_id')
-                    ->numeric()
+                TextColumn::make('role.name')
+                    ->label('Role')
                     ->sortable(),
-                TextColumn::make('division_id')
-                    ->numeric()
+                TextColumn::make('division.name')
+                    ->label('Division')
                     ->sortable(),
                 TextColumn::make('description')
                     ->searchable(),
+                IconColumn::make('allow_resubmission')
+                    ->label('Resubmission')
+                    ->boolean(),
             ])
             ->filters([
                 //
