@@ -15,16 +15,16 @@ class AtkDivisionStocksTable
     {
         return $table
             ->columns([
-                TextColumn::make('division_id')
+                TextColumn::make('division.name')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('item_id')
+                TextColumn::make('item.name')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('quantity')
+                TextColumn::make('category.name')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('max_stock_limit')
+                TextColumn::make('current_stock')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('created_at')

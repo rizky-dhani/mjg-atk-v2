@@ -22,4 +22,9 @@ class AtkDivisionStock extends Model
     {
         return $this->belongsTo(AtkItem::class, 'item_id');
     }
+
+    public function category()
+    {
+        return $this->belongsTo(AtkCategory::class, 'category_id');
+    }
 }
