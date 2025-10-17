@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('request_id')->constrained('atk_stock_requests')->onDelete('cascade');
             $table->foreignId('item_id')->constrained('atk_items')->onDelete('cascade');
+            $table->foreignId('category_id')->constrained('atk_categories')->onDelete('cascade');
             $table->integer('quantity_requested');
             $table->timestamps();
         });
