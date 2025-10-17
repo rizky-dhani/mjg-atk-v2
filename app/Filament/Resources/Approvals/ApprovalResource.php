@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Approvals;
 use App\Filament\Resources\Approvals\Pages\ManageApprovals;
 use App\Models\Approval;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -20,9 +21,8 @@ use Filament\Tables\Table;
 class ApprovalResource extends Resource
 {
     protected static ?string $model = Approval::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::CheckCircle;
+    protected static string | UnitEnum | null $navigationGroup = 'Approval Management';
     public static function form(Schema $schema): Schema
     {
         return $schema
