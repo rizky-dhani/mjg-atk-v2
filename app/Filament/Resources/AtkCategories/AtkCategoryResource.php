@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AtkCategories;
 use App\Filament\Resources\AtkCategories\Pages\ManageAtkCategories;
 use App\Models\AtkCategory;
 use BackedEnum;
+use UnitEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -20,9 +21,10 @@ use Filament\Tables\Table;
 class AtkCategoryResource extends Resource
 {
     protected static ?string $model = AtkCategory::class;
-
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
+    protected static ?string $slug = 'atk/categories';    
+    protected static ?string $navigationLabel = 'Category';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
+    protected static string | UnitEnum | null $navigationGroup = 'Alat Tulis Kantor';
     public static function form(Schema $schema): Schema
     {
         return $schema
