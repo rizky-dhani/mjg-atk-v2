@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class AtkStockUsage extends Model
 {
     protected $fillable = [
-        'usage_number',
+        'request_number',
         'requester_id',
         'division_id',
-        'notes'
+        'notes',
+        'request_type'
     ];
 
     protected static function booted()

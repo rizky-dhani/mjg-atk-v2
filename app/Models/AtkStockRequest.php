@@ -14,7 +14,8 @@ class AtkStockRequest extends Model
         'request_number',
         'requester_id',
         'division_id',
-        'notes'
+        'notes',
+        'request_type'
     ];
 
     protected static function booted()
@@ -93,5 +94,10 @@ class AtkStockRequest extends Model
     public function approval(): MorphOne
     {
         return $this->morphOne(Approval::class, 'approvable');
+    }
+
+    public function approvalHistory()
+    {
+        return $this->morphMany(ApprovalHistory::class, 'approvable');
     }
 }
