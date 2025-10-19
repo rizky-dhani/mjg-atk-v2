@@ -2,28 +2,26 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Resources\Permissions\PermissionResource;
-use App\Filament\Resources\Roles\RoleResource;
+use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\NavigationItem;
+use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Pages\Dashboard;
-use Filament\Support\Enums\Width;
 use Filament\Support\Colors\Color;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\AccountWidget;
 use Filament\Widgets\FilamentInfoWidget;
-use Filament\Http\Middleware\Authenticate;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Filament\Http\Middleware\AuthenticateSession;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class DashboardPanelProvider extends PanelProvider
 {
@@ -40,6 +38,18 @@ class DashboardPanelProvider extends PanelProvider
             ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Blue,
+            ])
+            ->navigationItems([
+                NavigationItem::make('Permintaan ATK')
+                    ->icon(fn () => Heroicon::ArrowDownTray)
+                    ->url(fn () => AtkStockRequestResource::getUrl('index'))
+                    ->group('Alat Tulis Kantor')
+                    ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('index')),
+                NavigationItem::make('Approval Permintaan ATK')
+                    ->icon(fn () => Heroicon::DocumentCheck)
+                    ->url(fn () => AtkStockRequestResource::getUrl('approval'))
+                    ->group('Approval Permintaan')
+                    ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval')),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

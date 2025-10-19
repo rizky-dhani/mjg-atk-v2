@@ -21,33 +21,29 @@ use Filament\Tables\Table;
 class AtkCategoryResource extends Resource
 {
     protected static ?string $model = AtkCategory::class;
-    protected static ?string $slug = 'atk/categories';    
-    protected static ?string $navigationLabel = 'Category';
+    protected static ?string $slug = "atk/categories";
+    protected static ?string $navigationLabel = "Category";
+    protected static ?string $navigationParentItem = "Inventory Stocks";
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
-    protected static string | UnitEnum | null $navigationGroup = 'Alat Tulis Kantor';
+    protected static string|UnitEnum|null $navigationGroup = "Alat Tulis Kantor";
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required(),
-                Textarea::make('description')
-                    ->default(null)
-                    ->columnSpanFull(),
-            ]);
+        return $schema->components([
+            TextInput::make("name")->required(),
+            Textarea::make("description")->default(null)->columnSpanFull(),
+        ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
-                TextColumn::make('created_at')
+                TextColumn::make("name")->searchable(),
+                TextColumn::make("created_at")
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make("updated_at")
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -55,21 +51,16 @@ class AtkCategoryResource extends Resource
             ->filters([
                 //
             ])
-            ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
+            ->recordActions([EditAction::make(), DeleteAction::make()])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                BulkActionGroup::make([DeleteBulkAction::make()]),
             ]);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ManageAtkCategories::route('/'),
+            "index" => ManageAtkCategories::route("/"),
         ];
     }
 }

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('atk_stock_requests', function (Blueprint $table) {
             $table->id();
             $table->string('request_number')->unique();
+            $table->string('request_type')->default('addition');
             $table->foreignId('requester_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('division_id')->constrained('user_divisions')->onDelete('cascade');
             $table->text('notes')->nullable();
@@ -29,4 +30,3 @@ return new class extends Migration
         Schema::dropIfExists('atk_stock_requests');
     }
 };
-

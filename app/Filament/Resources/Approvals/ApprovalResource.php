@@ -2,27 +2,28 @@
 
 namespace App\Filament\Resources\Approvals;
 
-use App\Filament\Resources\Approvals\Pages\ManageApprovals;
-use App\Models\Approval;
-use BackedEnum;
 use UnitEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
+use BackedEnum;
+use App\Models\User;
+use App\Models\Approval;
 use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Actions\EditAction;
+use Filament\Resources\Resource;
+use Filament\Actions\DeleteAction;
+use Filament\Support\Icons\Heroicon;
+use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\Select;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use App\Filament\Resources\Approvals\Pages\ManageApprovals;
 
 class ApprovalResource extends Resource
 {
     protected static ?string $model = Approval::class;
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CheckCircle;
-    protected static string | UnitEnum | null $navigationGroup = 'Approval Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Approval Management';
     public static function form(Schema $schema): Schema
     {
         return $schema

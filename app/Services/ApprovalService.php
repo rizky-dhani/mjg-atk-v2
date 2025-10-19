@@ -468,6 +468,8 @@ class ApprovalService
             return $model->stock_request_number;
         } elseif (isset($model->request_number)) {
             return $model->request_number;
+        } elseif (isset($model->request_number)) {
+            return $model->request_number;
         } elseif (isset($model->stock_usage_number)) {
             return $model->stock_usage_number;
         } elseif (isset($model->usage_number)) {
@@ -648,6 +650,9 @@ class ApprovalService
                     null // No specific step for final approval
                 );
 
+                // If this is a model that requires stock updates when approved, handle it
+                $this->handleStockUpdates($approvable);
+
                 // Synchronize approval status
                 $this->syncApprovalStatus($approvable);
 
@@ -768,5 +773,154 @@ class ApprovalService
             'Request resubmitted for approval',
             null // No specific step for resubmission
         );
+    }
+
+    /**
+     * Handle stock updates for various model types when they are fully approved
+     *
+     * @param mixed $model The approved model that may require stock updates
+     * @return void
+     */
+    private function handleStockUpdates($model): void
+    {
+        $modelClass = get_class($model);
+
+        // Check if the model has a request_type field (for future unified model)
+        if (isset($model->request_type)) {
+            // Use the request_type field to determine the operation
+            $this->updateStockByRequestType($model);
+        } else {
+            // For the current separate models, use the existing logic
+            switch ($modelClass) {
+                case \App\Models\AtkStockRequest::class:
+                    $this->updateStockForAddition($model);
+                    break;
+                    
+                case \App\Models\AtkStockUsage::class:
+                    $this->updateStockForReduction($model);
+                    break;
+                    
+                // Add more cases as needed for other models
+                default:
+                    // No stock update needed for this model type
+                    break;
+            }
+        }
+    }
+    
+    /**
+     * Update division stock for stock addition (e.g., AtkStockRequest)
+     *
+     * @param \App\Models\AtkStockRequest $stockRequest The approved stock request
+     * @return void
+     */
+    private function updateStockForAddition(\App\Models\AtkStockRequest $stockRequest): void
+    {
+        // Load the stock request items to ensure they are available
+        $stockRequest->load('atkStockRequestItems');
+        
+        // Loop through each item in the stock request and update the division stock
+        foreach ($stockRequest->atkStockRequestItems as $requestItem) {
+            // Find or create the division stock record for this item and division
+            $divisionStock = \App\Models\AtkDivisionStock::firstOrCreate(
+                [
+                    'division_id' => $stockRequest->division_id,
+                    'item_id' => $requestItem->item_id,
+                ],
+                [
+                    'quantity' => 0,
+                    'max_stock_limit' => 0, // Initially set to 0, can be updated later
+                ]
+            );
+
+            // Update the quantity by adding the requested quantity
+            $newQuantity = $divisionStock->quantity + $requestItem->quantity_requested;
+            $divisionStock->update([
+                'quantity' => $newQuantity
+            ]);
+        }
+    }
+    
+    /**
+     * Update division stock for stock reduction (e.g., AtkStockUsage)
+     *
+     * @param \App\Models\AtkStockUsage $stockUsage The approved stock usage
+     * @return void
+     */
+    private function updateStockForReduction(\App\Models\AtkStockUsage $stockUsage): void
+    {
+        // Load the stock usage items to ensure they are available
+        $stockUsage->load('atkStockUsageItems');
+        
+        // Loop through each item in the stock usage and update the division stock
+        foreach ($stockUsage->atkStockUsageItems as $usageItem) {
+            // Find the division stock record for this item and division
+            $divisionStock = \App\Models\AtkDivisionStock::where([
+                'division_id' => $stockUsage->division_id,
+                'item_id' => $usageItem->item_id,
+            ])->first();
+
+            // If division stock exists, reduce the quantity
+            if ($divisionStock) {
+                // Ensure the quantity doesn't go below zero
+                $newQuantity = max(0, $divisionStock->quantity - $usageItem->quantity_used);
+                $divisionStock->update([
+                    'quantity' => $newQuantity
+                ]);
+            }
+        }
+    }
+    /**
+     * Update division stock based on a request_type field
+     * This method is designed to work with a future unified model
+     *
+     * @param mixed $model The model with request_type field
+     * @return void
+     */
+    private function updateStockByRequestType($model): void
+    {
+        // Determine the operation based on request_type
+        $operation = $model->request_type;
+        $itemsRelation = $model->items_relation ?? 'items'; // Default to 'items' relation
+        $quantityField = $model->quantity_field ?? 'quantity'; // Default to 'quantity' field
+        
+        // Load the items relationship to ensure it's available
+        $model->load($itemsRelation);
+        
+        // Get the items to process
+        $items = $model->{$itemsRelation};
+        
+        foreach ($items as $item) {
+            $quantity = $item->{$quantityField} ?? 0;
+            
+            // Skip if quantity is zero or negative
+            if ($quantity <= 0) {
+                continue;
+            }
+            
+            // Find or create the division stock record for this item and division
+            $divisionStock = \App\Models\AtkDivisionStock::firstOrCreate(
+                [
+                    'division_id' => $model->division_id,
+                    'item_id' => $item->item_id,
+                ],
+                [
+                    'quantity' => 0,
+                    'max_stock_limit' => 0, // Initially set to 0, can be updated later
+                ]
+            );
+            
+            // Calculate new quantity based on the operation type
+            $newQuantity = match($operation) {
+                'addition', 'increase' => $divisionStock->quantity + $quantity,
+                'reduction', 'decrease' => max(0, $divisionStock->quantity - $quantity),
+                default => $divisionStock->quantity // No change for other types
+            };
+            
+            // Update the division stock
+            $divisionStock->update([
+                'quantity' => $newQuantity
+            ]);
+        }
     }
 }

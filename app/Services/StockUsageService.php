@@ -38,7 +38,7 @@ class StockUsageService
 
             // Create the stock usage
             $stockUsage = new AtkStockUsage([
-                'usage_number' => $usageNumber,
+                'request_number' => $usageNumber,
                 'requester_id' => $user->id,
                 'division_id' => $data['division_id'],
                 'notes' => $data['notes'] ?? null

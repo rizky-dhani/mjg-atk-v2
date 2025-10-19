@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('atk_stock_usages', function (Blueprint $table) {
             $table->id();
-            $table->string('usage_number')->unique();
+            $table->string('request_number')->unique();
+            $table->string('request_type')->default('reduction');
             $table->foreignId('requester_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('division_id')->constrained('user_divisions')->onDelete('cascade');
             $table->text('notes')->nullable();

@@ -24,7 +24,7 @@ class AtkStockUsageResource extends Resource
     protected static ?string $slug = 'atk/stock-usages';    
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowUpTray;
     protected static string | UnitEnum | null $navigationGroup = 'Alat Tulis Kantor';
-    protected static ?string $recordTitleAttribute = 'usage_number';
+    protected static ?string $recordTitleAttribute = 'request_number';
 
     public static function form(Schema $schema): Schema
     {

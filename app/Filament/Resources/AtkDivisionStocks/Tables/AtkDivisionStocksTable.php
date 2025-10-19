@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 
 use Filament\Actions\BulkActionGroup;
+use Illuminate\Database\Eloquent\Builder;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -14,24 +15,21 @@ class AtkDivisionStocksTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(
+                fn(Builder $query) => $query->where(
+                    "division_id",
+                    auth()->user()->division_id,
+                ),
+            )
             ->columns([
-                TextColumn::make('division.name')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('item.name')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('category.name')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('current_stock')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('created_at')
+                TextColumn::make("item.name")->numeric()->sortable(),
+                TextColumn::make("category.name")->numeric()->sortable(),
+                TextColumn::make("current_stock")->numeric()->sortable(),
+                TextColumn::make("created_at")
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make("updated_at")
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -39,14 +37,9 @@ class AtkDivisionStocksTable
             ->filters([
                 //
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
+            ->recordActions([ViewAction::make(), EditAction::make()])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                BulkActionGroup::make([DeleteBulkAction::make()]),
             ]);
     }
 }
