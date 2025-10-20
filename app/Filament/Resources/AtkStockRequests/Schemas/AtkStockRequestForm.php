@@ -2,19 +2,19 @@
 
 namespace App\Filament\Resources\AtkStockRequests\Schemas;
 
-use App\Models\AtkItem;
 use App\Models\AtkCategory;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
+use App\Models\AtkDivisionInventorySetting;
 use App\Models\AtkDivisionStock;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
+use App\Models\AtkItem;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use App\Models\AtkDivisionInventorySetting;
+use Filament\Schemas\Schema;
 
 class AtkStockRequestForm
 {
@@ -25,16 +25,16 @@ class AtkStockRequestForm
                 Section::make('Rejection Details')
                     ->visible(function ($get, $record) {
                         // Show this section only when there's a rejection
-                        if (!$record) {
+                        if (! $record) {
                             return false;
                         }
-                        
+
                         // Check if there are any rejection records in ApprovalHistory
                         $hasRejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                             ->where('approvable_id', $record->id)
                             ->where('action', 'rejected')
                             ->exists();
-                            
+
                         return $hasRejection;
                     })
                     ->schema([
@@ -45,17 +45,17 @@ class AtkStockRequestForm
                                     ->readOnly()
                                     ->dehydrated(false) // Don't include this in form data
                                     ->formatStateUsing(function ($record) {
-                                        if (!$record) {
+                                        if (! $record) {
                                             return null;
                                         }
-                                        
+
                                         // Get the most recent rejection reason from ApprovalHistory
                                         $rejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
                                             ->first();
-                                            
+
                                         return $rejection ? $rejection->rejection_reason : null;
                                     }),
                                 TextInput::make('rejector_name')
@@ -63,17 +63,17 @@ class AtkStockRequestForm
                                     ->readOnly()
                                     ->dehydrated(false) // Don't include this in form data
                                     ->formatStateUsing(function ($record) {
-                                        if (!$record) {
+                                        if (! $record) {
                                             return null;
                                         }
-                                        
+
                                         // Get the most recent rejection's user from ApprovalHistory
                                         $rejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
                                             ->first();
-                                            
+
                                         return $rejection ? $rejection->user->name : null;
                                     }),
                             ]),
@@ -91,25 +91,25 @@ class AtkStockRequestForm
                                     ->action(function (array $arguments, Repeater $component) {
                                         $state = $component->getState();
                                         $currentKey = $arguments['item'];
-                                        
+
                                         $newKey = uniqid('item_');
                                         // Pre-populate with empty values for proper binding
                                         $newItem = [
                                             'item_category_id' => null,
                                             'item_id' => null,
                                             'category_id' => null,
-                                            'quantity_requested' => null,
+                                            'quantity' => null,
                                             'notes' => null,
                                         ];
-                                        
+
                                         // Insert at correct position
                                         $keys = array_keys($state);
                                         $currentIndex = array_search($currentKey, $keys);
-                                        
+
                                         $newState = array_slice($state, 0, $currentIndex + 1, true) +
                                                 [$newKey => $newItem] +
                                                 array_slice($state, $currentIndex + 1, null, true);
-                                        
+
                                         $component->state($newState);
                                     }),
                             ])
@@ -129,9 +129,10 @@ class AtkStockRequestForm
                                     ->label('Item')
                                     ->options(function (callable $get) {
                                         $categoryId = $get('category_id');
-                                        if (!$categoryId) {
+                                        if (! $categoryId) {
                                             return AtkItem::all()->pluck('name', 'id');
                                         }
+
                                         return AtkItem::where('category_id', $categoryId)
                                             ->pluck('name', 'id');
                                     })
@@ -150,62 +151,62 @@ class AtkStockRequestForm
                                             }
                                         }
                                     }),
-                                TextInput::make('quantity_requested')
+                                TextInput::make('quantity')
                                     ->label('Quantity Requested')
                                     ->required()
                                     ->numeric()
                                     ->minValue(1)
                                     ->helperText(function (callable $get) {
                                         $itemId = $get('item_id');
-                                        if (!$itemId) {
+                                        if (! $itemId) {
                                             return '';
                                         }
-                                        
+
                                         $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
-                                            
-                                        if (!$setting) {
+
+                                        if (! $setting) {
                                             return 'No inventory limit set for this item';
                                         }
-                                        
+
                                         $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
-                                            
+
                                         $currentStock = $stock ? $stock->current_stock : 0;
                                         $maxLimit = $setting->max_limit;
                                         $availableSpace = $maxLimit - $currentStock;
-                                        
+
                                         return "Current: {$currentStock} | Max: {$maxLimit} | Available: {$availableSpace}";
                                     })
                                     ->live()
                                     ->afterStateUpdated(function (callable $get, callable $set, $state) {
                                         $itemId = $get('item_id');
-                                        if (!$itemId || !$state) {
+                                        if (! $itemId || ! $state) {
                                             return;
                                         }
-                                        
+
                                         $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
-                                            
-                                        if (!$setting) {
+
+                                        if (! $setting) {
                                             return;
                                         }
-                                        
+
                                         $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
-                                            
+
                                         $currentStock = $stock ? $stock->current_stock : 0;
                                         $maxLimit = $setting->max_limit;
                                         $availableSpace = $maxLimit - $currentStock;
-                                        
+
                                         if ($state > $availableSpace) {
                                             // Reset to available space
-                                            $set('quantity_requested', $availableSpace);
-                                            
+                                            $set('quantity', $availableSpace);
+
                                             // Show notification to user
                                             Notification::make()
                                                 ->title('Quantity exceeds maximum limit')
@@ -219,43 +220,43 @@ class AtkStockRequestForm
                                             return function (string $attribute, $value, \Closure $fail, $livewire) {
                                                 // Extract the repeater index from the attribute name
                                                 // e.g., "data.items.0.quantity" -> index 0
-                                                preg_match('/atkStockRequestItems\.(\d+)\.quantity_requested/', $attribute, $matches);
+                                                preg_match('/atkStockRequestItems\.(\d+)\.quantity/', $attribute, $matches);
                                                 $index = $matches[1] ?? null;
-                                                
+
                                                 if ($index === null) {
                                                     return;
                                                 }
-                                                
+
                                                 // Get the item_id for this repeater item
                                                 $itemId = data_get($livewire, "data.atkStockRequestItems.{$index}.item_id");
-                                                
-                                                if (!$itemId || !$value) {
+
+                                                if (! $itemId || ! $value) {
                                                     return;
                                                 }
-                                                
+
                                                 $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
                                                     ->where('item_id', $itemId)
                                                     ->first();
-                                                    
-                                                if (!$setting) {
+
+                                                if (! $setting) {
                                                     return;
                                                 }
-                                                
+
                                                 $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
                                                     ->where('item_id', $itemId)
                                                     ->first();
-                                                    
+
                                                 $currentStock = $stock ? $stock->current_stock : 0;
                                                 $maxLimit = $setting->max_limit;
                                                 $availableSpace = $maxLimit - $currentStock;
-                                                
+
                                                 if ($value > $availableSpace) {
                                                     $fail("Quantity requested ({$value}) exceeds maximum available quantity ({$availableSpace}) for this item.");
                                                 }
                                             };
                                         },
                                     ]),
-                                
+
                                 Textarea::make('notes')
                                     ->maxLength(1000)
                                     ->rows(1)
@@ -267,7 +268,7 @@ class AtkStockRequestForm
                             ->addActionLabel('Add Item')
                             ->reorderableWithButtons()
                             ->collapsible(),
-                    ])
+                    ]),
             ]);
     }
 }

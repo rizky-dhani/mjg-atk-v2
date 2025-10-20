@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\ApprovalHistory;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalHistoryPolicy
 {
@@ -13,7 +12,7 @@ class ApprovalHistoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('view approval-history');
     }
 
     /**
@@ -21,7 +20,7 @@ class ApprovalHistoryPolicy
      */
     public function view(User $user, ApprovalHistory $approvalHistory): bool
     {
-        return false;
+        return $user->can('view approval-history');
     }
 
     /**
@@ -29,7 +28,7 @@ class ApprovalHistoryPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('create approval-history');
     }
 
     /**
@@ -37,7 +36,7 @@ class ApprovalHistoryPolicy
      */
     public function update(User $user, ApprovalHistory $approvalHistory): bool
     {
-        return false;
+        return $user->can('edit approval-history');
     }
 
     /**
@@ -45,7 +44,7 @@ class ApprovalHistoryPolicy
      */
     public function delete(User $user, ApprovalHistory $approvalHistory): bool
     {
-        return false;
+        return $user->can('delete approval-history');
     }
 
     /**

@@ -9,7 +9,7 @@ class AtkStockUsageItem extends Model
     protected $fillable = [
         'usage_id',
         'item_id',
-        'quantity_used'
+        'quantity',
     ];
 
     public function usage()

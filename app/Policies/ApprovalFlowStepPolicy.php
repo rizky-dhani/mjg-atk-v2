@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\ApprovalFlowStep;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalFlowStepPolicy
 {
@@ -21,7 +20,7 @@ class ApprovalFlowStepPolicy
      */
     public function view(User $user, ApprovalFlowStep $approvalFlowStep): bool
     {
-        return false;
+        return $user->can('view approval-flow-step');
     }
 
     /**
@@ -29,7 +28,7 @@ class ApprovalFlowStepPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('create approval-flow-step');
     }
 
     /**
@@ -37,7 +36,7 @@ class ApprovalFlowStepPolicy
      */
     public function update(User $user, ApprovalFlowStep $approvalFlowStep): bool
     {
-        return false;
+        return $user->can('edit approval-flow-step');
     }
 
     /**
@@ -45,7 +44,7 @@ class ApprovalFlowStepPolicy
      */
     public function delete(User $user, ApprovalFlowStep $approvalFlowStep): bool
     {
-        return false;
+        return $user->can('delete approval-flow-step');
     }
 
     /**

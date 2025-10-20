@@ -2,13 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Approval;
 use App\Models\ApprovalFlow;
-use App\Models\AtkStockUsage;
-use App\Models\AtkStockRequest;
-use App\Models\ApprovalFlowStep;
 use App\Models\ApprovalHistory;
+use App\Models\AtkStockRequest;
+use App\Models\AtkStockUsage;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 class ApprovalService
@@ -22,14 +21,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return false;
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $model->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $model->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -41,44 +40,44 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
-        if (!$currentStep) {
+
+        if (! $currentStep) {
             // If there's no step for the current step number, return false
             return false;
         }
 
         // Check if the current step matches the user's role and division
         $userRoleIds = $user->roles->pluck('id')->toArray();
-        
+
         if (is_null($currentStep->division_id)) {
             // For null division_id steps, check if user's role matches and user's division matches model's division
             if (in_array($currentStep->role_id, $userRoleIds) &&
                 isset($model->division_id) && $model->division_id !== null &&
                 $user->division_id == $model->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         } else {
             // For non-null division_id steps, check if both role and division match
             // These users can approve requests from any division
             if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         }
-        
+
         return false;
     }
 
@@ -91,14 +90,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return collect();
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $model->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $model->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -110,26 +109,26 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
+
         $eligibleSteps = collect();
-        
+
         if ($currentStep) {
             // Check if the current step matches the user's role and division
             $userRoleIds = $user->roles->pluck('id')->toArray();
-            
+
             if (is_null($currentStep->division_id)) {
                 // For null division_id steps, check if user's role matches and user's division matches model's division
                 if (in_array($currentStep->role_id, $userRoleIds) &&
                     isset($model->division_id) && $model->division_id !== null &&
                     $user->division_id == $model->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $eligibleSteps->push($currentStep);
                     }
                 }
@@ -137,20 +136,20 @@ class ApprovalService
                 // For non-null division_id steps, check if both role and division match
                 // These users can approve requests from any division
                 if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $eligibleSteps->push($currentStep);
                     }
                 }
             }
         }
-        
+
         return $eligibleSteps;
     }
 
@@ -163,14 +162,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($stockRequest))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return false;
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $stockRequest->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $stockRequest->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -182,44 +181,44 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
-        if (!$currentStep) {
+
+        if (! $currentStep) {
             // If there's no step for the current step number, return false
             return false;
         }
 
         // Check if the current step matches the user's role and division
         $userRoleIds = $user->roles->pluck('id')->toArray();
-        
+
         if (is_null($currentStep->division_id)) {
             // For null division_id steps, check if user's role matches and user's division matches stock request's division
             if (in_array($currentStep->role_id, $userRoleIds) &&
                 $stockRequest->division_id !== null &&
                 $user->division_id == $stockRequest->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         } else {
             // For non-null division_id steps, check if both role and division match
             // These users can approve requests from any division
             if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         }
-        
+
         return false;
     }
 
@@ -232,14 +231,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($stockRequest))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return collect();
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $stockRequest->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $stockRequest->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -251,26 +250,26 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
+
         $matchingSteps = collect();
-        
+
         if ($currentStep) {
             // Check if the current step matches the user's role and division
             $userRoleIds = $user->roles->pluck('id')->toArray();
-            
+
             if (is_null($currentStep->division_id)) {
                 // For null division_id steps, check if user's role matches and user's division matches stock request's division
                 if (in_array($currentStep->role_id, $userRoleIds) &&
                     $stockRequest->division_id !== null &&
                     $user->division_id == $stockRequest->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $matchingSteps->push($currentStep);
                     }
                 }
@@ -278,20 +277,20 @@ class ApprovalService
                 // For non-null division_id steps, check if both role and division match
                 // These users can approve requests from any division
                 if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $matchingSteps->push($currentStep);
                     }
                 }
             }
         }
-        
+
         return $matchingSteps;
     }
 
@@ -304,14 +303,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($stockUsage))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return false;
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $stockUsage->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $stockUsage->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -323,44 +322,44 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
-        if (!$currentStep) {
+
+        if (! $currentStep) {
             // If there's no step for the current step number, return false
             return false;
         }
 
         // Check if the current step matches the user's role and division
         $userRoleIds = $user->roles->pluck('id')->toArray();
-        
+
         if (is_null($currentStep->division_id)) {
             // For null division_id steps, check if user's role matches and user's division matches stock usage's division
             if (in_array($currentStep->role_id, $userRoleIds) &&
                 $stockUsage->division_id !== null &&
                 $user->division_id == $stockUsage->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         } else {
             // For non-null division_id steps, check if both role and division match
             // These users can approve requests from any division
             if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                
+
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
                     ->where('step_id', $currentStep->id)
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return !$existingApproval;
+
+                return ! $existingApproval;
             }
         }
-        
+
         return false;
     }
 
@@ -373,14 +372,14 @@ class ApprovalService
         $approvalFlow = ApprovalFlow::where('model_type', get_class($stockUsage))
             ->where('is_active', true)
             ->first();
-        
-        if (!$approvalFlow) {
+
+        if (! $approvalFlow) {
             return collect();
         }
 
         // Get the approval record for this model, creating it if it doesn't exist
         $approval = $stockUsage->approval;
-        if (!$approval) {
+        if (! $approval) {
             // Create an approval record if one doesn't exist
             $approval = $stockUsage->approval()->create([
                 'flow_id' => $approvalFlow->id,
@@ -392,26 +391,26 @@ class ApprovalService
         // Get the current step in the approval flow
         $currentStepNumber = $approval->current_step;
         $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
-        
+
         $matchingSteps = collect();
-        
+
         if ($currentStep) {
             // Check if the current step matches the user's role and division
             $userRoleIds = $user->roles->pluck('id')->toArray();
-            
+
             if (is_null($currentStep->division_id)) {
                 // For null division_id steps, check if user's role matches and user's division matches stock usage's division
                 if (in_array($currentStep->role_id, $userRoleIds) &&
                     $stockUsage->division_id !== null &&
                     $user->division_id == $stockUsage->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $matchingSteps->push($currentStep);
                     }
                 }
@@ -419,27 +418,27 @@ class ApprovalService
                 // For non-null division_id steps, check if both role and division match
                 // These users can approve requests from any division
                 if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
-                    
+
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
                         ->where('step_id', $currentStep->id)
                         ->where('user_id', $user->id)
                         ->first();
-                    
-                    if (!$existingApproval) {
+
+                    if (! $existingApproval) {
                         $matchingSteps->push($currentStep);
                     }
                 }
             }
         }
-        
+
         return $matchingSteps;
     }
 
     /**
      * Log an approval action to the approval history
      */
-    public function logApprovalAction($model, User $user, string $action, string $documentId = null, string $rejectionReason = null, string $notes = null, int $stepId = null)
+    public function logApprovalAction($model, User $user, string $action, ?string $documentId = null, ?string $rejectionReason = null, ?string $notes = null, ?int $stepId = null)
     {
         return ApprovalHistory::create([
             'approvable_type' => get_class($model),
@@ -454,7 +453,7 @@ class ApprovalService
             'metadata' => [
                 'model_class' => get_class($model),
                 'model_id' => $model->id,
-            ]
+            ],
         ]);
     }
 
@@ -477,7 +476,8 @@ class ApprovalService
         } elseif (isset($model->id)) {
             // Fallback to model ID with prefix
             $prefix = class_basename($model);
-            return $prefix . '-' . $model->id;
+
+            return $prefix.'-'.$model->id;
         }
 
         return null;
@@ -512,7 +512,7 @@ class ApprovalService
     public function syncApprovalStatus($model): void
     {
         $approval = $model->approval;
-        if (!$approval) {
+        if (! $approval) {
             return;
         }
 
@@ -522,19 +522,26 @@ class ApprovalService
             ->orderBy('performed_at', 'desc')
             ->first();
 
-        if ($latestHistory) {
-            // Update the approval record based on the latest history if needed
-            $statusMap = [
-                'approved' => 'approved',
-                'rejected' => 'rejected',
-                'pending' => 'pending',
-            ];
+        // Check if approval flow is complete
+        $approvalFlow = $approval->approvalFlow;
+        $allSteps = $approvalFlow->approvalFlowSteps->sortBy('step_number');
+        $approvedSteps = $approval->approvalStepApprovals->pluck('step_id');
+        $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
+            return ! $approvedSteps->contains($step->id);
+        });
 
-            if (isset($statusMap[$latestHistory->action])) {
-                $approval->update([
-                    'status' => $statusMap[$latestHistory->action]
-                ]);
-            }
+        // If all steps are approved, confirm status is 'approved'
+        if ($unapprovedSteps->isEmpty()) {
+            $approval->update([
+                'status' => 'approved',
+            ]);
+        } 
+        // Otherwise, if there are still unapproved steps, status should remain 'pending'
+        // regardless of the latest history action
+        else {
+            $approval->update([
+                'status' => 'pending',
+            ]);
         }
     }
 
@@ -552,7 +559,7 @@ class ApprovalService
     /**
      * Create an approval history record when a new approval is created
      */
-    public function logNewApproval($model, User $user, string $documentId = null): void
+    public function logNewApproval($model, User $user, ?string $documentId = null): void
     {
         $this->logApprovalAction(
             $model,
@@ -568,10 +575,10 @@ class ApprovalService
     /**
      * Process an approval step for a given approval
      *
-     * @param Approval $approval The approval to process
-     * @param User $user The user processing the approval
-     * @param string $action The action (approve/reject)
-     * @param string|null $notes Optional notes
+     * @param  Approval  $approval  The approval to process
+     * @param  User  $user  The user processing the approval
+     * @param  string  $action  The action (approve/reject)
+     * @param  string|null  $notes  Optional notes
      * @return bool True if the approval is completed, false if there are more steps
      */
     public function processApprovalStep(Approval $approval, User $user, string $action, ?string $notes = null): bool
@@ -608,7 +615,7 @@ class ApprovalService
             $status, // 'approved' or 'rejected'
             null, // document_id will be auto-generated
             $action === 'reject' ? ($notes ?? 'No reason provided') : null, // rejection_reason
-            $notes ?? ($action === 'approve' ? 'Request approved at step ' . $step->step_number . ': ' . $step->step_name : 'Request rejected'),
+            $notes ?? ($action === 'approve' ? 'Request approved at step '.$step->step_number.': '.$step->step_name : 'Request rejected'),
             $step->id
         );
 
@@ -629,7 +636,7 @@ class ApprovalService
             $approvedSteps = $approval->approvalStepApprovals->pluck('step_id');
 
             $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
-                return !$approvedSteps->contains($step->id);
+                return ! $approvedSteps->contains($step->id);
             });
 
             // If no unapproved steps remain, mark the overall approval as approved
@@ -658,10 +665,11 @@ class ApprovalService
 
                 return true; // Approval is completed
             } else {
-                // Update to the next step number
+                // Update to the next step number and keep status as 'pending'
                 $nextStep = $unapprovedSteps->first();
                 $approval->update([
-                    'current_step' => $nextStep?->step_number ?? $approval->current_step,
+                    'status' => 'pending', // Keep status as pending since approval isn't complete
+                    'current_step' => $nextStep?->step_number ?? $allSteps->last()?->step_number,
                 ]);
 
                 // Log progress to history
@@ -671,7 +679,7 @@ class ApprovalService
                     'pending', // Still pending further approvals
                     null, // document_id will be auto-generated
                     null, // rejection_reason
-                    'Request awaiting next approval step: ' . ($nextStep?->step_number ?? 'unknown'),
+                    'Request awaiting next approval step: '.($nextStep?->step_number ?? 'unknown'),
                     $nextStep?->id
                 );
 
@@ -682,13 +690,12 @@ class ApprovalService
             }
         }
     }
-    
+
     /**
      * Create an approval record for a model
      *
-     * @param mixed $model The model to create approval for
-     * @param string $modelType The model type
-     * @return \App\Models\Approval
+     * @param  mixed  $model  The model to create approval for
+     * @param  string  $modelType  The model type
      */
     public function createApproval($model, string $modelType): \App\Models\Approval
     {
@@ -697,13 +704,13 @@ class ApprovalService
             ->where('is_active', true)
             ->first();
 
-        if (!$approvalFlow) {
-            throw new \Exception('No active approval flow found for model type: ' . get_class($model));
+        if (! $approvalFlow) {
+            throw new \Exception('No active approval flow found for model type: '.get_class($model));
         }
 
         // Create an approval record if one doesn't exist
         $approval = $model->approval;
-        if (!$approval) {
+        if (! $approval) {
             $approval = $model->approval()->create([
                 'flow_id' => $approvalFlow->id,
                 'current_step' => 1,
@@ -720,14 +727,13 @@ class ApprovalService
     /**
      * Cancel an approval
      *
-     * @param \App\Models\Approval $approval The approval to cancel
-     * @param \App\Models\User $user The user cancelling the approval
-     * @return void
+     * @param  \App\Models\Approval  $approval  The approval to cancel
+     * @param  \App\Models\User  $user  The user cancelling the approval
      */
     public function cancelApproval(\App\Models\Approval $approval, \App\Models\User $user): void
     {
         $approval->update([
-            'status' => 'cancelled'
+            'status' => 'cancelled',
         ]);
 
         // Log cancellation to history
@@ -748,9 +754,8 @@ class ApprovalService
     /**
      * Resubmit a rejected approval to restart the approval flow from the beginning
      *
-     * @param \App\Models\Approval $approval The approval to resubmit
-     * @param \App\Models\User $user The user resubmitting the approval
-     * @return void
+     * @param  \App\Models\Approval  $approval  The approval to resubmit
+     * @param  \App\Models\User  $user  The user resubmitting the approval
      */
     public function resubmitApproval(Approval $approval, User $user): void
     {
@@ -778,8 +783,7 @@ class ApprovalService
     /**
      * Handle stock updates for various model types when they are fully approved
      *
-     * @param mixed $model The approved model that may require stock updates
-     * @return void
+     * @param  mixed  $model  The approved model that may require stock updates
      */
     private function handleStockUpdates($model): void
     {
@@ -795,32 +799,31 @@ class ApprovalService
                 case \App\Models\AtkStockRequest::class:
                     $this->updateStockForAddition($model);
                     break;
-                    
+
                 case \App\Models\AtkStockUsage::class:
                     $this->updateStockForReduction($model);
                     break;
-                    
-                // Add more cases as needed for other models
+
+                    // Add more cases as needed for other models
                 default:
                     // No stock update needed for this model type
                     break;
             }
         }
     }
-    
+
     /**
      * Update division stock for stock addition (e.g., AtkStockRequest)
      *
-     * @param \App\Models\AtkStockRequest $stockRequest The approved stock request
-     * @return void
+     * @param  \App\Models\AtkStockRequest  $stockRequest  The approved stock request
      */
     private function updateStockForAddition(\App\Models\AtkStockRequest $stockRequest): void
     {
-        // Load the stock request items to ensure they are available
-        $stockRequest->load('atkStockRequestItems');
-        
+        // Load the items to ensure they are available
+        $stockRequest->load('items');
+
         // Loop through each item in the stock request and update the division stock
-        foreach ($stockRequest->atkStockRequestItems as $requestItem) {
+        foreach ($stockRequest->items as $requestItem) {
             // Find or create the division stock record for this item and division
             $divisionStock = \App\Models\AtkDivisionStock::firstOrCreate(
                 [
@@ -828,76 +831,89 @@ class ApprovalService
                     'item_id' => $requestItem->item_id,
                 ],
                 [
-                    'quantity' => 0,
+                    'current_stock' => 0,
                     'max_stock_limit' => 0, // Initially set to 0, can be updated later
                 ]
             );
 
             // Update the quantity by adding the requested quantity
-            $newQuantity = $divisionStock->quantity + $requestItem->quantity_requested;
+            $newQuantity = $divisionStock->current_stock + $requestItem->quantity;
             $divisionStock->update([
-                'quantity' => $newQuantity
+                'current_stock' => $newQuantity,
             ]);
         }
     }
-    
+
     /**
      * Update division stock for stock reduction (e.g., AtkStockUsage)
      *
-     * @param \App\Models\AtkStockUsage $stockUsage The approved stock usage
-     * @return void
+     * @param  \App\Models\AtkStockUsage  $stockUsage  The approved stock usage
      */
     private function updateStockForReduction(\App\Models\AtkStockUsage $stockUsage): void
     {
-        // Load the stock usage items to ensure they are available
-        $stockUsage->load('atkStockUsageItems');
-        
-        // Loop through each item in the stock usage and update the division stock
-        foreach ($stockUsage->atkStockUsageItems as $usageItem) {
-            // Find the division stock record for this item and division
-            $divisionStock = \App\Models\AtkDivisionStock::where([
-                'division_id' => $stockUsage->division_id,
-                'item_id' => $usageItem->item_id,
-            ])->first();
+        // Load the items to ensure they are available
+        $stockUsage->load('items');
 
-            // If division stock exists, reduce the quantity
-            if ($divisionStock) {
-                // Ensure the quantity doesn't go below zero
-                $newQuantity = max(0, $divisionStock->quantity - $usageItem->quantity_used);
-                $divisionStock->update([
-                    'quantity' => $newQuantity
-                ]);
-            }
+        // Loop through each item in the stock usage and update the division stock
+        foreach ($stockUsage->items as $usageItem) {
+            // Find or create the division stock record for this item and division
+            $divisionStock = \App\Models\AtkDivisionStock::firstOrCreate(
+                [
+                    'division_id' => $stockUsage->division_id,
+                    'item_id' => $usageItem->item_id,
+                ],
+                [
+                    'current_stock' => 0,
+                    'max_stock_limit' => 0, // Initially set to 0, can be updated later
+                ]
+            );
+
+            // Reduce the quantity, ensuring it doesn't go below zero
+            $newQuantity = max(0, $divisionStock->current_stock - $usageItem->quantity);
+            $divisionStock->update([
+                'current_stock' => $newQuantity,
+            ]);
         }
     }
+
     /**
      * Update division stock based on a request_type field
      * This method is designed to work with a future unified model
      *
-     * @param mixed $model The model with request_type field
-     * @return void
+     * @param  mixed  $model  The model with request_type field
      */
     private function updateStockByRequestType($model): void
     {
         // Determine the operation based on request_type
         $operation = $model->request_type;
-        $itemsRelation = $model->items_relation ?? 'items'; // Default to 'items' relation
-        $quantityField = $model->quantity_field ?? 'quantity'; // Default to 'quantity' field
-        
+
+        // Set the correct relationship name and quantity field based on model type
+        $itemsRelation = match (get_class($model)) {
+            \App\Models\AtkStockRequest::class => 'items', // Uses the generic relationship we added
+            \App\Models\AtkStockUsage::class => 'items',   // Uses the generic relationship we added
+            default => $model->items_relation ?? 'items' // Default to 'items' relation
+        };
+
+        $quantityField = match (get_class($model)) {
+            \App\Models\AtkStockRequest::class => 'quantity',
+            \App\Models\AtkStockUsage::class => 'quantity',
+            default => $model->quantity ?? 'quantity' // Default to 'quantity' field
+        };
+
         // Load the items relationship to ensure it's available
         $model->load($itemsRelation);
-        
+
         // Get the items to process
         $items = $model->{$itemsRelation};
-        
+
         foreach ($items as $item) {
             $quantity = $item->{$quantityField} ?? 0;
-            
+
             // Skip if quantity is zero or negative
             if ($quantity <= 0) {
                 continue;
             }
-            
+
             // Find or create the division stock record for this item and division
             $divisionStock = \App\Models\AtkDivisionStock::firstOrCreate(
                 [
@@ -905,21 +921,21 @@ class ApprovalService
                     'item_id' => $item->item_id,
                 ],
                 [
-                    'quantity' => 0,
+                    'current_stock' => 0,
                     'max_stock_limit' => 0, // Initially set to 0, can be updated later
                 ]
             );
-            
+
             // Calculate new quantity based on the operation type
-            $newQuantity = match($operation) {
-                'addition', 'increase' => $divisionStock->quantity + $quantity,
-                'reduction', 'decrease' => max(0, $divisionStock->quantity - $quantity),
-                default => $divisionStock->quantity // No change for other types
+            $newQuantity = match ($operation) {
+                'addition', 'increase' => $divisionStock->current_stock + $quantity,
+                'reduction', 'decrease' => max(0, $divisionStock->current_stock - $quantity), // Prevent negative stock
+                default => $divisionStock->current_stock // No change for other types
             };
-            
+
             // Update the division stock
             $divisionStock->update([
-                'quantity' => $newQuantity
+                'current_stock' => $newQuantity,
             ]);
         }
     }
