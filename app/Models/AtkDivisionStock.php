@@ -9,8 +9,8 @@ class AtkDivisionStock extends Model
     protected $fillable = [
         'division_id',
         'item_id',
-        'quantity',
-        'max_stock_limit'
+        'current_stock',
+        'max_stock_limit',
     ];
 
     public function division()

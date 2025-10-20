@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
+use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -40,16 +41,29 @@ class DashboardPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->navigationItems([
+                // Alat Tulis Kantor
                 NavigationItem::make('Permintaan ATK')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('index'))
                     ->group('Alat Tulis Kantor')
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('index')),
-                NavigationItem::make('Approval Permintaan ATK')
-                    ->icon(fn () => Heroicon::DocumentCheck)
+                NavigationItem::make('Pengeluaran ATK')
+                    ->icon(fn () => Heroicon::ArrowUpTray)
+                    ->url(fn () => AtkStockUsageResource::getUrl('index'))
+                    ->group('Alat Tulis Kantor')
+                    ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('index')),
+
+                // Approval Permintaan
+                NavigationItem::make('Permintaan ATK')
+                    ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval')),
+                NavigationItem::make('Pengeluaran ATK')
+                    ->icon(fn () => Heroicon::ArrowUpTray)
+                    ->url(fn () => AtkStockUsageResource::getUrl('approval'))
+                    ->group('Approval Permintaan')
+                    ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval')),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

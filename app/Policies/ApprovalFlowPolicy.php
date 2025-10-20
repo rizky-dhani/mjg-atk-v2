@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\ApprovalFlow;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalFlowPolicy
 {
@@ -21,7 +20,7 @@ class ApprovalFlowPolicy
      */
     public function view(User $user, ApprovalFlow $approvalFlow): bool
     {
-        return false;
+        return $user->can('view approval-flow');
     }
 
     /**
@@ -29,7 +28,7 @@ class ApprovalFlowPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('create approval-flow');
     }
 
     /**
@@ -37,7 +36,7 @@ class ApprovalFlowPolicy
      */
     public function update(User $user, ApprovalFlow $approvalFlow): bool
     {
-        return false;
+        return $user->can('edit approval-flow');
     }
 
     /**
@@ -45,7 +44,7 @@ class ApprovalFlowPolicy
      */
     public function delete(User $user, ApprovalFlow $approvalFlow): bool
     {
-        return false;
+        return $user->can('delete approval-flow');
     }
 
     /**

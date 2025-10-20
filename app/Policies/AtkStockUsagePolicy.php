@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\AtkStockUsage;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class AtkStockUsagePolicy
 {
@@ -13,7 +12,7 @@ class AtkStockUsagePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view atk-stock-usage');
+        return $user->can('view-any atk-stock-usage');
     }
 
     /**
@@ -21,8 +20,8 @@ class AtkStockUsagePolicy
      */
     public function view(User $user, AtkStockUsage $atkStockUsage): bool
     {
-        // Users can view their own usages or if they have the permission
-        return $user->id === $atkStockUsage->requester_id || $user->can('view atk-stock-usage');
+        // Users can only view their own usages (where requester_id matches logged in user id)
+        return $user->can('view atk-stock-usage');
     }
 
     /**
@@ -39,9 +38,9 @@ class AtkStockUsagePolicy
     public function update(User $user, AtkStockUsage $atkStockUsage): bool
     {
         // Users can update their own pending usages
-        return $user->id === $atkStockUsage->requester_id && 
-               $atkStockUsage->approval && 
-               $atkStockUsage->approval->status === 'pending';
+        return $user->id === $atkStockUsage->requester_id &&
+            $atkStockUsage->approval &&
+            $atkStockUsage->approval->status === 'pending';
     }
 
     /**
@@ -50,9 +49,9 @@ class AtkStockUsagePolicy
     public function delete(User $user, AtkStockUsage $atkStockUsage): bool
     {
         // Users can delete their own pending usages
-        return $user->id === $atkStockUsage->requester_id && 
-               $atkStockUsage->approval && 
-               $atkStockUsage->approval->status === 'pending';
+        return $user->id === $atkStockUsage->requester_id &&
+            $atkStockUsage->approval &&
+            $atkStockUsage->approval->status === 'pending';
     }
 
     /**
@@ -60,27 +59,23 @@ class AtkStockUsagePolicy
      */
     public function approve(User $user, AtkStockUsage $atkStockUsage): bool
     {
-        // Check if user has permission to approve stock usages
-        if (!$user->can('approve stock-usages')) {
-            return false;
-        }
-
-        // Check if there's an approval for this usage
-        if (!$atkStockUsage->approval) {
-            return false;
-        }
-
-        // Get the current approval step
-        $currentStep = $atkStockUsage->approval->approvalFlow->approvalFlowSteps()
-            ->where('step_number', $atkStockUsage->approval->current_step)
-            ->first();
-
-        if (!$currentStep) {
-            return false;
-        }
-
-        // Check if user is authorized for this step
+        // Use the ApprovalService to check if user can approve this specific usage
         $approvalService = app(\App\Services\ApprovalService::class);
-        return $approvalService->isUserAuthorizedForStep($user, $currentStep, $atkStockUsage->division_id);
+
+        return $approvalService->canUserApproveStockUsage(
+            $atkStockUsage,
+            $user,
+        );
+    }
+
+    /**
+     * Determine whether the user can resubmit the model after rejected.
+     */
+    public function resubmit(User $user, AtkStockUsage $atkStockUsage): bool
+    {
+        // Users can resubmit their own rejected usages
+        return $user->id === $atkStockUsage->requester_id &&
+            $atkStockUsage->approval &&
+            $atkStockUsage->approval->status === 'rejected';
     }
 }

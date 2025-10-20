@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\AtkStockRequests\RelationManagers;
 
-use Filament\Tables;
-use App\Models\AtkItem;
-use App\Models\AtkCategory;
-use Filament\Tables\Table;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class AtkStockRequestItemsRelationManager extends RelationManager
 {
@@ -25,7 +23,7 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                     ->label('Category')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('quantity_requested')
+                Tables\Columns\TextColumn::make('quantity')
                     ->label('Quantity Requested')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('notes')

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Approval;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ApprovalPolicy
 {
@@ -21,7 +20,7 @@ class ApprovalPolicy
      */
     public function view(User $user, Approval $approval): bool
     {
-        return false;
+        return $user->can('view approval');
     }
 
     /**
@@ -29,7 +28,7 @@ class ApprovalPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('create approval');
     }
 
     /**
@@ -37,7 +36,7 @@ class ApprovalPolicy
      */
     public function update(User $user, Approval $approval): bool
     {
-        return false;
+        return $user->can('edit approval');
     }
 
     /**
@@ -45,7 +44,7 @@ class ApprovalPolicy
      */
     public function delete(User $user, Approval $approval): bool
     {
-        return false;
+        return $user->can('delete approval');
     }
 
     /**

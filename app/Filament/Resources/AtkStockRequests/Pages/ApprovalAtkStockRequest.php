@@ -34,26 +34,26 @@ class ApprovalAtkStockRequest extends ListRecords
     public static function getNavigationBadge(): ?string
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 
         // Find approval flow steps that match the user's role and division
-        $matchingStepIds = ApprovalFlowStep::whereHas("role", function ($query) use ($user) {
-            $query->whereIn("id", $user->roles->pluck('id'));
+        $matchingStepIds = ApprovalFlowStep::whereHas('role', function ($query) use ($user) {
+            $query->whereIn('id', $user->roles->pluck('id'));
         })
-        ->where(function ($query) use ($user) {
-            // Step is available for the user's own division OR for specific division
-            $query
-                ->whereNull("division_id")
-                ->orWhere("division_id", $user->division_id);
-        })
-        ->pluck("id");
+            ->where(function ($query) use ($user) {
+                // Step is available for the user's own division OR for specific division
+                $query
+                    ->whereNull('division_id')
+                    ->orWhere('division_id', $user->division_id);
+            })
+            ->pluck('id');
 
         // Get count of approval records that are pending and have steps matching the user's permissions
-        $count = Approval::whereIn("current_step", $matchingStepIds)
-            ->where("status", "pending")
-            ->where("approvable_type", (new AtkStockRequest)->getMorphClass()) // Ensure it's for ATK Stock Requests
+        $count = Approval::whereIn('current_step', $matchingStepIds)
+            ->where('status', 'pending')
+            ->where('approvable_type', (new AtkStockRequest)->getMorphClass()) // Ensure it's for ATK Stock Requests
             ->count();
 
         return (string) $count;
@@ -110,34 +110,34 @@ class ApprovalAtkStockRequest extends ListRecords
     {
         // Get the current user
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return AtkStockRequest::query()->whereRaw('0=1'); // Return empty query if no user
         }
 
-        // Find approval flow steps that match the user's role and division
-        $matchingStepIds = ApprovalFlowStep::whereHas("role", function ($query) use ($user) {
-            $query->whereIn("id", $user->roles->pluck('id'));
-        })
-        ->where(function ($query) use ($user) {
-            // Step is available for the user's own division OR for specific division
-            $query
-                ->whereNull("division_id")
-                ->orWhere("division_id", $user->division_id);
-        })
-        ->pluck("id");
-
-        // Get approval records that are pending and have steps matching the user's permissions
-        $approvableIds = Approval::whereIn("current_step", $matchingStepIds)
-            ->where("status", "pending")
-            ->where("approvable_type", (new AtkStockRequest)->getMorphClass()) // Ensure it's for ATK Stock Requests
-            ->pluck("approvable_id");
-
-        return AtkStockRequest::whereIn("id", $approvableIds)
+        // Get all pending AtkStockRequest records
+        $query = AtkStockRequest::query()
+            ->whereHas('approval', function ($query) {
+                $query->where('status', 'pending');
+            })
             ->with([
-                "requester",
-                "division",
-                "approval",
+                'requester',
+                'division',
+                'approval',
             ]);
+
+        // Filter to only show records that the current user can approve
+        $approvalService = new \App\Services\ApprovalService;
+        $approvableIds = [];
+
+        foreach (AtkStockRequest::whereHas('approval', function ($q) {
+            $q->where('status', 'pending');
+        })->get() as $stockRequest) {
+            if ($approvalService->canUserApproveStockRequest($stockRequest, $user)) {
+                $approvableIds[] = $stockRequest->id;
+            }
+        }
+
+        return $query->whereIn('id', $approvableIds);
     }
 
     protected function getHeaderActions(): array

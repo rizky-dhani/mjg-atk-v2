@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AtkDivisionStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockRequestItem;
-use App\Models\AtkDivisionStock;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -20,9 +20,8 @@ class StockRequestService
     /**
      * Create a new stock request
      *
-     * @param User $user The user creating the request
-     * @param array $data The request data
-     * @return AtkStockRequest
+     * @param  User  $user  The user creating the request
+     * @param  array  $data  The request data
      */
     public function createStockRequest(User $user, array $data): AtkStockRequest
     {
@@ -30,18 +29,18 @@ class StockRequestService
             // Get the user's division for the initial
             $userDivision = $user->division;
             $divisionInitial = substr(strtoupper($userDivision->name), 0, 3);
-            
+
             // Generate request number
             $lastRequest = AtkStockRequest::orderBy('id', 'desc')->first();
             $nextId = $lastRequest ? $lastRequest->id + 1 : 1;
-            $requestNumber = $divisionInitial . '-REQ-' . str_pad($nextId, 8, '0', STR_PAD_LEFT);
-            
+            $requestNumber = $divisionInitial.'-REQ-'.str_pad($nextId, 8, '0', STR_PAD_LEFT);
+
             // Create the stock request
             $stockRequest = new AtkStockRequest([
                 'requester_id' => $user->id,
                 'division_id' => $data['division_id'],
                 'request_number' => $requestNumber,
-                'notes' => $data['notes'] ?? null
+                'notes' => $data['notes'] ?? null,
             ]);
             $stockRequest->save();
 
@@ -50,7 +49,7 @@ class StockRequestService
                 $requestItem = new AtkStockRequestItem([
                     'request_id' => $stockRequest->id,
                     'item_id' => $itemData['item_id'],
-                    'quantity_requested' => $itemData['quantity']
+                    'quantity' => $itemData['quantity'],
                 ]);
                 $requestItem->save();
             }
@@ -65,17 +64,17 @@ class StockRequestService
     /**
      * Approve a stock request
      *
-     * @param AtkStockRequest $stockRequest The stock request to approve
-     * @param User $user The user approving the request
-     * @param string|null $notes Optional notes
+     * @param  AtkStockRequest  $stockRequest  The stock request to approve
+     * @param  User  $user  The user approving the request
+     * @param  string|null  $notes  Optional notes
      * @return bool True if the approval is completed, false if there are more steps
      */
     public function approveStockRequest(AtkStockRequest $stockRequest, User $user, ?string $notes = null): bool
     {
         $approval = $stockRequest->approval;
-        
-        if (!$approval) {
-            throw new \Exception("No approval found for this stock request");
+
+        if (! $approval) {
+            throw new \Exception('No approval found for this stock request');
         }
 
         // Process the approval step
@@ -92,17 +91,16 @@ class StockRequestService
     /**
      * Reject a stock request
      *
-     * @param AtkStockRequest $stockRequest The stock request to reject
-     * @param User $user The user rejecting the request
-     * @param string|null $notes Optional notes
-     * @return void
+     * @param  AtkStockRequest  $stockRequest  The stock request to reject
+     * @param  User  $user  The user rejecting the request
+     * @param  string|null  $notes  Optional notes
      */
     public function rejectStockRequest(AtkStockRequest $stockRequest, User $user, ?string $notes = null): void
     {
         $approval = $stockRequest->approval;
-        
-        if (!$approval) {
-            throw new \Exception("No approval found for this stock request");
+
+        if (! $approval) {
+            throw new \Exception('No approval found for this stock request');
         }
 
         // Process the rejection
@@ -112,8 +110,7 @@ class StockRequestService
     /**
      * Update division stocks when a stock request is approved
      *
-     * @param AtkStockRequest $stockRequest The approved stock request
-     * @return void
+     * @param  AtkStockRequest  $stockRequest  The approved stock request
      */
     protected function updateDivisionStocks(AtkStockRequest $stockRequest): void
     {
@@ -121,11 +118,11 @@ class StockRequestService
             // Find or create the division stock record
             $divisionStock = AtkDivisionStock::firstOrNew([
                 'division_id' => $stockRequest->division_id,
-                'item_id' => $requestItem->item_id
+                'item_id' => $requestItem->item_id,
             ]);
-            
+
             // Update the quantity
-            $divisionStock->quantity += $requestItem->quantity_requested;
+            $divisionStock->quantity += $requestItem->quantity;
             $divisionStock->save();
         }
     }
@@ -133,16 +130,15 @@ class StockRequestService
     /**
      * Cancel a stock request
      *
-     * @param AtkStockRequest $stockRequest The stock request to cancel
-     * @param User $user The user cancelling the request
-     * @return void
+     * @param  AtkStockRequest  $stockRequest  The stock request to cancel
+     * @param  User  $user  The user cancelling the request
      */
     public function cancelStockRequest(AtkStockRequest $stockRequest, User $user): void
     {
         $approval = $stockRequest->approval;
-        
-        if (!$approval) {
-            throw new \Exception("No approval found for this stock request");
+
+        if (! $approval) {
+            throw new \Exception('No approval found for this stock request');
         }
 
         // Cancel the approval

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AtkStockUsages\Pages;
 
 use App\Filament\Actions\ApprovalAction;
+use App\Filament\Actions\ResubmitAction;
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -17,7 +18,7 @@ class ViewAtkStockUsage extends ViewRecord
             EditAction::make(),
             ApprovalAction::makeApprove(),
             ApprovalAction::makeReject(),
-            ApprovalAction::makeResubmit(),
+            ResubmitAction::make(),
         ];
     }
 }

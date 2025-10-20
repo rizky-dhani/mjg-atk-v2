@@ -10,7 +10,7 @@ class AtkStockRequestItem extends Model
         'request_id',
         'item_id',
         'category_id',
-        'quantity_requested'
+        'quantity',
     ];
 
     public function request()
