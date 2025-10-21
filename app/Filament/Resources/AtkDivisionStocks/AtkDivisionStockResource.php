@@ -11,19 +11,27 @@ use App\Filament\Resources\AtkDivisionStocks\Schemas\AtkDivisionStockInfolist;
 use App\Filament\Resources\AtkDivisionStocks\Tables\AtkDivisionStocksTable;
 use App\Models\AtkDivisionStock;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AtkDivisionStockResource extends Resource
 {
     protected static ?string $model = AtkDivisionStock::class;
-    protected static ?string $navigationLabel = 'Inventory Stocks';
-    protected static ?string $slug = 'atk/inventory-stocks';   
+
+    protected static ?string $navigationLabel = 'Stok ATK';
+
+    protected static ?string $slug = 'atk/inventory-stocks';
+
+    protected static ?string $modelLabel = 'Stok ATK';
+
+    protected static ?string $pluralModelLabel = 'Stok ATK';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::PaperClip;
-    protected static string | UnitEnum | null $navigationGroup = 'Alat Tulis Kantor';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
     public static function form(Schema $schema): Schema
     {

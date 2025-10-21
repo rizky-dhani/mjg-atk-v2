@@ -24,6 +24,10 @@ class AtkStockUsageResource extends Resource
 
     protected static ?string $slug = 'atk/stock-usages';
 
+    protected static ?string $modelLabel = 'Pengeluaran ATK';
+
+    protected static ?string $pluralModelLabel = 'Pengeluaran ATK';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowUpTray;
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';

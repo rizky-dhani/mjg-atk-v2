@@ -24,6 +24,10 @@ class AtkStockRequestResource extends Resource
 
     protected static ?string $slug = 'atk/stock-requests';
 
+    protected static ?string $modelLabel = 'Permintaan ATK';
+
+    protected static ?string $pluralModelLabel = 'Permintaan ATK';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowDownTray;
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
