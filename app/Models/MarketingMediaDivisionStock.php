@@ -12,7 +12,6 @@ class MarketingMediaDivisionStock extends Model
         'item_id',
         'category_id',
         'current_stock',
-        'max_stock_limit',
     ];
 
     public function division(): BelongsTo
