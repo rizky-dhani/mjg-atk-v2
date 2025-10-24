@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks;
 
-use App\Filament\Resources\AtkDivisionStocks\Pages\CreateAtkDivisionStock;
-use App\Filament\Resources\AtkDivisionStocks\Pages\EditAtkDivisionStock;
 use App\Filament\Resources\AtkDivisionStocks\Pages\ListAtkDivisionStocks;
 use App\Filament\Resources\AtkDivisionStocks\Pages\ViewAtkDivisionStock;
 use App\Filament\Resources\AtkDivisionStocks\Schemas\AtkDivisionStockForm;
@@ -21,13 +19,13 @@ class AtkDivisionStockResource extends Resource
 {
     protected static ?string $model = AtkDivisionStock::class;
 
-    protected static ?string $navigationLabel = 'Stok ATK';
+    protected static ?string $navigationLabel = 'Stok Inventaris';
 
     protected static ?string $slug = 'atk/inventory-stocks';
 
-    protected static ?string $modelLabel = 'Stok ATK';
+    protected static ?string $modelLabel = 'Stok Inventaris ATK';
 
-    protected static ?string $pluralModelLabel = 'Stok ATK';
+    protected static ?string $pluralModelLabel = 'Stok Inventaris ATK';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::PaperClip;
 
@@ -59,9 +57,7 @@ class AtkDivisionStockResource extends Resource
     {
         return [
             'index' => ListAtkDivisionStocks::route('/'),
-            'create' => CreateAtkDivisionStock::route('/create'),
-            'view' => ViewAtkDivisionStock::route('/{record}'),
-            'edit' => EditAtkDivisionStock::route('/{record}/edit'),
+            'view' => ViewAtkDivisionStock::route('/view/{record}'),
         ];
     }
 }

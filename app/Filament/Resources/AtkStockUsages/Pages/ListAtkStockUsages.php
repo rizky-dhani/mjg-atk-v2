@@ -26,7 +26,7 @@ class ListAtkStockUsages extends ListRecords
                 ->modalWidth(Width::SevenExtraLarge)
                 ->successNotification(
                     Notification::make()
-                        ->title('Permintaan ATK berhasil dibuat!')
+                        ->title('Request Pengeluaran ATK berhasil dibuat!')
                         ->success()
                 ),
         ];

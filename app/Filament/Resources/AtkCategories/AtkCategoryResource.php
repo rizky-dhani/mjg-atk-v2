@@ -2,65 +2,53 @@
 
 namespace App\Filament\Resources\AtkCategories;
 
-use App\Filament\Resources\AtkCategories\Pages\ManageAtkCategories;
+use App\Filament\Resources\AtkCategories\Pages\ListAtkCategories;
+use App\Filament\Resources\AtkCategories\Pages\ViewAtkCategory;
+use App\Filament\Resources\AtkCategories\Schemas\AtkCategoryForm;
+use App\Filament\Resources\AtkCategories\Tables\AtkCategoriesTable;
 use App\Models\AtkCategory;
 use BackedEnum;
-use UnitEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AtkCategoryResource extends Resource
 {
     protected static ?string $model = AtkCategory::class;
-    protected static ?string $slug = "atk/categories";
-    protected static ?string $navigationLabel = "Category";
-    protected static ?string $navigationParentItem = "Inventory Stocks";
+
+    protected static ?string $slug = 'atk/categories';
+
+    protected static ?string $modelLabel = 'Kategori ATK';
+
+    protected static ?string $pluralModelLabel = 'Kategori ATK';
+
+    protected static ?string $navigationLabel = 'Kategori';
+
+    protected static ?string $navigationParentItem = 'Stok ATK';
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
-    protected static string|UnitEnum|null $navigationGroup = "Alat Tulis Kantor";
+
+    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Schema $schema): Schema
     {
-        return $schema->components([
-            TextInput::make("name")->required(),
-            Textarea::make("description")->default(null)->columnSpanFull(),
-        ]);
+        return AtkCategoryForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make("name")->searchable(),
-                TextColumn::make("created_at")
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make("updated_at")
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([EditAction::make(), DeleteAction::make()])
-            ->toolbarActions([
-                BulkActionGroup::make([DeleteBulkAction::make()]),
-            ]);
+        return AtkCategoriesTable::configure($table);
     }
 
     public static function getPages(): array
     {
         return [
-            "index" => ManageAtkCategories::route("/"),
+            'index' => ListAtkCategories::route('/'),
+            'view' => ViewAtkCategory::route('/view/{record}'),
         ];
     }
 }

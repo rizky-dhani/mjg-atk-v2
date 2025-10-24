@@ -66,7 +66,7 @@ class AtkStockUsageResource extends Resource
         return [
             'index' => ListAtkStockUsages::route('/'),
             'approval' => ApprovalAtkStockUsage::route('/approval'),
-            'view' => ViewAtkStockUsage::route('/{record}'),
+            'view' => ViewAtkStockUsage::route('/view/{record}'),
         ];
     }
 }

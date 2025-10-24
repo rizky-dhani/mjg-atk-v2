@@ -5,6 +5,10 @@ namespace App\Filament\Actions;
 use App\Models\Approval;
 use App\Models\User;
 use App\Services\ApprovalService;
+use App\Services\ApprovalValidationService;
+use App\Services\ApprovalProcessingService;
+use App\Services\ApprovalHistoryService;
+use App\Services\StockUpdateService;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
@@ -21,14 +25,19 @@ class ApprovalAction
             ->modalDescription('Are you sure you want to approve this request?')
             ->modalSubmitActionLabel('Approve')
             ->visible(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
-                return $approvalService->canUserApprove($record, $user);
+                return $validationService->canUserApprove($record, $user);
             })
             ->action(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
+                $historyService = new ApprovalHistoryService();
+                $stockUpdateService = new StockUpdateService();
+                $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+                $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
+                
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -74,14 +83,19 @@ class ApprovalAction
             ->modalDescription('Are you sure you want to approve this request?')
             ->modalSubmitActionLabel('Approve')
             ->visible(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
-                return $approvalService->canUserApprove($record, $user);
+                return $validationService->canUserApprove($record, $user);
             })
             ->action(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
+                $historyService = new ApprovalHistoryService();
+                $stockUpdateService = new StockUpdateService();
+                $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+                $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
+                
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -129,14 +143,19 @@ class ApprovalAction
                     ->required(),
             ])
             ->visible(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record (same check for rejection)
-                return $approvalService->canUserApprove($record, $user);
+                return $validationService->canUserApprove($record, $user);
             })
             ->action(function (array $data, Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
+                $historyService = new ApprovalHistoryService();
+                $stockUpdateService = new StockUpdateService();
+                $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+                $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
+                
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -171,11 +190,11 @@ class ApprovalAction
             ->label('Approve/Reject Request')
             ->color('success')
             ->visible(function (Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
-                return $approvalService->canUserApprove($record, $user);
+                return $validationService->canUserApprove($record, $user);
             })
             ->form([
                 \Filament\Forms\Components\Select::make('action')
@@ -190,7 +209,12 @@ class ApprovalAction
                     ->placeholder('Add any notes regarding your decision...'),
             ])
             ->action(function (array $data, Model $record) {
-                $approvalService = new ApprovalService;
+                $validationService = new ApprovalValidationService();
+                $historyService = new ApprovalHistoryService();
+                $stockUpdateService = new StockUpdateService();
+                $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+                $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
+                
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type

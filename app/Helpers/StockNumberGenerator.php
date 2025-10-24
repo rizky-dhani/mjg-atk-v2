@@ -73,9 +73,6 @@ class StockNumberGenerator
 
     /**
      * Generate a unique request number for Marketing Media Stock Request
-     *
-     * @param  int  $divisionId
-     * @return string
      */
     public static function generateMarketingMediaRequestNumber(int $divisionId): string
     {
@@ -101,30 +98,27 @@ class StockNumberGenerator
                 $nextNumber = 1;
             }
 
-            return 'MM-' . $divisionInitial . '-REQ-' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+            return 'MM-'.$divisionInitial.'-REQ-'.str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
         });
     }
 
     /**
      * Generate a unique usage number for Marketing Media Stock Usage
-     *
-     * @param  int  $divisionId
-     * @return string
      */
     public static function generateMarketingMediaUsageNumber(int $divisionId): string
     {
         $division = UserDivision::find($divisionId);
         $divisionInitial = $division ? $division->initial : 'DIV';
 
-        $latestUsage = MarketingMediaStockUsage::whereNotNull('usage_number')
+        $latestUsage = MarketingMediaStockUsage::whereNotNull('request_number')
             ->where('division_id', $divisionId)
-            ->orderBy('usage_number', 'desc')
+            ->orderBy('request_number', 'desc')
             ->first();
 
         if ($latestUsage) {
             // Extract the numeric part from the latest usage number and increment it
             // Format is MM-DIV-USAGE-00000001, so we need to extract the numeric part after the last dash
-            $parts = explode('-', $latestUsage->usage_number);
+            $parts = explode('-', $latestUsage->request_number);
             $latestNumber = intval(end($parts));
             $nextNumber = $latestNumber + 1;
         } else {
@@ -132,6 +126,6 @@ class StockNumberGenerator
             $nextNumber = 1;
         }
 
-        return 'MM-' . $divisionInitial . '-USAGE-' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+        return 'MM-'.$divisionInitial.'-USAGE-'.str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
     }
 }

@@ -5,15 +5,10 @@ declare(strict_types=1);
 namespace Database\Seeders;
 
 use App\Models\AtkDivisionStock;
-use App\Models\item;
+use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkItem;
 use App\Models\UserDivision;
-use App\Models\CompanyDivision;
 use Illuminate\Database\Seeder;
-use App\Models\OfficeStationeryItem;
-use App\Models\AtkDivisionInventorySetting;
-use App\Models\OfficeStationeryStockPerDivision;
-use App\Models\OfficeStationeryDivisionInventorySetting;
 
 class AtkDivisionStockSeeder extends Seeder
 {
@@ -27,7 +22,7 @@ class AtkDivisionStockSeeder extends Seeder
 
         foreach ($divisions as $division) {
             foreach ($items as $item) {
-                $setting = AtkDivisionInventorySetting::where('division_id', $division->id)
+                $setting = AtkDivisionStockSetting::where('division_id', $division->id)
                     ->where('item_id', $item->id)
                     ->first();
 
@@ -35,7 +30,7 @@ class AtkDivisionStockSeeder extends Seeder
 
                 // Only seed if max_limit > 0
                 if ($maxLimit > 0) {
-                    $stock = rand(1, $maxLimit);
+                    $stock = 0;
 
                     AtkDivisionStock::updateOrCreate(
                         [
