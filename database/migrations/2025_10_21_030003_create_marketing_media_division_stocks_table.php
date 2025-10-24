@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('item_id')->constrained('marketing_media_items')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('marketing_media_categories')->onDelete('cascade');
             $table->integer('current_stock')->default(0);
-            $table->integer('max_stock_limit')->default(0);
             $table->timestamps();
         });
     }
