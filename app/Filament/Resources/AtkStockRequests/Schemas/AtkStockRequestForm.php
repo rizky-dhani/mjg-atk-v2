@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\AtkStockRequests\Schemas;
 
 use App\Models\AtkCategory;
-use App\Models\AtkDivisionInventorySetting;
+use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkDivisionStock;
 use App\Models\AtkItem;
 use Filament\Actions\Action;
@@ -162,7 +162,7 @@ class AtkStockRequestForm
                                             return '';
                                         }
 
-                                        $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
+                                        $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -187,7 +187,7 @@ class AtkStockRequestForm
                                             return;
                                         }
 
-                                        $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
+                                        $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -234,7 +234,7 @@ class AtkStockRequestForm
                                                     return;
                                                 }
 
-                                                $setting = AtkDivisionInventorySetting::where('division_id', auth()->user()->division_id ?? null)
+                                                $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
                                                     ->where('item_id', $itemId)
                                                     ->first();
 

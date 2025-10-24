@@ -6,6 +6,10 @@ use App\Models\Approval;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use App\Services\ApprovalService;
+use App\Services\ApprovalValidationService;
+use App\Services\ApprovalProcessingService;
+use App\Services\ApprovalHistoryService;
+use App\Services\StockUpdateService;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
@@ -69,7 +73,18 @@ class ResubmitAction
                 }
 
                 // Resubmit via service
-                $approvalService = new ApprovalService();
+                $validationService = new ApprovalValidationService();
+                $processingService = new ApprovalProcessingService(
+                    $validationService, 
+                    new ApprovalHistoryService(), 
+                    new StockUpdateService()
+                );
+                $approvalService = new ApprovalService(
+                    $validationService,
+                    $processingService,
+                    new ApprovalHistoryService(),
+                    new StockUpdateService()
+                );
                 $approvalService->resubmitApproval($approval, $user);
 
                 // Optional: Add notification or redirect

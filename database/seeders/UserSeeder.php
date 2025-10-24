@@ -2,13 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Permission;
 use App\Models\UserDivision;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class UserSeeder extends Seeder
 {
@@ -27,13 +26,13 @@ class UserSeeder extends Seeder
         $superAdmin->assignRole('Super Admin');
 
         $division = UserDivision::all();
-        foreach($division as $div){
+        foreach ($division as $div) {
             $head = User::create([
                 'name' => $div->name.' Head',
                 'email' => strtolower($div->initial).'.head@medquest.co.id',
                 'initial' => 'H'.$div->initial,
                 'password' => Hash::make('Atk2025!'),
-                'division_id' => $div->id
+                'division_id' => $div->id,
             ]);
             $head->assignRole('Head');
 
@@ -42,7 +41,7 @@ class UserSeeder extends Seeder
                 'email' => strtolower($div->initial).'.admin@medquest.co.id',
                 'initial' => 'A'.$div->initial,
                 'password' => Hash::make('Atk2025!'),
-                'division_id' => $div->id
+                'division_id' => $div->id,
             ]);
             $admin->assignRole('Admin');
         }
@@ -50,37 +49,56 @@ class UserSeeder extends Seeder
         // Assign default permission to Head and Admin role
         $headRole = Role::where('name', 'Head')->first();
         $adminRole = Role::where('name', 'Admin')->first();
-        
+
         if ($headRole) {
-            // Head role gets only view-any and view permissions for atk-stock-request
-            $viewAnyAtkStockRequestPermission = Permission::where('name', 'view-any atk-stock-request')->first();
-            $viewAtkStockRequestPermission = Permission::where('name', 'view atk-stock-request')->first();
-            
-            if ($viewAnyAtkStockRequestPermission) {
-                $headRole->givePermissionTo($viewAnyAtkStockRequestPermission);
-            }
-            if ($viewAtkStockRequestPermission) {
-                $headRole->givePermissionTo($viewAtkStockRequestPermission);
+            // Head role gets view-any permissions
+            $permissions = [
+                'view-any atk-division-stock',
+                'view-any atk-stock-request',
+                'view-any atk-stock-usage',
+                'view-any marketing-media-stock-request',
+                'view-any marketing-media-stock-usage',
+            ];
+            foreach ($permissions as $permissionName) {
+                $headPermission = Permission::where('name', $permissionName)->first();
+                if ($headPermission) {
+                    $headRole->givePermissionTo($headPermission);
+                }
             }
         }
-        
+
         if ($adminRole) {
-            // Admin role gets view-any, view, create, edit, delete permissions for atk-stock-request
+            // Admin role gets view-any, view, create, edit, delete permissions
             $permissions = [
                 'view-any atk-stock-request',
                 'view atk-stock-request',
                 'create atk-stock-request',
                 'edit atk-stock-request',
-                'delete atk-stock-request'
+                'delete atk-stock-request',
+                'view-any atk-stock-usage',
+                'view atk-stock-usage',
+                'create atk-stock-usage',
+                'edit atk-stock-usage',
+                'delete atk-stock-usage',
+                'view-any marketing-media-stock-request',
+                'view marketing-media-stock-request',
+                'create marketing-media-stock-request',
+                'edit marketing-media-stock-request',
+                'delete marketing-media-stock-request',
+                'view-any marketing-media-stock-usage',
+                'view marketing-media-stock-usage',
+                'create marketing-media-stock-usage',
+                'edit marketing-media-stock-usage',
+                'delete marketing-media-stock-usage',
             ];
-            
+
             foreach ($permissions as $permissionName) {
-                $permission = Permission::where('name', $permissionName)->first();
-                if ($permission) {
-                    $adminRole->givePermissionTo($permission);
+                $adminPermission = Permission::where('name', $permissionName)->first();
+                if ($adminPermission) {
+                    $adminRole->givePermissionTo($adminPermission);
                 }
             }
         }
-        
+
     }
 }

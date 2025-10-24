@@ -2,39 +2,43 @@
 
 namespace App\Filament\Resources\ApprovalFlows;
 
+use App\Filament\Actions\DuplicateAction;
+use App\Filament\Resources\ApprovalFlows\Pages\ManageApprovalFlows;
 use App\Filament\Resources\ApprovalFlows\Pages\ViewApprovalFlow;
-use BackedEnum;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Section;
-use UnitEnum;
-use Filament\Forms;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Tables\Table;
-use Illuminate\Support\Str;
 use App\Models\ApprovalFlow;
-use Filament\Schemas\Schema;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Resources\Resource;
-use Filament\Actions\DeleteAction;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\File;
-use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
-use App\Filament\Resources\ApprovalFlows\Pages\ManageApprovalFlows;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\File;
+use UnitEnum;
 
 class ApprovalFlowResource extends Resource
 {
     protected static ?string $model = ApprovalFlow::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::NumberedList;
-    protected static string | UnitEnum | null $navigationGroup = 'Approval Management';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Approval Management';
+
+    protected static ?string $recordTitleAttribute = 'name';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -75,6 +79,7 @@ class ApprovalFlowResource extends Resource
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
+                DuplicateAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -82,6 +87,7 @@ class ApprovalFlowResource extends Resource
                 ]),
             ]);
     }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema
@@ -96,19 +102,21 @@ class ApprovalFlowResource extends Resource
                                     ->trueIcon('heroicon-o-check-circle')
                                     ->trueColor('success')
                                     ->falseIcon('heroicon-o-x-circle')
-                                    ->falseColor('danger')
-                            ])
+                                    ->falseColor('danger'),
+                            ]),
                     ])
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
+
     public static function getPages(): array
     {
         return [
             'index' => ManageApprovalFlows::route('/'),
-            'view' => ViewApprovalFlow::route('/view/{record}')
+            'view' => ViewApprovalFlow::route('/view/{record}'),
         ];
     }
+
     public static function getRelations(): array
     {
         return [
