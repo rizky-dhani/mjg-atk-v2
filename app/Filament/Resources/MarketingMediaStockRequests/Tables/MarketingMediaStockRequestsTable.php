@@ -30,15 +30,45 @@ class MarketingMediaStockRequestsTable
                 TextColumn::make('approval.status')
                     ->label('Status')
                     ->badge()
+                    ->formatStateUsing(function ($record) {
+                        $approval = $record->approval;
+                        if (! $approval) {
+                            return 'Pending';
+                        }
+
+                        // Get the latest approval step approval
+                        $latestApproval = $approval
+                            ->approvalStepApprovals()
+                            ->with(['user', 'user.division'])
+                            ->latest('approved_at')
+                            ->first();
+
+                        if ($latestApproval) {
+                            $status = ucfirst($latestApproval->status);
+
+                            if ($latestApproval->user && $latestApproval->user->division) {
+                                // Get division's initial and user's first role name
+                                $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
+                                $roleNames = $latestApproval->user->getRoleNames();
+                                $role = $roleNames->first() ?? 'N/A';
+
+                                return "{$status} by {$divisionInitial} {$role}";
+                            } else {
+                                return $status;
+                            }
+                        }
+
+                        return $approval->status
+                            ? ucfirst($approval->status)
+                            : 'Pending';
+                    })
                     ->color(
-                        fn (string $state): string => match ($state) {
-                            'approved' => 'success',
-                            'rejected' => 'danger',
-                            'pending' => 'warning',
-                            default => 'gray',
+                        fn (string $state): string => match (true) {
+                            str_contains($state, 'approved') => 'success',
+                            str_contains($state, 'rejected') => 'danger',
+                            default => 'warning',
                         },
-                    )
-                    ->sortable(),
+                    ),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime()
