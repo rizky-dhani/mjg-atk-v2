@@ -169,6 +169,24 @@ class MarketingMediaItemPolicy
     }
 
     /**
+     * Determine whether the user can manage items.
+     */
+    public function manageItems(User $user): bool
+    {
+        // Check for Super Admin and Admin from GA roles
+        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+            return true;
+        }
+
+        // Check if user has 'admin' role and belongs to Marketing division
+        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Determine whether the user can restore the model.
      */
     public function restore(User $user, MarketingMediaItem $marketingMediaItem): bool

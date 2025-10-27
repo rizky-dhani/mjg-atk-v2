@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\AtkDivisionStockSetting;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class AtkDivisionStockSettingPolicy
 {
@@ -13,7 +12,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view-any atk-division-stock-setting');
+        return $user->can('view-any atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -21,7 +20,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function view(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('view atk-division-stock-setting');
+        return $user->can('view atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -29,7 +28,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create atk-division-stock-setting');
+        return $user->can('create atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -37,7 +36,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function update(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('edit atk-division-stock-setting');
+        return $user->can('edit atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -45,7 +44,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function delete(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('delete atk-division-stock-setting');
+        return $user->can('delete atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
