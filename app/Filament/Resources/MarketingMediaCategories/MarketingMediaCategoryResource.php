@@ -16,7 +16,7 @@ class MarketingMediaCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Folder;
 
-    protected static ?string $navigationParentItem = 'Stok Marketing Media';
+    protected static ?string $navigationParentItem = 'Stok Inventaris';
 
     protected static ?string $navigationLabel = 'Kategori';
 
