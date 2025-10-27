@@ -2,8 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\AtkItems\AtkItemResource;
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
+use App\Filament\Resources\MarketingMediaItems\MarketingMediaItemResource;
 use App\Filament\Resources\MarketingMediaStockRequests\MarketingMediaStockRequestResource;
 use App\Filament\Resources\MarketingMediaStockUsages\MarketingMediaStockUsageResource;
 use Filament\Http\Middleware\Authenticate;
@@ -94,6 +96,21 @@ class DashboardPanelProvider extends PanelProvider
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
+
+                // Inventory Stock Management
+                NavigationItem::make('Item Inventaris - ATK')
+                    ->icon(fn () => Heroicon::ArchiveBox)
+                    ->url(fn () => AtkItemResource::getUrl('index'))
+                    ->group('Settings')
+                    ->isActiveWhen(fn () => request()->url() === AtkItemResource::getUrl('index'))
+                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA'),
+                NavigationItem::make('Item Inventaris - Marketing Media')
+                    ->icon(fn () => Heroicon::ArchiveBox)
+                    ->url(fn () => MarketingMediaItemResource::getUrl('index'))
+                    ->group('Settings')
+                    ->isActiveWhen(fn () => request()->url() === MarketingMediaItemResource::getUrl('index'))
+                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA'),
+
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
