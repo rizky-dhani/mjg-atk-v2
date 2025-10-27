@@ -27,7 +27,7 @@ class AtkItemResource extends Resource
 
     protected static ?string $navigationLabel = 'Item';
 
-    protected static ?string $navigationParentItem = 'Stok ATK';
+    protected static ?string $navigationParentItem = 'Stok Inventaris';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
