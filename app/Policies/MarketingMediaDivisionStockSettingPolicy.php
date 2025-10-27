@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\MarketingMediaDivisionStockSetting;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class MarketingMediaDivisionStockSettingPolicy
 {
@@ -13,7 +12,7 @@ class MarketingMediaDivisionStockSettingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view-any marketing-media-division-stock-setting');
+        return $user->can('view-any marketing-media-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -21,7 +20,7 @@ class MarketingMediaDivisionStockSettingPolicy
      */
     public function view(User $user, MarketingMediaDivisionStockSetting $marketingMediaDivisionStockSetting): bool
     {
-        return $user->can('view marketing-media-division-stock-setting');
+        return $user->can('view marketing-media-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -29,7 +28,7 @@ class MarketingMediaDivisionStockSettingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create marketing-media-division-stock-setting');
+        return $user->can('create marketing-media-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -37,7 +36,7 @@ class MarketingMediaDivisionStockSettingPolicy
      */
     public function update(User $user, MarketingMediaDivisionStockSetting $marketingMediaDivisionStockSetting): bool
     {
-        return $user->can('edit marketing-media-division-stock-setting');
+        return $user->can('edit marketing-media-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
@@ -45,7 +44,7 @@ class MarketingMediaDivisionStockSettingPolicy
      */
     public function delete(User $user, MarketingMediaDivisionStockSetting $marketingMediaDivisionStockSetting): bool
     {
-        return $user->can('delete marketing-media-division-stock-setting');
+        return $user->can('delete marketing-media-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
     }
 
     /**
