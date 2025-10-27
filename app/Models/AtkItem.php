@@ -8,9 +8,10 @@ class AtkItem extends Model
 {
     protected $fillable = [
         'name',
+        'slug',
         'description',
         'category_id',
-        'unit'
+        'unit_of_measure',
     ];
 
     public function category()
