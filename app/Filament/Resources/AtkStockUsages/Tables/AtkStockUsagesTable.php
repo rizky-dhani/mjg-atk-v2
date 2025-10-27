@@ -48,17 +48,23 @@ class AtkStockUsagesTable
                         // Get the latest approval step approval
                         $latestApproval = $approval
                             ->approvalStepApprovals()
-                            ->with('user')
+                            ->with(['user', 'user.division'])
                             ->latest('approved_at')
                             ->first();
 
                         if ($latestApproval) {
                             $status = ucfirst($latestApproval->status);
-                            $approver = $latestApproval->user
-                                ? $latestApproval->user->name
-                                : 'Unknown';
 
-                            return "{$status} by {$approver}";
+                            if ($latestApproval->user && $latestApproval->user->division) {
+                                // Get division's initial and user's first role name
+                                $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
+                                $roleNames = $latestApproval->user->getRoleNames();
+                                $role = $roleNames->first() ?? 'N/A';
+
+                                return "{$status} by {$divisionInitial} {$role}";
+                            } else {
+                                return $status;
+                            }
                         }
 
                         return $approval->status
