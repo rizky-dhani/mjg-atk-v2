@@ -36,7 +36,7 @@ class MarketingMediaStockUsagesTable
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable(),
-                TextColumn::make('approval_status')
+                TextColumn::make('approval.status')
                     ->label('Status')
                     ->badge()
                     ->formatStateUsing(function ($record) {
@@ -48,17 +48,22 @@ class MarketingMediaStockUsagesTable
                         // Get the latest approval step approval
                         $latestApproval = $approval
                             ->approvalStepApprovals()
-                            ->with('user')
+                            ->with(['user', 'user.division'])
                             ->latest('approved_at')
                             ->first();
 
                         if ($latestApproval) {
                             $status = ucfirst($latestApproval->status);
-                            $approver = $latestApproval->user
-                                ? $latestApproval->user->name
-                                : 'Unknown';
 
-                            return "{$status} by {$approver}";
+                            if ($latestApproval->user && $latestApproval->user->division) {
+                                // Get division's initial and user's role
+                                $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
+                                $role = $latestApproval->user->roles->first()->name ?? 'N/A';
+
+                                return "{$status} by {$divisionInitial} {$role}";
+                            } else {
+                                return $status;
+                            }
                         }
 
                         return $approval->status
