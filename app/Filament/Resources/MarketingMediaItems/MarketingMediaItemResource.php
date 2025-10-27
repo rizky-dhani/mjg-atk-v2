@@ -25,7 +25,7 @@ class MarketingMediaItemResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Item Marketing Media';
 
-    protected static ?string $slug = 'marketing-media-items';
+    protected static ?string $slug = 'marketing-media/items';
 
     protected static string|UnitEnum|null $navigationGroup = 'Marketing Media';
 
