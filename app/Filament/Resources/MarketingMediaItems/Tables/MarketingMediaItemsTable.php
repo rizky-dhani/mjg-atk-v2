@@ -29,9 +29,6 @@ class MarketingMediaItemsTable
                     ->getStateUsing(fn ($record) => $record->category?->name ?? 'N/A'),
                 Tables\Columns\TextColumn::make('unit_of_measure')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('unit_price')
-                    ->money('usd')
-                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
@@ -67,6 +64,7 @@ class MarketingMediaItemsTable
                     }),
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make()
                     ->using(function ($record, array $data) {
                         $selectedDivisions = $data['divisions'] ?? [];
@@ -101,7 +99,6 @@ class MarketingMediaItemsTable
 
                         return $record;
                     }),
-                ViewAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
