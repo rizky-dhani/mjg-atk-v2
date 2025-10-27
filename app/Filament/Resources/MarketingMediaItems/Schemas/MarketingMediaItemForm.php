@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\MarketingMediaItems\Schemas;
 
 use App\Models\MarketingMediaCategory;
+use App\Models\UserDivision;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,10 +23,6 @@ class MarketingMediaItemForm
                             ->required()
                             ->maxLength(255)
                             ->columnSpanFull(),
-                        Textarea::make('description')
-                            ->nullable()
-                            ->maxLength(65535)
-                            ->columnSpanFull(),
                         Select::make('category_id')
                             ->label('Category')
                             ->relationship('category', 'name')
@@ -33,17 +30,21 @@ class MarketingMediaItemForm
                             ->searchable()
                             ->preload()
                             ->required(),
-                        TextInput::make('unit')
+                        Select::make('division_id')
+                            ->multiple()
+                            ->label('Marketing Divisions')
+                            ->helperText('Select marketing divisions to add this item to. Leave empty to add to all marketing divisions.')
+                            ->options(UserDivision::where('name', 'like', '%Marketing%')->pluck('name', 'id'))
+                            ->preload()
+                            ->columnSpanFull(),
+                        TextInput::make('unit_of_measure')
                             ->required()
                             ->maxLength(50)
                             ->default('piece'),
-                        TextInput::make('unit_price')
-                            ->label('Unit Price')
-                            ->required()
-                            ->numeric()
-                            ->prefix()
-                            ->default(0.00)
-                            ->step(0.01),
+                        Textarea::make('description')
+                            ->nullable()
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
                     ])
                     ->columns(2),
             ]);

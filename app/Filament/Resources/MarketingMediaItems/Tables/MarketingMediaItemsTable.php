@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\MarketingMediaItems\Tables;
 
 use App\Models\MarketingMediaCategory;
+use App\Models\MarketingMediaDivisionStock;
+use App\Models\UserDivision;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -15,6 +17,7 @@ class MarketingMediaItemsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->orderBy('category_id')->orderBy('created_at'))
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -24,26 +27,18 @@ class MarketingMediaItemsTable
                     ->sortable()
                     ->searchable()
                     ->getStateUsing(fn ($record) => $record->category?->name ?? 'N/A'),
-                Tables\Columns\TextColumn::make('unit')
+                Tables\Columns\TextColumn::make('unit_of_measure')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('unit_price')
                     ->money('usd')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('M j, Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime('M j, Y')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('category_id')
                     ->label('Category')
                     ->options(MarketingMediaCategory::pluck('name', 'id')),
                 Tables\Filters\Filter::make('created_at')
-                    ->form([
+                    ->schema([
                         \Filament\Forms\Components\DatePicker::make('created_from')
                             ->placeholder('Start date'),
                         \Filament\Forms\Components\DatePicker::make('created_until')
@@ -72,7 +67,40 @@ class MarketingMediaItemsTable
                     }),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->using(function ($record, array $data) {
+                        $selectedDivisions = $data['divisions'] ?? [];
+                        unset($data['divisions']);
+
+                        $record->update($data);
+
+                        // If no divisions selected, add to all marketing divisions
+                        if (empty($selectedDivisions)) {
+                            $marketingDivisions = UserDivision::where('name', 'like', '%Marketing%')->get();
+                        } else {
+                            $marketingDivisions = UserDivision::whereIn('id', $selectedDivisions)->get();
+                        }
+
+                        foreach ($marketingDivisions as $division) {
+                            // Check if stock record already exists for this division
+                            $existingStock = MarketingMediaDivisionStock::where([
+                                'item_id' => $record->id,
+                                'division_id' => $division->id,
+                            ])->first();
+
+                            if (! $existingStock) {
+                                MarketingMediaDivisionStock::create([
+                                    'item_id' => $record->id,
+                                    'category_id' => $record->category_id,
+                                    'division_id' => $division->id,
+                                    'quantity' => 0,
+                                    'max_quantity' => 0,
+                                ]);
+                            }
+                        }
+
+                        return $record;
+                    }),
                 ViewAction::make(),
             ])
             ->toolbarActions([
