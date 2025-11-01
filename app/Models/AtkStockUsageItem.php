@@ -9,6 +9,7 @@ class AtkStockUsageItem extends Model
     protected $fillable = [
         'usage_id',
         'item_id',
+        'category_id',
         'quantity',
     ];
 
@@ -20,5 +21,10 @@ class AtkStockUsageItem extends Model
     public function item()
     {
         return $this->belongsTo(AtkItem::class, 'item_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(AtkCategory::class, 'category_id');
     }
 }

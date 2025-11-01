@@ -128,4 +128,35 @@ class StockNumberGenerator
 
         return 'MM-'.$divisionInitial.'-USAGE-'.str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
     }
+
+    /**
+     * Generate a unique transfer number for Transfer Stock
+     */
+    public static function generateTransferStockNumber(int $divisionId): string
+    {
+        $division = UserDivision::find($divisionId);
+        $divisionInitial = $division ? $division->initial : 'DIV';
+
+        // Use database locking to ensure we get a unique sequential number
+        return DB::transaction(function () use ($divisionId, $divisionInitial) {
+            // Lock the table to prevent race conditions
+            $latestTransfer = \App\Models\AtkTransferStock::whereNotNull('transfer_number')
+                ->where('requesting_division_id', $divisionId)
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($latestTransfer) {
+                // Extract the numeric part from the latest transfer number and increment it
+                $parts = explode('-', $latestTransfer->transfer_number);
+                $latestNumber = intval(end($parts));
+                $nextNumber = $latestNumber + 1;
+            } else {
+                // If no previous transfers for this division, start with 1
+                $nextNumber = 1;
+            }
+
+            return 'TRANSFER-'.$divisionInitial.'-'.str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+        });
+    }
 }
