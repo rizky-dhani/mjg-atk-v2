@@ -46,6 +46,14 @@ class ApprovalFlowSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        ApprovalFlow::create([
+            'name' => 'Transfer Stock',
+            'description' => 'Approval flow for Transfer Stock between divisions',
+            'model_type' => 'App\Models\AtkTransferStock',
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // ATK Stock Request
         ApprovalFlowStep::insert([
@@ -236,6 +244,37 @@ class ApprovalFlowSeeder extends Seeder
                 'role_id' => 2,
                 'division_id' => 5,
                 'description' => '',
+                'allow_resubmission' => true,
+            ],
+        ]);
+        
+        // Transfer Stock - Flow ID 5
+        ApprovalFlowStep::insert([
+            [
+                'flow_id' => 5,
+                'step_name' => 'Division Head',
+                'step_number' => 1,
+                'role_id' => 2,
+                'division_id' => null, // Will be the requesting division's head
+                'description' => 'Division Head approval for transfer request',
+                'allow_resubmission' => true,
+            ],
+            [
+                'flow_id' => 5,
+                'step_name' => 'GA Admin',
+                'step_number' => 2,
+                'role_id' => 3,
+                'division_id' => 5, // GA division
+                'description' => 'GA Admin reviews and assigns source division',
+                'allow_resubmission' => true,
+            ],
+            [
+                'flow_id' => 5,
+                'step_name' => 'Source Division Head',
+                'step_number' => 3,
+                'role_id' => 2,
+                'division_id' => null, // Will be the source division's head (dynamically assigned)
+                'description' => 'Source Division Head approval for providing items',
                 'allow_resubmission' => true,
             ],
         ]);
