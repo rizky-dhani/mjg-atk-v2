@@ -29,6 +29,11 @@ class ApprovalFlowStep extends Model
     {
         return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'role_id');
     }
+    
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_approval_flow_steps', 'step_id', 'user_id');
+    }
 
     public function division()
     {
