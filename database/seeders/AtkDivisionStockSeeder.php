@@ -30,7 +30,7 @@ class AtkDivisionStockSeeder extends Seeder
 
                 // Only seed if max_limit > 0
                 if ($maxLimit > 0) {
-                    $stock = 0;
+                    $stock = rand(1, $maxLimit);
 
                     AtkDivisionStock::updateOrCreate(
                         [
