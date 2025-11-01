@@ -2,13 +2,15 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Tables;
 
+use Filament\Tables\Table;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\Width;
+use Filament\Tables\Filters\Filter;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class AtkTransferStocksTable
@@ -126,6 +128,13 @@ class AtkTransferStocksTable
             ])
             ->actions([
                 ViewAction::make(),
+                EditAction::make()
+                    ->modalWidth(Width::SevenExtraLarge)
+                    ->visible(function ($record) {
+                        $approvalService = new \App\Services\TransferStockApprovalService();
+                        // Don't show Edit action if user is the last approver (source division that can only approve/reject)
+                        return !$approvalService->isLastApprover($record);
+                    }),
                 \Filament\Actions\Action::make('approve')
                     ->label('Approve')
                     ->color('success')

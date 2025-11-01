@@ -183,4 +183,30 @@ class TransferStockApprovalService
 
         return true;
     }
+    
+    /**
+     * Check if the user is the last approver in the approval flow
+     */
+    public function isLastApprover(AtkTransferStock $transferStock): bool
+    {
+        $user = Auth::user();
+        $approval = $transferStock->approval;
+
+        if (!$approval) {
+            return false;
+        }
+
+        // Get the total number of steps in the approval flow
+        $totalSteps = $approval->approvalFlow->approvalFlowSteps()->count();
+
+        // Check if the current step is the last step
+        $isCurrentStepLast = ($approval->current_step == $totalSteps);
+
+        if (!$isCurrentStepLast) {
+            return false;
+        }
+
+        // Check if this user can approve the current (last) step
+        return $this->canApprove($transferStock);
+    }
 }
