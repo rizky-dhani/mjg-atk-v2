@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Filament\Resources\AtkItemPriceHistories\Tables;
+
+use App\Models\AtkItem;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class AtkItemPriceHistoriesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                \Filament\Tables\Columns\TextColumn::make('item.name')
+                    ->label('Item')
+                    ->sortable()
+                    ->searchable(),
+                \Filament\Tables\Columns\TextColumn::make('old_price')
+                    ->label('Old Price')
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'N/A'),
+                \Filament\Tables\Columns\TextColumn::make('new_price')
+                    ->label('New Price')
+                    ->sortable()
+                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                \Filament\Tables\Columns\TextColumn::make('effective_date')
+                    ->label('Effective Date')
+                    ->date()
+                    ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('user.name')
+                    ->label('Changed By')
+                    ->sortable()
+                    ->searchable(),
+                \Filament\Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->filters([
+                //
+            ])
+            ->actions([
+                \Filament\Tables\Actions\ViewAction::make(),
+            ])
+            ->bulkActions([
+                \Filament\Tables\Actions\BulkActionGroup::make([
+                    \Filament\Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

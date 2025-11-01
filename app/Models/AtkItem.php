@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class AtkItem extends Model
 {
@@ -32,5 +33,27 @@ class AtkItem extends Model
     public function atkStockUsageItems()
     {
         return $this->hasMany(AtkStockUsageItem::class, 'item_id');
+    }
+
+    public function atkItemPrices(): HasMany
+    {
+        return $this->hasMany(AtkItemPrice::class, 'item_id');
+    }
+
+    public function atkItemPriceHistories(): HasMany
+    {
+        return $this->hasMany(AtkItemPriceHistory::class, 'item_id');
+    }
+
+    public function activePrice()
+    {
+        return $this->hasOne(AtkItemPrice::class, 'item_id')
+                    ->where('is_active', true)
+                    ->latest('effective_date');
+    }
+    
+    public function latestPrice()
+    {
+        return $this->activePrice()->first();
     }
 }
