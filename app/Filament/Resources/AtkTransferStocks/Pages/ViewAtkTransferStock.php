@@ -6,6 +6,7 @@ use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Services\TransferStockApprovalService;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
 use Filament\Notifications\Notification;
 
@@ -15,13 +16,19 @@ class ViewAtkTransferStock extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        $actions = [
-            \Filament\Actions\EditAction::make(),
-        ];
-
         // Add approval buttons if the user has permission
         $record = $this->getRecord();
         $approvalService = new TransferStockApprovalService();
+        
+        // Check if user is the last approver (source division for the final approval)
+        $isLastApprover = $approvalService->isLastApprover($record);
+
+        // Don't show Edit action if user is the last approver (source division that can only approve/reject)
+        $actions = [];
+        if (!$isLastApprover) {
+            $actions[] = \Filament\Actions\EditAction::make()
+                ->modalWidth(Width::SevenExtraLarge);
+        }
         
         if ($approvalService->canApprove($record)) {
             // Add approve action
@@ -52,6 +59,7 @@ class ViewAtkTransferStock extends ViewRecord
                 ->label('Reject')
                 ->color('danger')
                 ->requiresConfirmation()
+                ->modalWidth(Width::SevenExtraLarge)
                 ->modalHeading('Reject Transfer Stock')
                 ->modalDescription('Are you sure you want to reject this transfer stock request?')
                 ->form([
