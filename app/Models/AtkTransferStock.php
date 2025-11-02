@@ -39,7 +39,7 @@ class AtkTransferStock extends Model
             'transfer_stock_id', // Foreign key on atk_transfer_stock_items table
             'id',                // Foreign key on user_divisions table
             'id',                // Local key on atk_transfer_stocks table
-            'id'                 // Local key on atk_transfer_stock_items table
+            'source_division_id' // Local key on atk_transfer_stock_items table
         )->distinct();
     }
 
@@ -59,6 +59,12 @@ class AtkTransferStock extends Model
     public function getSourceDivisionsCountAttribute()
     {
         return $this->sourceDivisions()->count();
+    }
+    
+    // Accessor to get unique source divisions count
+    public function getSourceDivisionsUniqueCountAttribute()
+    {
+        return $this->transferStockItems->pluck('source_division_id')->unique()->count();
     }
 
     // Accessor for approval status with detailed information

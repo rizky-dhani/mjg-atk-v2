@@ -116,9 +116,12 @@ class TransferStockApprovalService
         $totalSteps = $flow->approvalFlowSteps()->count();
 
         if ($completedSteps == $totalSteps) {
-            // All steps approved
+            // All steps approved - process stock transfer
             $approval->status = 'approved';
             $transferStock->status = 'approved';
+            
+            // Process the stock transfer
+            $this->processStockTransfer($transferStock);
         } else {
             // Move to next step
             $approval->current_step = $approval->current_step + 1;
@@ -208,5 +211,83 @@ class TransferStockApprovalService
 
         // Check if this user can approve the current (last) step
         return $this->canApprove($transferStock);
+    }
+    
+    /**
+     * Check if the user is the first approver in the approval flow
+     */
+    public function isFirstApprover(AtkTransferStock $transferStock): bool
+    {
+        $user = Auth::user();
+        $approval = $transferStock->approval;
+
+        if (!$approval) {
+            return false;
+        }
+
+        // Check if the current step is the first step
+        $isCurrentStepFirst = ($approval->current_step == 1);
+
+        if (!$isCurrentStepFirst) {
+            return false;
+        }
+
+        // Check if this user can approve the current (first) step
+        return $this->canApprove($transferStock);
+    }
+    
+    /**
+     * Process the stock transfer when approval is complete
+     */
+    private function processStockTransfer(AtkTransferStock $transferStock): bool
+    {
+        // Loop through each transfer stock item and update the division stocks
+        foreach ($transferStock->transferStockItems as $transferItem) {
+            $quantity = $transferItem->quantity;
+            $itemId = $transferItem->item_id;
+            $sourceDivisionId = $transferItem->source_division_id;
+            $requestingDivisionId = $transferStock->requesting_division_id;
+            
+            // Reduce stock from source division
+            $sourceStock = \App\Models\AtkDivisionStock::where('division_id', $sourceDivisionId)
+                ->where('item_id', $itemId)
+                ->first();
+                
+            if ($sourceStock && $sourceStock->current_stock >= $quantity) {
+                $sourceStock->current_stock -= $quantity;
+                $sourceStock->save();
+            } else {
+                // If source doesn't have enough stock, we should handle this appropriately
+                \Illuminate\Support\Facades\Log::error("Insufficient stock for item {$itemId} in division {$sourceDivisionId}");
+                continue;
+            }
+            
+            // Add stock to requesting division
+            $requestingStock = \App\Models\AtkDivisionStock::firstOrCreate(
+                [
+                    'division_id' => $requestingDivisionId,
+                    'item_id' => $itemId,
+                ],
+                [
+                    'category_id' => $transferItem->itemCategory ? $transferItem->itemCategory->id : $transferItem->item->category_id,
+                    'current_stock' => 0,
+                    'max_stock_limit' => 0, // This may need to be set differently
+                ]
+            );
+            
+            $requestingStock->current_stock += $quantity;
+            $requestingStock->save();
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if the user is the requester of the transfer stock
+     */
+    public function isRequester(AtkTransferStock $transferStock): bool
+    {
+        $user = Auth::user();
+        return $user && $user->id == $transferStock->requester_id;
     }
 }
