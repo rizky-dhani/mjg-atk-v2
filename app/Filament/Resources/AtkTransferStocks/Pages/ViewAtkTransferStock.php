@@ -20,12 +20,22 @@ class ViewAtkTransferStock extends ViewRecord
         $record = $this->getRecord();
         $approvalService = new TransferStockApprovalService();
         
-        // Check if user is the last approver (source division for the final approval)
-        $isLastApprover = $approvalService->isLastApprover($record);
+        // Check if user is authorized to edit (requester, users with GA initial, or Admin role)
+        $user = Auth::user();
+        $isRequester = $user->id == $record->requester_id;
+        $hasDivision = $user->division && (strtolower($user->division->initial) === 'GA' || strtolower($user->division->name) === 'General Affair' || strtolower($user->division->name) === 'General Affairs');
+        $hasRole = $user->hasRole('Admin') || $user->hasRole('Super Admin');
 
-        // Don't show Edit action if user is the last approver (source division that can only approve/reject)
+        // Only allow editing if the request hasn't been approved yet and the user is authorized
+        $canEdit = false;
+        $approval = $record->approval;
+        if ($approval && $approval->status === 'pending') {
+            // Can edit if user is the requester, GA division user, or has admin role
+            $canEdit = $isRequester || $hasDivision || $hasRole;
+        }
+
         $actions = [];
-        if (!$isLastApprover) {
+        if ($canEdit) {
             $actions[] = \Filament\Actions\EditAction::make()
                 ->modalWidth(Width::SevenExtraLarge);
         }

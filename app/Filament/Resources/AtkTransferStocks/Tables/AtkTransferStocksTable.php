@@ -31,17 +31,24 @@ class AtkTransferStocksTable
                     ->label('Divisi Pemohon')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('sourceDivisionsCount')
+                TextColumn::make('source_divisions_unique_count')
                     ->label('Divisi Sumber')
                     ->placeholder('Belum dipilih')
                     ->formatStateUsing(function ($record) {
-                        $sourceDivisions = $record->sourceDivisions;
-                        if ($sourceDivisions->count() === 0) {
+                        // Get unique source division IDs from transfer stock items
+                        $uniqueSourceDivisionIds = $record->transferStockItems
+                            ->pluck('source_division_id')
+                            ->unique()
+                            ->toArray();
+                        
+                        if (empty($uniqueSourceDivisionIds)) {
                             return 'Belum dipilih';
-                        } elseif ($sourceDivisions->count() === 1) {
-                            return $sourceDivisions->first()->name;
+                        } elseif (count($uniqueSourceDivisionIds) === 1) {
+                            // Return the name of the single source division
+                            $division = \App\Models\UserDivision::find($uniqueSourceDivisionIds[0]);
+                            return $division ? $division->name : 'Unknown Division';
                         } else {
-                            return $sourceDivisions->count() . ' Divisi';
+                            return count($uniqueSourceDivisionIds) . ' Divisi';
                         }
                     }),
                 TextColumn::make('approval_status')
@@ -131,9 +138,20 @@ class AtkTransferStocksTable
                 EditAction::make()
                     ->modalWidth(Width::SevenExtraLarge)
                     ->visible(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
-                        // Don't show Edit action if user is the last approver (source division that can only approve/reject)
-                        return !$approvalService->isLastApprover($record);
+                        $user = \Illuminate\Support\Facades\Auth::user();
+                        $isRequester = $user->id == $record->requester_id;
+                        $hasDivision = $user->division && (strtolower($user->division->initial) === 'GA' || strtolower($user->division->name) === 'General Affair' || strtolower($user->division->name) === 'General Affairs');
+                        $hasRole = $user->hasRole('Admin') || $user->hasRole('Super Admin');
+
+                        // Only allow editing if the request hasn't been approved yet and the user is authorized
+                        $canEdit = false;
+                        $approval = $record->approval;
+                        if ($approval && $approval->status === 'pending') {
+                            // Can edit if user is the requester, GA division user, or has admin role
+                            $canEdit = $isRequester || $hasDivision || $hasRole;
+                        }
+                        
+                        return $canEdit;
                     }),
                 \Filament\Actions\Action::make('approve')
                     ->label('Approve')
