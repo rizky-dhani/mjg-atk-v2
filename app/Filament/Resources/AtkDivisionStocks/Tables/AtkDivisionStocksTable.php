@@ -22,6 +22,11 @@ class AtkDivisionStocksTable
                 TextColumn::make('item.name')->numeric()->sortable(),
                 TextColumn::make('category.name')->numeric()->sortable(),
                 TextColumn::make('current_stock')->numeric()->sortable(),
+                TextColumn::make('moving_average_cost')
+                    ->label('Average Cost')
+                    ->numeric()
+                    ->sortable()
+                    ->money('IDR'),
                 TextColumn::make('max_limit')
                     ->label('Max Stock Limit')
                     ->numeric()

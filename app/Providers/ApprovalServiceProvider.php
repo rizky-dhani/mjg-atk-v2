@@ -26,7 +26,9 @@ class ApprovalServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(StockUpdateService::class, function ($app) {
-            return new StockUpdateService();
+            return new StockUpdateService(
+                $app->make(\App\Services\BudgetService::class)
+            );
         });
 
         $this->app->singleton(ApprovalProcessingService::class, function ($app) {
