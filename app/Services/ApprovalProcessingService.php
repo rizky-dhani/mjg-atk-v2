@@ -95,25 +95,34 @@ class ApprovalProcessingService
             });
 
             // If no unapproved steps remain, mark the overall approval as approved
-            if ($unapprovedSteps->isEmpty()) {
-                $approval->update([
-                    'status' => 'approved',
-                    'current_step' => $allSteps->last()?->step_number ?? null,
-                ]);
+            if ($unapprovedSteps->isEmpty() && $approval->status !== 'approved') {
+                // Use a database transaction to ensure atomicity and prevent race conditions
+                \DB::transaction(function () use ($approval, $approvable, $user, $allSteps) {
+                    // Re-fetch the approval to ensure we have the latest status
+                    $approval->refresh();
+                    
+                    // Double-check that it's not already approved to prevent race conditions
+                    if ($approval->status !== 'approved') {
+                        $approval->update([
+                            'status' => 'approved',
+                            'current_step' => $allSteps->last()?->step_number ?? null,
+                        ]);
 
-                // Log final approval to history
-                $this->historyService->logApprovalAction(
-                    $approvable,
-                    $user,
-                    'submitted', // Final submission/approval
-                    null, // document_id will be auto-generated
-                    null, // rejection_reason
-                    'Request fully approved',
-                    null // No specific step for final approval
-                );
+                        // Log final approval to history
+                        $this->historyService->logApprovalAction(
+                            $approvable,
+                            $user,
+                            'submitted', // Final submission/approval
+                            null, // document_id will be auto-generated
+                            null, // rejection_reason
+                            'Request fully approved',
+                            null // No specific step for final approval
+                        );
 
-                // If this is a model that requires stock updates when approved, handle it
-                $this->stockUpdateService->handleStockUpdates($approvable);
+                        // If this is a model that requires stock updates when approved, handle it
+                        $this->stockUpdateService->handleStockUpdates($approvable);
+                    }
+                });
 
                 // Synchronize approval status
                 $this->syncApprovalStatus($approvable);
