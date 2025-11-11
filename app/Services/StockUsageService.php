@@ -46,10 +46,18 @@ class StockUsageService
 
             // Create the usage items
             foreach ($data['items'] as $itemData) {
+                // Get the moving_average_cost from AtkDivisionStock for this item and division
+                $divisionStock = AtkDivisionStock::where('division_id', $data['division_id'])
+                    ->where('item_id', $itemData['item_id'])
+                    ->first();
+                
+                $movingAverageCost = $divisionStock ? $divisionStock->moving_average_cost : 0;
+
                 $usageItem = new AtkStockUsageItem([
                     'usage_id' => $stockUsage->id,
                     'item_id' => $itemData['item_id'],
                     'quantity' => $itemData['quantity'],
+                    'moving_average_cost' => $movingAverageCost,
                 ]);
                 $usageItem->save();
             }

@@ -2,19 +2,20 @@
 
 namespace App\Filament\Resources\AtkStockRequests\Schemas;
 
-use App\Models\AtkCategory;
-use App\Models\AtkDivisionStockSetting;
-use App\Models\AtkDivisionStock;
 use App\Models\AtkItem;
+use App\Models\AtkCategory;
+use App\Models\AtkItemPrice;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Repeater;
+use Filament\Schemas\Schema;
+use App\Models\AtkDivisionStock;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
+use App\Models\AtkDivisionStockSetting;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
 
 class AtkStockRequestForm
 {
@@ -146,9 +147,71 @@ class AtkStockRequestForm
                                             $item = AtkItem::find($state);
                                             if ($item) {
                                                 $set('category_id', $item->category_id);
-                                                // Also set the category in the form to keep it in sync
-                                                // $set('item_category_id', $item->category_id);
                                             }
+                                        }
+                                        
+                                        // Update current_mac when item_id changes
+                                        if ($state) {
+                                            $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                ->where('item_id', $state)
+                                                ->first();
+
+                                            if ($stock) {
+                                                $set('current_mac', 'Rp ' . number_format($stock->moving_average_cost, 0, ',', '.'));
+                                            } else {
+                                                $set('current_mac', 'Rp 0');
+                                            }
+                                        } else {
+                                            // If item_id is cleared, reset current_mac
+                                            $set('current_mac', '');
+                                        }
+                                        
+                                        // Update item_price when item_id changes
+                                        if ($state) {
+                                            $item = AtkItem::find($state);
+                                            // Get the active price with the latest effective_date
+                                            $priceModel = $item ? $item->activePrice()->first() : null;
+                                            $price = $priceModel ? $priceModel->unit_price : 0;
+                                            $set('item_price', 'Rp ' . number_format($price, 0, ',', '.'));
+                                            
+                                            // Update new_mac_estimate when item_id changes
+                                            $quantity = $get('quantity') ?? 0;
+                                            if ($quantity > 0) {
+                                                // Get current stock data
+                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                    ->where('item_id', $state)
+                                                    ->first();
+
+                                                $currentStock = $stock ? $stock->current_stock : 0;
+                                                $currentMac = $stock ? $stock->moving_average_cost : 0;
+                                                
+                                                // Calculate new MAC using the formula:
+                                                // New MAC = ((Old Stock × Old MAC) + (Incoming Stock × Incoming Unit Cost)) / (Old Stock + Incoming Stock)
+                                                $totalValue = ($currentStock * $currentMac) + ($quantity * $price);
+                                                $totalQuantity = $currentStock + $quantity;
+                                                
+                                                if ($totalQuantity == 0) {
+                                                    $newMac = 0;
+                                                } else {
+                                                    $newMac = $totalValue / $totalQuantity;
+                                                }
+                                                $set('new_mac_estimate', 'Rp ' . number_format((int) round($newMac), 0, ',', '.'));
+                                            } else {
+                                                // If quantity is 0, just show current MAC
+                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                    ->where('item_id', $state)
+                                                    ->first();
+
+                                                if ($stock) {
+                                                    $set('new_mac_estimate', 'Rp ' . number_format($stock->moving_average_cost, 0, ',', '.'));
+                                                } else {
+                                                    $set('new_mac_estimate', 'Rp 0');
+                                                }
+                                            }
+                                        } else {
+                                            // If item_id is cleared, clear dependent fields
+                                            $set('item_price', '');
+                                            $set('new_mac_estimate', '');
                                         }
                                     }),
                                 TextInput::make('quantity')
@@ -183,36 +246,76 @@ class AtkStockRequestForm
                                     ->live()
                                     ->afterStateUpdated(function (callable $get, callable $set, $state) {
                                         $itemId = $get('item_id');
-                                        if (! $itemId || ! $state) {
-                                            return;
+                                        
+                                        // First run the original validation logic
+                                        if ($itemId && $state) {
+                                            $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                                ->where('item_id', $itemId)
+                                                ->first();
+
+                                            if ($setting) {
+                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                    ->where('item_id', $itemId)
+                                                    ->first();
+
+                                                $currentStock = $stock ? $stock->current_stock : 0;
+                                                $maxLimit = $setting->max_limit;
+                                                $availableSpace = $maxLimit - $currentStock;
+
+                                                if ($state > $availableSpace) {
+                                                    // Reset to available space
+                                                    $set('quantity', $availableSpace);
+
+                                                    // Show notification to user
+                                                    Notification::make()
+                                                        ->title('Quantity exceeds maximum limit')
+                                                        ->body("Quantity requested exceeds maximum limit, maximum quantity available: {$availableSpace}")
+                                                        ->warning()
+                                                        ->send();
+                                                }
+                                            }
                                         }
+                                        
+                                        // Update new_mac_estimate when quantity changes
+                                        if ($itemId && $state) {
+                                            $item = AtkItem::find($itemId);
+                                            $priceModel = $item ? $item->activePrice()->first() : null;
+                                            $itemPrice = $priceModel ? $priceModel->unit_price : 0;
+                                            
+                                            // Get current stock data
+                                            $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                ->where('item_id', $itemId)
+                                                ->first();
 
-                                        $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
-                                            ->where('item_id', $itemId)
-                                            ->first();
+                                            $currentStock = $stock ? $stock->current_stock : 0;
+                                            $currentMac = $stock ? $stock->moving_average_cost : 0;
 
-                                        if (! $setting) {
-                                            return;
-                                        }
+                                            // Calculate new MAC using the formula:
+                                            // New MAC = ((Old Stock × Old MAC) + (Incoming Stock × Incoming Unit Cost)) / (Old Stock + Incoming Stock)
+                                            $totalValue = ($currentStock * $currentMac) + ($state * $itemPrice);
+                                            $totalQuantity = $currentStock + $state;
+                                            
+                                            if ($totalQuantity == 0) {
+                                                $newMac = 0;
+                                            } else {
+                                                $newMac = $totalValue / $totalQuantity;
+                                            }
+                                            $set('new_mac_estimate', 'Rp ' . number_format((int) round($newMac), 0, ',', '.'));
+                                        } else if (!$state) {
+                                            // If quantity is 0, get current MAC (if item exists)
+                                            if ($itemId) {
+                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                    ->where('item_id', $itemId)
+                                                    ->first();
 
-                                        $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
-                                            ->where('item_id', $itemId)
-                                            ->first();
-
-                                        $currentStock = $stock ? $stock->current_stock : 0;
-                                        $maxLimit = $setting->max_limit;
-                                        $availableSpace = $maxLimit - $currentStock;
-
-                                        if ($state > $availableSpace) {
-                                            // Reset to available space
-                                            $set('quantity', $availableSpace);
-
-                                            // Show notification to user
-                                            Notification::make()
-                                                ->title('Quantity exceeds maximum limit')
-                                                ->body("Quantity requested exceeds maximum limit, maximum quantity available: {$availableSpace}")
-                                                ->warning()
-                                                ->send();
+                                                if ($stock) {
+                                                    $set('new_mac_estimate', 'Rp ' . number_format($stock->moving_average_cost, 0, ',', '.'));
+                                                } else {
+                                                    $set('new_mac_estimate', 'Rp 0');
+                                                }
+                                            } else {
+                                                $set('new_mac_estimate', ''); // If no item either, clear field
+                                            }
                                         }
                                     })
                                     ->rules([
@@ -257,13 +360,47 @@ class AtkStockRequestForm
                                         },
                                     ]),
 
-                                Textarea::make('notes')
-                                    ->maxLength(1000)
-                                    ->rows(1)
-                                    ->autosize(),
+                                TextInput::make('current_mac')
+                                    ->label('Current MAC')
+                                    ->readOnly()
+                                    ->dehydrated(false) // Don't include in form data
+                                    ->live() // Make it live-update when dependencies change
+                                    ->formatStateUsing(function (callable $get) {
+                                        $itemId = $get('item_id');
+                                        if (! $itemId) {
+                                            return '';
+                                        }
+
+                                        $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                            ->where('item_id', $itemId)
+                                            ->first();
+
+                                        if (!$stock) {
+                                            return 'Rp 0';
+                                        }
+
+                                        $mac = $stock->moving_average_cost ?? 0;
+                                        return 'Rp ' . number_format($mac, 0, ',', '.');
+                                        // return $mac;
+                                    })
+                                    ->extraInputAttributes(['class' => 'bg-gray-50']),
+                                
+                                TextInput::make('item_price')
+                                    ->label('Item Price')
+                                    ->readOnly()
+                                    ->dehydrated(false) // Don't include in form data
+                                    ->default('') // Set default to empty string
+                                    ->extraInputAttributes(['class' => 'bg-blue-50']),
+
+                                TextInput::make('new_mac_estimate')
+                                    ->label('New MAC Estimate')
+                                    ->readOnly()
+                                    ->dehydrated(false) // Don't include in form data
+                                    ->default('') // Set default to empty string
+                                    ->extraInputAttributes(['class' => 'bg-green-50']),
                                 \Filament\Forms\Components\Hidden::make('category_id'),
                             ])
-                            ->columns(4)
+                            ->columns(6)
                             ->minItems(1)
                             ->addActionLabel('Add Item')
                             ->reorderableWithButtons()
