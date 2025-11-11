@@ -2,20 +2,25 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Pages;
 
-use App\Filament\Actions\ApprovalAction;
-use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
-use App\Models\AtkTransferStock;
-use App\Models\UserDivision;
-use App\Models\Approval;
-use App\Models\ApprovalFlow;
-use App\Models\ApprovalFlowStep;
-use App\Models\ApprovalStepApproval;
-use Filament\Resources\Pages\Page;
+use UnitEnum;
+use BackedEnum;
 use Filament\Tables;
+use App\Models\Approval;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\ApprovalFlow;
+use App\Models\UserDivision;
+use Filament\Actions\Action;
+use App\Models\ApprovalFlowStep;
+use App\Models\AtkTransferStock;
+use Filament\Resources\Pages\Page;
+use App\Models\ApprovalStepApproval;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
+use Filament\Actions\BulkActionGroup;
+use App\Filament\Actions\ApprovalAction;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 
 class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
 {
@@ -23,13 +28,21 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
 
     protected static string $resource = AtkTransferStockResource::class;
 
-    protected ?string $heading = 'Approval Transfer Stok';
+    protected static ?string $slug = 'atk/transfer-stocks/approval';
+
+    protected static ?string $navigationLabel = 'Transfer Stok ATK';
+
+    protected static string|UnitEnum|null $navigationGroup = 'Approval Permintaan';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
+
+    protected static ?string $title = 'Transfer Stok ATK';
 
     public function table(Table $table): Table
     {
         return $table
             ->query(
-                AtkTransferStock::query()
+            AtkTransferStock::query()
                     ->whereHas('approval', function (Builder $query) {
                         $user = Auth::user();
                         
@@ -45,20 +58,20 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
                             if ($user->division_id) {
                                 $stepQuery->where(function (Builder $subQuery) use ($user) {
                                     $subQuery->where('division_id', $user->division_id)
-                                           ->orWhere(function (Builder $subSubQuery) use ($user) {
-                                               // For steps with null division_id (like Source Division Head), 
-                                               // check if user's division matches any of the item's source divisions
-                                               $subSubQuery->whereNull('division_id')
-                                                          ->whereHas('approvable.transferStockItems', function (Builder $itemQuery) use ($user) {
-                                                              $itemQuery->where('source_division_id', $user->division_id);
-                                                          });
-                                           });
+                                            ->orWhere(function (Builder $subSubQuery) use ($user) {
+                                                // For steps with null division_id (like Source Division Head), 
+                                                // check if user's division matches any of the item's source divisions
+                                                $subSubQuery->whereNull('division_id')
+                                                            ->whereHas('approvable.transferStockItems', function (Builder $itemQuery) use ($user) {
+                                                                $itemQuery->where('source_division_id', $user->division_id);
+                                                            });
+                                            });
                                 });
                             }
                         })
                         ->where(function (Builder $subQuery) {
                             $subQuery->where('approvals.status', 'pending')
-                                   ->orWhere('approvals.status', 'partially_approved');
+                                    ->orWhere('approvals.status', 'partially_approved');
                         });
                     })
             )
@@ -137,7 +150,7 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
                     ->sortable(),
             ])
             ->actions([
-                Tables\Actions\Action::make('approve')
+                Action::make('approve')
                     ->label('Approve')
                     ->color('success')
                     ->action(function (AtkTransferStock $record) {
@@ -165,7 +178,7 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
                                 ->send();
                         }
                     }),
-                Tables\Actions\Action::make('reject')
+                Action::make('reject')
                     ->label('Reject')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -204,7 +217,7 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
                     }),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                BulkActionGroup::make([
                     //
                 ]),
             ]);
