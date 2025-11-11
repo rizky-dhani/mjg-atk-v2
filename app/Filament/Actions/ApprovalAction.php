@@ -34,7 +34,7 @@ class ApprovalAction
             ->action(function (Model $record) {
                 $validationService = new ApprovalValidationService();
                 $historyService = new ApprovalHistoryService();
-                $stockUpdateService = new StockUpdateService();
+                $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
                 
@@ -92,7 +92,7 @@ class ApprovalAction
             ->action(function (Model $record) {
                 $validationService = new ApprovalValidationService();
                 $historyService = new ApprovalHistoryService();
-                $stockUpdateService = new StockUpdateService();
+                $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
                 
@@ -152,7 +152,7 @@ class ApprovalAction
             ->action(function (array $data, Model $record) {
                 $validationService = new ApprovalValidationService();
                 $historyService = new ApprovalHistoryService();
-                $stockUpdateService = new StockUpdateService();
+                $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
                 
@@ -211,7 +211,7 @@ class ApprovalAction
             ->action(function (array $data, Model $record) {
                 $validationService = new ApprovalValidationService();
                 $historyService = new ApprovalHistoryService();
-                $stockUpdateService = new StockUpdateService();
+                $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
                 
