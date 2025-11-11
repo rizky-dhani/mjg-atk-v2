@@ -12,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -85,7 +86,9 @@ class AtkStockRequestsTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make()->authorize(static function ($record) {
+                EditAction::make()
+                ->modalWidth(Width::SevenExtraLarge)
+                ->authorize(static function ($record) {
                     $user = auth()->user();
 
                     return $user && $user->id === $record->requester_id;

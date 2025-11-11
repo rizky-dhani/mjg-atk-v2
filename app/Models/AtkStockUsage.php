@@ -15,7 +15,28 @@ class AtkStockUsage extends Model
         'division_id',
         'notes',
         'request_type',
+        'potential_cost',
     ];
+
+    protected $casts = [
+        'potential_cost' => 'integer',
+    ];
+    
+    /**
+     * Update potential_cost based on associated items
+     */
+    public function updatePotentialCost(): void
+    {
+        $items = $this->atkStockUsageItems;
+        
+        $potentialCost = 0;
+        foreach ($items as $item) {
+            $potentialCost += ($item->quantity * $item->moving_average_cost);
+        }
+        
+        $this->potential_cost = $potentialCost;
+        $this->save();
+    }
 
     public function requester()
     {

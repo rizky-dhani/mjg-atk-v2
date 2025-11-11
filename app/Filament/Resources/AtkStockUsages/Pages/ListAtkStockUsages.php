@@ -19,6 +19,19 @@ class ListAtkStockUsages extends ListRecords
                 ->mutateFormDataUsing(function (array $data) {
                     $data['division_id'] = auth()->user()->division_id;
                     $data['requester_id'] = auth()->user()->id;
+                    
+                    // Calculate potential_cost from the atkStockUsageItems
+                    $potentialCost = 0;
+                    
+                    if (isset($data['atkStockUsageItems']) && is_array($data['atkStockUsageItems'])) {
+                        foreach ($data['atkStockUsageItems'] as $item) {
+                            if (isset($item['quantity']) && isset($item['moving_average_cost'])) {
+                                $potentialCost += (int)$item['quantity'] * (int)$item['moving_average_cost'];
+                            }
+                        }
+                    }
+                    
+                    $data['potential_cost'] = $potentialCost;
 
                     return $data;
                 })

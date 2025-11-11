@@ -140,9 +140,57 @@ class StockUpdateService
             // Determine unit cost for the item
             $incomingUnitCost = 0;
             if (get_class($stockRequest) === AtkStockRequest::class) {
-                // Get the active price with the latest effective_date (similar to the form)
+                // Get the active price with the latest effective_date
                 $priceModel = $requestItem->item->activePrice()->first();
-                $incomingUnitCost = $priceModel && $priceModel->unit_price !== null ? $priceModel->unit_price : 0;
+                
+                \Log::info('StockUpdateService: Price retrieval for item', [
+                    'item_id' => $requestItem->item_id,
+                    'request_id' => $stockRequest->id,
+                    'price_model_exists' => $priceModel ? true : false,
+                    'price_model_details' => $priceModel ? [
+                        'id' => $priceModel->id,
+                        'unit_price' => $priceModel->unit_price,
+                        'is_active' => $priceModel->is_active,
+                        'effective_date' => $priceModel->effective_date
+                    ] : null
+                ]);
+                
+                if ($priceModel && isset($priceModel->unit_price) && $priceModel->unit_price !== null && $priceModel->unit_price > 0) {
+                    $incomingUnitCost = $priceModel->unit_price;
+                    \Log::info('StockUpdateService: Using active price for MAC calculation', [
+                        'item_id' => $requestItem->item_id,
+                        'unit_price_used' => $incomingUnitCost
+                    ]);
+                } else {
+                    // Fallback: try to get the latest price if no active price exists
+                    $fallbackPriceModel = $requestItem->item->latestPrice()->first();
+                    \Log::info('StockUpdateService: No active price found, checking fallback', [
+                        'item_id' => $requestItem->item_id,
+                        'fallback_price_exists' => $fallbackPriceModel ? true : false,
+                        'fallback_price_details' => $fallbackPriceModel ? [
+                            'id' => $fallbackPriceModel->id,
+                            'unit_price' => $fallbackPriceModel->unit_price,
+                            'is_active' => $fallbackPriceModel->is_active,
+                            'effective_date' => $fallbackPriceModel->effective_date
+                        ] : null
+                    ]);
+                    
+                    if ($fallbackPriceModel && isset($fallbackPriceModel->unit_price) && $fallbackPriceModel->unit_price !== null && $fallbackPriceModel->unit_price > 0) {
+                        $incomingUnitCost = $fallbackPriceModel->unit_price;
+                        \Log::info('StockUpdateService: Using fallback price for MAC calculation', [
+                            'item_id' => $requestItem->item_id,
+                            'unit_price_used' => $incomingUnitCost
+                        ]);
+                    } else {
+                        \Log::warning('No price found for item during stock update', [
+                            'item_id' => $requestItem->item_id,
+                            'request_id' => $stockRequest->id,
+                            'price_model' => $priceModel ? $priceModel->toArray() : null,
+                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null
+                        ]);
+                        // Use 0 as final fallback - this will result in MAC being 0 if no pricing info is available
+                    }
+                }
             }
 
             // Calculate new moving average cost using the formula:
@@ -197,7 +245,8 @@ class StockUpdateService
 
         // Calculate the total cost for budget deduction (only for AtkStockUsage)
         if (get_class($stockUsage) === AtkStockUsage::class) {
-            $totalCost = $this->calculateUsageTotalCost($stockUsage);
+            // Use the stored potential_cost that was calculated when the form was submitted
+            $totalCost = $stockUsage->potential_cost;
 
             // Deduct the cost from the division's budget
             $this->budgetService->deductFromBudget(
@@ -412,17 +461,85 @@ class StockUpdateService
             $unitCost = 0;
             $transactionType = 'adjustment'; // Default to adjustment
             if (get_class($model) === AtkStockRequest::class && $operation === 'addition') {
+                // Get the active price with the latest effective_date
                 $priceModel = $item->item->activePrice()->first();
-                $unitCost = $priceModel && $priceModel->unit_price !== null ? $priceModel->unit_price : 0;
+                
+                \Log::info('StockUpdateService: Price retrieval for item in updateStockByRequestType', [
+                    'item_id' => $item->item_id,
+                    'model_id' => $model->id,
+                    'model_type' => get_class($model),
+                    'price_model_exists' => $priceModel ? true : false,
+                    'price_model_details' => $priceModel ? [
+                        'id' => $priceModel->id,
+                        'unit_price' => $priceModel->unit_price,
+                        'is_active' => $priceModel->is_active,
+                        'effective_date' => $priceModel->effective_date
+                    ] : null
+                ]);
+                
+                if ($priceModel && isset($priceModel->unit_price) && $priceModel->unit_price !== null && $priceModel->unit_price > 0) {
+                    $unitCost = $priceModel->unit_price;
+                    \Log::info('StockUpdateService: Using active price for MAC calculation in updateStockByRequestType', [
+                        'item_id' => $item->item_id,
+                        'unit_price_used' => $unitCost
+                    ]);
+                } else {
+                    // Fallback: try to get the latest price if no active price exists
+                    $fallbackPriceModel = $item->item->latestPrice()->first();
+                    \Log::info('StockUpdateService: No active price found in updateStockByRequestType, checking fallback', [
+                        'item_id' => $item->item_id,
+                        'model_id' => $model->id,
+                        'model_type' => get_class($model),
+                        'fallback_price_exists' => $fallbackPriceModel ? true : false,
+                        'fallback_price_details' => $fallbackPriceModel ? [
+                            'id' => $fallbackPriceModel->id,
+                            'unit_price' => $fallbackPriceModel->unit_price,
+                            'is_active' => $fallbackPriceModel->is_active,
+                            'effective_date' => $fallbackPriceModel->effective_date
+                        ] : null
+                    ]);
+                    
+                    if ($fallbackPriceModel && isset($fallbackPriceModel->unit_price) && $fallbackPriceModel->unit_price !== null && $fallbackPriceModel->unit_price > 0) {
+                        $unitCost = $fallbackPriceModel->unit_price;
+                        \Log::info('StockUpdateService: Using fallback price for MAC calculation in updateStockByRequestType', [
+                            'item_id' => $item->item_id,
+                            'unit_price_used' => $unitCost
+                        ]);
+                    } else {
+                        \Log::warning('No price found for item during stock update by request type', [
+                            'item_id' => $item->item_id,
+                            'model_id' => $model->id,
+                            'model_type' => get_class($model),
+                            'price_model' => $priceModel ? $priceModel->toArray() : null,
+                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null
+                        ]);
+                    }
+                }
                 $transactionType = 'request';
             } elseif (get_class($model) === AtkStockUsage::class && $operation === 'reduction') {
                 $unitCost = $divisionStock->moving_average_cost ?? 0;
                 $transactionType = 'usage';
             }
 
+            // Calculate new MAC if this is an addition and we have a unit cost
+            $newMovingAverageCost = $divisionStock->moving_average_cost; // Default to existing MAC
+            if ($operation === 'addition' && $unitCost > 0) {
+                // Calculate new moving average cost using the formula:
+                // New MAC = ((Old Stock × Old MAC) + (Incoming Stock × Incoming Unit Cost)) / (Old Stock + Incoming Stock)
+                $oldStock = $divisionStock->current_stock;
+                $oldMac = $divisionStock->moving_average_cost;
+
+                $totalValue = ($oldStock * $oldMac) + ($quantity * $unitCost);
+                $totalQuantity = $oldStock + $quantity;
+
+                // Calculate new MAC, ensuring we don't divide by zero
+                $newMovingAverageCost = $totalQuantity > 0 ? $totalValue / $totalQuantity : $unitCost;
+            }
+
             // Update the division stock
             $divisionStock->update([
                 'current_stock' => $newQuantity,
+                'moving_average_cost' => (int) round($newMovingAverageCost), // Store as integer
             ]);
 
             \Log::info('StockUpdateService: Updated division stock in updateStockByRequestType', [
@@ -432,8 +549,23 @@ class StockUpdateService
                 'quantity' => $quantity,
                 'current_stock_before' => $currentStockBefore,
                 'new_quantity' => $newQuantity,
-                'current_stock_after' => $newQuantity
+                'current_stock_after' => $newQuantity,
+                'old_mac' => $divisionStock->moving_average_cost,
+                'new_mac' => (int) round($newMovingAverageCost)
             ]);
+        }
+        
+        // For AtkStockUsage reduction operations, also handle budget deduction
+        if (get_class($model) === AtkStockUsage::class && in_array($operation, ['reduction', 'decrease'])) {
+            // Get the potential cost from the model
+            $totalCost = $model->potential_cost ?? 0;
+            
+            // Deduct the cost from the division's budget
+            $this->budgetService->deductFromBudget(
+                $model->division_id,
+                $totalCost,
+                $model->created_at->year ?? now()->year
+            );
         }
     }
 }

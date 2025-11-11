@@ -126,7 +126,7 @@ class ApprovalAtkStockUsage extends ListRecords
             ]);
 
         // Filter to only show records that the current user can approve
-        $approvalService = new \App\Services\ApprovalService;
+        $approvalService = app(\App\Services\ApprovalService::class);
         $approvableIds = [];
 
         foreach (AtkStockUsage::whereHas('approval', function ($q) {

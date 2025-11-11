@@ -11,6 +11,11 @@ class AtkStockUsageItem extends Model
         'item_id',
         'category_id',
         'quantity',
+        'moving_average_cost',
+    ];
+
+    protected $casts = [
+        'moving_average_cost' => 'integer',
     ];
 
     public function usage()
@@ -26,5 +31,25 @@ class AtkStockUsageItem extends Model
     public function category()
     {
         return $this->belongsTo(AtkCategory::class, 'category_id');
+    }
+    
+    /**
+     * Update the parent AtkStockUsage potential_cost after saving or deleting
+     */
+    protected static function booted()
+    {
+        static::saved(function ($item) {
+            $usage = $item->usage;
+            if ($usage) {
+                $usage->updatePotentialCost();
+            }
+        });
+        
+        static::deleted(function ($item) {
+            $usage = $item->usage;
+            if ($usage) {
+                $usage->updatePotentialCost();
+            }
+        });
     }
 }

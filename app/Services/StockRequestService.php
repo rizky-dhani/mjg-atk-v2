@@ -81,8 +81,10 @@ class StockRequestService
         $isCompleted = $this->approvalService->processApprovalStep($approval, $user, 'approve', $notes);
 
         // If approval is completed, update the division stocks
+        // NOTE: Stock updates are handled by StockUpdateService through the approval process
+        // to ensure proper MAC calculations and other business logic
         if ($isCompleted && $approval->status === 'approved') {
-            $this->updateDivisionStocks($stockRequest);
+            // $this->updateDivisionStocks($stockRequest); // COMMENTED OUT - DUPLICATE PROCESSING
         }
 
         return $isCompleted;
@@ -109,6 +111,8 @@ class StockRequestService
 
     /**
      * Update division stocks when a stock request is approved
+     * NOTE: This method is currently not used - stock updates are handled by StockUpdateService
+     * This is kept for reference or future modifications
      *
      * @param  AtkStockRequest  $stockRequest  The approved stock request
      */
@@ -121,8 +125,8 @@ class StockRequestService
                 'item_id' => $requestItem->item_id,
             ]);
 
-            // Update the quantity
-            $divisionStock->quantity += $requestItem->quantity;
+            // Update the quantity - NOTE: field name corrected from 'quantity' to 'current_stock'
+            $divisionStock->current_stock += $requestItem->quantity;
             $divisionStock->save();
         }
     }
