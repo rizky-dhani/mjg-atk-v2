@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AtkStockTransactions;
 
+use App\Filament\Resources\AtkTransferStocks\Pages\ApprovalAtkTransferStock;
 use UnitEnum;
 use BackedEnum;
 use Filament\Tables\Table;
@@ -58,6 +59,7 @@ class AtkStockTransactionResource extends Resource
         return [
             'index' => ListAtkStockTransactions::route('/'),
             'view' => ViewAtkStockTransaction::route('/view/{record}'),
+            'approval' => ApprovalAtkTransferStock::route('/approval')
         ];
     }
 }

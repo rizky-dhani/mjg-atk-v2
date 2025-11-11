@@ -18,6 +18,9 @@ class AtkTransferStocksTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function(Builder $query){
+                $query->where('requesting_division_id', auth()->user()->division_id)->orderByDesc('created_at');
+            })
             ->columns([
                 TextColumn::make('transfer_number')
                     ->label('Nomor Transfer')
