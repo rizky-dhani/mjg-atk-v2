@@ -77,13 +77,13 @@ class ResubmitAction
                 $processingService = new ApprovalProcessingService(
                     $validationService, 
                     new ApprovalHistoryService(), 
-                    new StockUpdateService()
+                    app(StockUpdateService::class)
                 );
                 $approvalService = new ApprovalService(
                     $validationService,
                     $processingService,
                     new ApprovalHistoryService(),
-                    new StockUpdateService()
+                    app(StockUpdateService::class)
                 );
                 $approvalService->resubmitApproval($approval, $user);
 
