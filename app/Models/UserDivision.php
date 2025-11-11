@@ -32,6 +32,11 @@ class UserDivision extends Model
         return $this->hasMany(AtkStockUsage::class, 'division_id');
     }
 
+    public function atkBudgetings()
+    {
+        return $this->hasMany(AtkBudgeting::class, 'division_id');
+    }
+
     public function approvalFlowSteps()
     {
         return $this->hasMany(ApprovalFlowStep::class, 'division_id');
