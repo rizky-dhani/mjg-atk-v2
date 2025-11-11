@@ -13,7 +13,7 @@ class AtkStockTransactionsTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->orderBy('created_at', 'desc'))
+                fn (Builder $query) => $query->where('division_id', auth()->user()->division_id)->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('id')
                     ->label('Transaction ID')
