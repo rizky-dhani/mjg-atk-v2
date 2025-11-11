@@ -26,34 +26,10 @@ class AtkItemPriceSeeder extends Seeder
         $now = now();
         
         foreach ($items as $item) {
-            // Set fixed price based on category
-            $categoryName = $item->category->name ?? 'Lain-Lain';
-            
-            // Assign fixed prices based on category
-            switch ($categoryName) {
-                case 'Kertas':
-                    $price = 50000; // Rp 50,000
-                    break;
-                case 'Odner':
-                    $price = 25000; // Rp 25,000
-                    break;
-                case 'Buku dan Kwitansi':
-                    $price = 15000; // Rp 15,000
-                    break;
-                case 'Pulpen, Pensil, Stabilo':
-                    $price = 10000; // Rp 10,000
-                    break;
-                case 'Binder Clip':
-                    $price = 5000; // Rp 5,000
-                    break;
-                case 'Label T&J':
-                    $price = 3000; // Rp 3,000
-                    break;
-                default:
-                    $price = 5000; // Rp 5,000 for 'Lain-Lain' and other categories
-                    break;
-            }
-            
+            // Generate price between 1000 and 10000 with 500 steps (1000, 1500, 2000, ..., 9500, 10000)
+            $randomStep = rand(2, 20); // Random step from 2 to 20 (since 2*500=1000, 20*500=10000)
+            $price = $randomStep * 500; // This will give us values from 1000 to 10000 in 500 increments
+
             $prices[] = [
                 'item_id' => $item->id,
                 'category_id' => $item->category_id,
