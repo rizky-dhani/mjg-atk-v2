@@ -9,14 +9,17 @@ use App\Models\AtkStockUsageItem;
 use App\Models\MarketingMediaStockUsage;
 use App\Models\MarketingMediaStockRequest;
 use App\Models\MarketingMediaDivisionStock;
+use App\Services\StockTransactionService;
 
 class StockUpdateService
 {
     protected BudgetService $budgetService;
+    protected StockTransactionService $stockTransactionService;
     
-    public function __construct(BudgetService $budgetService)
+    public function __construct(BudgetService $budgetService, StockTransactionService $stockTransactionService)
     {
         $this->budgetService = $budgetService;
+        $this->stockTransactionService = $stockTransactionService;
     }
 
     /**
@@ -222,6 +225,18 @@ class StockUpdateService
                 'new_mac' => (int) round($newMovingAverageCost),
                 'unit_cost_used' => $incomingUnitCost
             ]);
+            
+            // Record the transaction for tracking purposes
+            if (get_class($stockRequest) === AtkStockRequest::class) {
+                $this->stockTransactionService->recordTransactionOnly(
+                    $stockRequest->division_id,
+                    $requestItem->item_id,
+                    'request',
+                    $requestItem->quantity,
+                    $incomingUnitCost,
+                    $stockRequest
+                );
+            }
         }
     }
 
@@ -309,6 +324,18 @@ class StockUpdateService
                 'new_quantity' => $newQuantity,
                 'unit_cost_used' => $unitCost
             ]);
+            
+            // Record the transaction for tracking purposes
+            if (get_class($stockUsage) === AtkStockUsage::class) {
+                $this->stockTransactionService->recordTransactionOnly(
+                    $stockUsage->division_id,
+                    $usageItem->item_id,
+                    'usage',
+                    $usageItem->quantity,
+                    $unitCost,
+                    $stockUsage
+                );
+            }
         }
     }
 
@@ -553,6 +580,18 @@ class StockUpdateService
                 'old_mac' => $divisionStock->moving_average_cost,
                 'new_mac' => (int) round($newMovingAverageCost)
             ]);
+            
+            // Record the transaction for tracking purposes
+            if (in_array(get_class($model), [AtkStockRequest::class, AtkStockUsage::class])) {
+                $this->stockTransactionService->recordTransactionOnly(
+                    $model->division_id,
+                    $item->item_id,
+                    $transactionType,  // 'request', 'usage', etc.
+                    $quantity,
+                    $unitCost,
+                    $model
+                );
+            }
         }
         
         // For AtkStockUsage reduction operations, also handle budget deduction

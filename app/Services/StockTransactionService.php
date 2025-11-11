@@ -280,6 +280,45 @@ class StockTransactionService
     }
 
     /**
+     * Record only a transaction without updating the division stock
+     * This is used when stock updates are handled separately to avoid duplication
+     *
+     * @param int $divisionId
+     * @param int $itemId
+     * @param string $type
+     * @param int $quantity
+     * @param float $unitCost
+     * @param object $transactionSource
+     * @return AtkStockTransaction
+     */
+    public function recordTransactionOnly(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource): AtkStockTransaction
+    {
+        // Get the current division stock record to get the current MAC and balance for the snapshot
+        $divisionStock = AtkDivisionStock::where('division_id', $divisionId)
+            ->where('item_id', $itemId)
+            ->first();
+
+        $currentMac = $divisionStock ? $divisionStock->moving_average_cost : 0;
+        $currentBalance = $divisionStock ? $divisionStock->current_stock : 0;
+
+        // Create the transaction record with the current state as snapshots
+        $transaction = AtkStockTransaction::create([
+            'division_id' => $divisionId,
+            'item_id' => $itemId,
+            'type' => $type,
+            'quantity' => $quantity,
+            'unit_cost' => $unitCost,
+            'total_cost' => $quantity * $unitCost,
+            'mac_snapshot' => $currentMac,
+            'balance_snapshot' => $currentBalance,
+            'trx_src_type' => get_class($transactionSource),
+            'trx_src_id' => $transactionSource->id,
+        ]);
+
+        return $transaction;
+    }
+
+    /**
      * Get transaction history for a specific division and item
      *
      * @param int $divisionId
