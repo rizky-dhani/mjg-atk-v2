@@ -22,7 +22,7 @@ class AtkTransferStockResource extends Resource
 
     protected static ?string $navigationLabel = 'Transfer Stok';
 
-    protected static ?string $slug = 'transfer/stocks';
+    protected static ?string $slug = 'atk/transfer-stocks';
 
     protected static ?string $modelLabel = 'Transfer Stok';
 
@@ -54,6 +54,11 @@ class AtkTransferStockResource extends Resource
         return [
             \App\Filament\Resources\AtkTransferStocks\RelationManagers\AtkTransferStockItemsRelationManager::class,
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 
     public static function getPages(): array
