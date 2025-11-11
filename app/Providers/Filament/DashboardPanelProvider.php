@@ -38,8 +38,7 @@ class DashboardPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login()
             ->spa()
-            ->plugins([
-            ])
+            ->databaseTransactions()
             ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Blue,
@@ -120,7 +119,6 @@ class DashboardPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
