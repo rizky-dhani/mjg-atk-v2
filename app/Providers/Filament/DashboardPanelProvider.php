@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Resources\AtkItems\AtkItemResource;
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
+use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Filament\Resources\MarketingMediaItems\MarketingMediaItemResource;
 use App\Filament\Resources\MarketingMediaStockRequests\MarketingMediaStockRequestResource;
 use App\Filament\Resources\MarketingMediaStockUsages\MarketingMediaStockUsageResource;
@@ -55,6 +56,11 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => AtkStockUsageResource::getUrl('index'))
                     ->group('Alat Tulis Kantor')
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('index')),
+                NavigationItem::make('Transfer Stok ATK')
+                    ->icon(fn () => Heroicon::ArrowsRightLeft)
+                    ->url(fn () => AtkTransferStockResource::getUrl('index'))
+                    ->group('Alat Tulis Kantor')
+                    ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('index')),
 
                 // Marketing Media
                 NavigationItem::make('Permintaan Marketing Media')
@@ -82,6 +88,12 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval'))
+                    ->visible(fn () => $this->canUserSeeApprovalNav()),
+                NavigationItem::make('Transfer Stok ATK')
+                    ->icon(fn () => Heroicon::ArrowsRightLeft)
+                    ->url(fn () => AtkTransferStockResource::getUrl('approval'))
+                    ->group('Approval Permintaan')
+                    ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Permintaan Marketing Media')
                     ->icon(fn () => Heroicon::ArrowDownTray)
@@ -118,7 +130,6 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
