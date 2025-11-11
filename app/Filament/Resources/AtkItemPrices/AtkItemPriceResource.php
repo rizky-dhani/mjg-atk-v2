@@ -29,8 +29,6 @@ class AtkItemPriceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Harga Item ATK';
 
-    protected static ?string $navigationParentItem = 'Stok Inventaris';
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCurrencyDollar;
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
@@ -61,9 +59,7 @@ class AtkItemPriceResource extends Resource
     {
         return [
             'index' => ListAtkItemPrices::route('/'),
-            'create' => CreateAtkItemPrice::route('/create'),
             'view' => ViewAtkItemPrice::route('/view/{record}'),
-            'edit' => EditAtkItemPrice::route('/edit/{record}'),
         ];
     }
 }
