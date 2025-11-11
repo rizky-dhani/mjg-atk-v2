@@ -27,7 +27,7 @@ class AtkItemPriceHistoryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Histori Harga Item';
 
-    protected static ?string $navigationParentItem = 'Stok Inventaris';
+    protected static ?string $navigationParentItem = 'Harga Item';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 

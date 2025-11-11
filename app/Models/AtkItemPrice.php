@@ -28,6 +28,11 @@ class AtkItemPrice extends Model
         return $this->belongsTo(AtkItem::class, 'item_id');
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(AtkCategory::class, 'category_id');
+    }
+
     public function priceHistories(): HasMany
     {
         return $this->hasMany(AtkItemPriceHistory::class, 'item_id');
