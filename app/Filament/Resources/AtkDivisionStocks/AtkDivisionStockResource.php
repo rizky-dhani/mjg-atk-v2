@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AtkDivisionStocks;
 
 use App\Filament\Resources\AtkDivisionStocks\Pages\ListAtkDivisionStocks;
 use App\Filament\Resources\AtkDivisionStocks\Pages\ViewAtkDivisionStock;
+use App\Filament\Resources\AtkDivisionStocks\RelationManagers\AtkStockTransactionsRelationManager;
 use App\Filament\Resources\AtkDivisionStocks\Schemas\AtkDivisionStockForm;
 use App\Filament\Resources\AtkDivisionStocks\Schemas\AtkDivisionStockInfolist;
 use App\Filament\Resources\AtkDivisionStocks\Tables\AtkDivisionStocksTable;
@@ -49,7 +50,7 @@ class AtkDivisionStockResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AtkStockTransactionsRelationManager::class,
         ];
     }
 
