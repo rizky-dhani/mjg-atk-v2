@@ -67,6 +67,16 @@ class ApprovalService
         return $this->validationService->getMatchingApprovalStepsForStockUsage($stockUsage, $user);
     }
 
+    public function canUserApproveTransferStock(\App\Models\AtkTransferStock $transferStock, \App\Models\User $user): bool
+    {
+        return $this->validationService->canUserApproveTransferStock($transferStock, $user);
+    }
+
+    public function getEligibleApprovalStepsForTransferStock(\App\Models\AtkTransferStock $transferStock, \App\Models\User $user): \Illuminate\Support\Collection
+    {
+        return $this->validationService->getEligibleApprovalStepsForTransferStock($transferStock, $user);
+    }
+
     // Delegate processing methods
     public function processApprovalStep(\App\Models\Approval $approval, \App\Models\User $user, string $action, ?string $notes = null): bool
     {

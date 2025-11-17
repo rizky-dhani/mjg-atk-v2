@@ -129,10 +129,10 @@ class ApprovalProcessingService
 
                 return true; // Approval is completed
             } else {
-                // Update to the next step number and keep status as 'pending'
+                // Update to the next step number and set status to 'partially_approved'
                 $nextStep = $unapprovedSteps->first();
                 $approval->update([
-                    'status' => 'pending', // Keep status as pending since approval isn't complete
+                    'status' => 'partially_approved', // Set status to partially approved since some steps are approved
                     'current_step' => $nextStep?->step_number ?? $allSteps->last()?->step_number,
                 ]);
 
@@ -274,12 +274,23 @@ class ApprovalProcessingService
                 'status' => 'approved',
             ]);
         } 
-        // Otherwise, if there are still unapproved steps, status should remain 'pending'
-        // regardless of the latest history action
+        // Otherwise, if there are still unapproved steps but some are approved, status should be 'partially_approved'
+        // If no steps are approved yet, status should remain 'pending'
         else {
-            $approval->update([
-                'status' => 'pending',
-            ]);
+            // Check if any steps have been approved
+            $hasApprovedSteps = $approval->approvalStepApprovals()
+                ->where('status', 'approved')
+                ->exists();
+                
+            if ($hasApprovedSteps) {
+                $approval->update([
+                    'status' => 'partially_approved',
+                ]);
+            } else {
+                $approval->update([
+                    'status' => 'pending',
+                ]);
+            }
         }
     }
 }

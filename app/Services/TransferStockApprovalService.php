@@ -7,6 +7,10 @@ use App\Models\Approval;
 use App\Models\ApprovalFlowStep;
 use App\Models\ApprovalStepApproval;
 use Illuminate\Support\Facades\Auth;
+use App\Services\ApprovalValidationService;
+use App\Services\ApprovalHistoryService;
+use App\Services\ApprovalProcessingService;
+use App\Services\StockUpdateService;
 
 class TransferStockApprovalService
 {
@@ -18,7 +22,7 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval || $approval->status !== 'pending') {
+        if (!$approval || ($approval->status !== 'pending' && $approval->status !== 'partially_approved')) {
             return false;
         }
 
@@ -33,21 +37,31 @@ class TransferStockApprovalService
 
         // Check if user has the right role for this step (using Spatie roles permissions)
         $canApprove = false;
-        
-        $roleName = $currentStep->role ? $currentStep->role->name : null;
-        if ($roleName && $user->hasRole($roleName)) {
-            if ($currentStep->division_id) {
-                $canApprove = $currentStep->division_id == $user->division_id;
-            } else {
-                $canApprove = true; // No specific division required
-            }
-        }
 
-        // For steps with null division_id (like Source Division Head), 
-        // check if user's division matches any of the item's source divisions
-        if (!$canApprove && is_null($currentStep->division_id)) {
-            $sourceDivisionIds = $transferStock->transferStockItems->pluck('source_division_id')->toArray();
-            $canApprove = in_array($user->division_id, $sourceDivisionIds);
+        $roleName = $currentStep->role ? $currentStep->role->name : null;
+        $userHasRole = $roleName && $user->hasRole($roleName);
+
+        if ($currentStep->division_id) {
+            // For steps with a specific division, check both role and division
+            $canApprove = $userHasRole && $currentStep->division_id == $user->division_id;
+        } elseif (is_null($currentStep->division_id) && $userHasRole) {
+            // For steps with null division_id, check based on the step name:
+            // - "Division Head": should match requesting division
+            // - "Source Division Head": should match source division
+            // - For other step names with null division_id: this should not happen for AtkTransferStock based on the seeder data
+            if ($currentStep->step_name == 'Division Head') {
+                // Division Head step - check against requesting division
+                $canApprove = $user->division_id == $transferStock->requesting_division_id;
+            } elseif ($currentStep->step_name == 'Source Division Head') {
+                // Source Division Head step - check against source division
+                $canApprove = $user->division_id == $transferStock->source_division_id;
+            } else {
+                // For other step names with null division_id, if user has the required role
+                // Default to checking against requesting division (as per your requirement)
+                // However, for AtkTransferStock, there shouldn't be other step names besides the two above
+                // based on the ApprovalFlowSeeder, so this case shouldn't occur in normal flow
+                $canApprove = $user->division_id == $transferStock->requesting_division_id;
+            }
         }
 
         // Check if this user has already approved this step
@@ -73,62 +87,22 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval || $approval->status !== 'pending') {
+        if (!$approval) {
             return false;
         }
 
-        // Find the current approval flow step
-        $currentStep = $approval->approvalFlow->approvalFlowSteps()
-            ->where('step_number', $approval->current_step)
-            ->first();
+        // Use the general ApprovalProcessingService to handle the approval
+        $validationService = new ApprovalValidationService();
+        $historyService = new ApprovalHistoryService();
+        $stockUpdateService = app(StockUpdateService::class);
+        $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+        $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
 
-        if (!$currentStep) {
-            return false;
-        }
+        // Process the approval step using the service method
+        $approvalService->processApprovalStep($approval, $user, 'approve', 'Request approved via table action');
 
-        // Process the approval
-        $approvalStepApproval = new ApprovalStepApproval();
-        $approvalStepApproval->approval_id = $approval->id;
-        $approvalStepApproval->step_id = $currentStep->id;
-        $approvalStepApproval->user_id = $user->id;
-        $approvalStepApproval->approved_at = now();
-        $approvalStepApproval->status = 'approved';
-        $approvalStepApproval->save();
-
-        // Create approval history
-        $approvalHistory = new \App\Models\ApprovalHistory();
-        $approvalHistory->approvable_type = get_class($transferStock);
-        $approvalHistory->approvable_id = $transferStock->id;
-        $approvalHistory->document_id = $transferStock->transfer_number;
-        $approvalHistory->approval_id = $approval->id;
-        $approvalHistory->step_id = $currentStep->id;
-        $approvalHistory->user_id = $user->id;
-        $approvalHistory->action = 'approved';
-        $approvalHistory->performed_at = now();
-        $approvalHistory->save();
-
-        // Check if all required steps are approved
-        $flow = $approval->approvalFlow;
-        $completedSteps = ApprovalStepApproval::where('approval_id', $approval->id)
-            ->where('status', 'approved')
-            ->count();
-        
-        $totalSteps = $flow->approvalFlowSteps()->count();
-
-        if ($completedSteps == $totalSteps) {
-            // All steps approved - process stock transfer
-            $approval->status = 'approved';
-            $transferStock->status = 'approved';
-            
-            // Process the stock transfer
-            $this->processStockTransfer($transferStock);
-        } else {
-            // Move to next step
-            $approval->current_step = $approval->current_step + 1;
-        }
-        
-        $approval->save();
-        $transferStock->save();
+        // Synchronize approval status
+        $approvalService->syncApprovalStatus($transferStock);
 
         return true;
     }
@@ -141,48 +115,22 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval || $approval->status !== 'pending') {
+        if (!$approval) {
             return false;
         }
 
-        // Find the current approval flow step
-        $currentStep = $approval->approvalFlow->approvalFlowSteps()
-            ->where('step_number', $approval->current_step)
-            ->first();
+        // Use the general ApprovalProcessingService to handle the rejection
+        $validationService = new ApprovalValidationService();
+        $historyService = new ApprovalHistoryService();
+        $stockUpdateService = app(StockUpdateService::class);
+        $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
+        $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
 
-        if (!$currentStep) {
-            return false;
-        }
+        // Process the rejection step using the service method
+        $approvalService->processApprovalStep($approval, $user, 'reject', $rejectionReason);
 
-        // Process the rejection
-        $approvalStepApproval = new ApprovalStepApproval();
-        $approvalStepApproval->approval_id = $approval->id;
-        $approvalStepApproval->step_id = $currentStep->id;
-        $approvalStepApproval->user_id = $user->id;
-        $approvalStepApproval->approved_at = now();
-        $approvalStepApproval->status = 'rejected';
-        $approvalStepApproval->notes = $rejectionReason;
-        $approvalStepApproval->save();
-
-        // Create approval history
-        $approvalHistory = new \App\Models\ApprovalHistory();
-        $approvalHistory->approvable_type = get_class($transferStock);
-        $approvalHistory->approvable_id = $transferStock->id;
-        $approvalHistory->document_id = $transferStock->transfer_number;
-        $approvalHistory->approval_id = $approval->id;
-        $approvalHistory->step_id = $currentStep->id;
-        $approvalHistory->user_id = $user->id;
-        $approvalHistory->action = 'rejected';
-        $approvalHistory->rejection_reason = $rejectionReason;
-        $approvalHistory->performed_at = now();
-        $approvalHistory->save();
-
-        // Update approval and record status
-        $approval->status = 'rejected';
-        $transferStock->status = 'rejected';
-        
-        $approval->save();
-        $transferStock->save();
+        // Synchronize approval status
+        $approvalService->syncApprovalStatus($transferStock);
 
         return true;
     }
@@ -236,51 +184,6 @@ class TransferStockApprovalService
         return $this->canApprove($transferStock);
     }
     
-    /**
-     * Process the stock transfer when approval is complete
-     */
-    private function processStockTransfer(AtkTransferStock $transferStock): bool
-    {
-        // Loop through each transfer stock item and update the division stocks
-        foreach ($transferStock->transferStockItems as $transferItem) {
-            $quantity = $transferItem->quantity;
-            $itemId = $transferItem->item_id;
-            $sourceDivisionId = $transferItem->source_division_id;
-            $requestingDivisionId = $transferStock->requesting_division_id;
-            
-            // Reduce stock from source division
-            $sourceStock = \App\Models\AtkDivisionStock::where('division_id', $sourceDivisionId)
-                ->where('item_id', $itemId)
-                ->first();
-                
-            if ($sourceStock && $sourceStock->current_stock >= $quantity) {
-                $sourceStock->current_stock -= $quantity;
-                $sourceStock->save();
-            } else {
-                // If source doesn't have enough stock, we should handle this appropriately
-                \Illuminate\Support\Facades\Log::error("Insufficient stock for item {$itemId} in division {$sourceDivisionId}");
-                continue;
-            }
-            
-            // Add stock to requesting division
-            $requestingStock = \App\Models\AtkDivisionStock::firstOrCreate(
-                [
-                    'division_id' => $requestingDivisionId,
-                    'item_id' => $itemId,
-                ],
-                [
-                    'category_id' => $transferItem->itemCategory ? $transferItem->itemCategory->id : $transferItem->item->category_id,
-                    'current_stock' => 0,
-                    'max_stock_limit' => 0, // This may need to be set differently
-                ]
-            );
-            
-            $requestingStock->current_stock += $quantity;
-            $requestingStock->save();
-        }
-        
-        return true;
-    }
     
     /**
      * Check if the user is the requester of the transfer stock

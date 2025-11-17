@@ -4,28 +4,26 @@ namespace App\Filament\Resources\AtkTransferStocks\Pages;
 
 use UnitEnum;
 use BackedEnum;
-use Filament\Tables;
 use App\Models\Approval;
 use Filament\Tables\Table;
-use App\Models\ApprovalFlow;
-use App\Models\UserDivision;
 use Filament\Actions\Action;
 use App\Models\ApprovalFlowStep;
 use App\Models\AtkTransferStock;
+use App\Services\ApprovalService;
 use Filament\Resources\Pages\Page;
-use App\Models\ApprovalStepApproval;
+use Illuminate\Support\Facades\DB;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Auth;
 use Filament\Actions\BulkActionGroup;
+use Filament\Tables\Columns\TextColumn;
 use App\Filament\Actions\ApprovalAction;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 
-class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
+class ApprovalAtkTransferStock extends ListRecords
 {
-    use Tables\Concerns\InteractsWithTable;
-
     protected static string $resource = AtkTransferStockResource::class;
 
     protected static ?string $slug = 'atk/transfer-stocks/approval';
@@ -38,188 +36,118 @@ class ApprovalAtkTransferStock extends Page implements Tables\Contracts\HasTable
 
     protected static ?string $title = 'Transfer Stok ATK';
 
+    public static function getNavigationBadge(): ?string
+    {
+        $user = auth()->user();
+        if (! $user) {
+            return null;
+        }
+
+        // Find approval flow steps that match the user's role and division
+        $matchingStepIds = ApprovalFlowStep::whereHas('role', function ($query) use ($user) {
+            $query->whereIn('id', $user->roles->pluck('id'));
+        })
+            ->where(function ($query) use ($user) {
+                // Step is available for the user's own division OR for specific division
+                $query
+                    ->whereNull('division_id')
+                    ->orWhere('division_id', $user->division_id);
+            })
+            ->pluck('id');
+
+        // Get count of approval records that are pending/partially_approved and have steps matching the user's permissions
+        $count = Approval::whereIn('current_step', $matchingStepIds)
+            ->where(function ($query) {
+                $query->where('status', 'pending')
+                    ->orWhere('status', 'partially_approved');
+            })
+            ->where('approvable_type', (new AtkTransferStock)->getMorphClass()) // Ensure it's for ATK Transfer Stocks
+            ->count();
+
+        return (string) $count;
+    }
+
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-            AtkTransferStock::query()
-                    ->whereHas('approval', function (Builder $query) {
-                        $user = Auth::user();
-                        
-                        // Get approval steps that the current user can approve
-                        $query->whereHas('approvalFlow.approvalFlowSteps', function (Builder $stepQuery) use ($user) {
-                            // Filter by the roles the user has (using Spatie roles)
-                            $userRoleNames = $user->roles->pluck('name');
-                            $stepQuery->whereHas('role', function (Builder $roleQuery) use ($userRoleNames) {
-                                $roleQuery->whereIn('name', $userRoleNames);
-                            });
-                            
-                            // If the step has a specific division, check if the user belongs to that division
-                            if ($user->division_id) {
-                                $stepQuery->where(function (Builder $subQuery) use ($user) {
-                                    $subQuery->where('division_id', $user->division_id)
-                                            ->orWhere(function (Builder $subSubQuery) use ($user) {
-                                                // For steps with null division_id (like Source Division Head), 
-                                                // check if user's division matches any of the item's source divisions
-                                                $subSubQuery->whereNull('division_id')
-                                                            ->whereHas('approvable.transferStockItems', function (Builder $itemQuery) use ($user) {
-                                                                $itemQuery->where('source_division_id', $user->division_id);
-                                                            });
-                                            });
-                                });
-                            }
-                        })
-                        ->where(function (Builder $subQuery) {
-                            $subQuery->where('approvals.status', 'pending')
-                                    ->orWhere('approvals.status', 'partially_approved');
-                        });
-                    })
-            )
+            ->modifyQueryUsing(fn (Builder $query) => $this->getQuery())
             ->columns([
-                Tables\Columns\TextColumn::make('transfer_number')
+                TextColumn::make('transfer_number')
                     ->label('Nomor Transfer')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('requester.name')
+                TextColumn::make('requester.name')
                     ->label('Pemohon')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('requestingDivision.name')
+                TextColumn::make('requestingDivision.name')
                     ->label('Divisi Pemohon')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('sourceDivisionsCount')
+                TextColumn::make('sourceDivision.name')
                     ->label('Divisi Sumber')
-                    ->placeholder('Belum dipilih')
-                    ->formatStateUsing(function ($record) {
-                        $sourceDivisions = $record->sourceDivisions;
-                        if ($sourceDivisions->count() === 0) {
-                            return 'Belum dipilih';
-                        } elseif ($sourceDivisions->count() === 1) {
-                            return $sourceDivisions->first()->name;
-                        } else {
-                            return $sourceDivisions->count() . ' Divisi';
-                        }
-                    }),
-                Tables\Columns\TextColumn::make('approval_status')
-                    ->label('Status')
+                    ->placeholder('Belum dipilih'),
+                TextColumn::make('approval.status')
+                    ->label('Status Approval')
                     ->badge()
-                    ->formatStateUsing(function ($record) {
-                        $approval = $record->approval;
-                        if (! $approval) {
-                            return 'Pending';
-                        }
-
-                        // Get the latest approval step approval
-                        $latestApproval = $approval
-                            ->approvalStepApprovals()
-                            ->with(['user', 'user.division'])
-                            ->latest('approved_at')
-                            ->first();
-
-                        if ($latestApproval) {
-                            $status = ucfirst($latestApproval->status);
-
-                            if ($latestApproval->user && $latestApproval->user->division) {
-                                // Get division's initial and user's first role name
-                                $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
-                                $roleNames = $latestApproval->user->getRoleNames();
-                                $role = $roleNames->first() ?? 'N/A';
-
-                                return "{$status} by {$divisionInitial} {$role}";
-                            } else {
-                                return $status;
-                            }
-                        }
-
-                        return $approval->status
-                            ? ucfirst($approval->status)
-                            : 'Pending';
-                    })
                     ->color(
-                        fn (string $state): string => match (true) {
-                            str_contains($state, 'approved') => 'success',
-                            str_contains($state, 'rejected') => 'danger',
-                            default => 'warning',
+                        fn (string $state): string => match ($state) {
+                            'approved' => 'success',
+                            'rejected' => 'danger',
+                            'pending' => 'warning',
+                            default => 'gray',
                         },
-                    )
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                    ),
+                TextColumn::make('created_at')
                     ->label('Tanggal Dibuat')
                     ->dateTime()
                     ->sortable(),
             ])
             ->actions([
-                Action::make('approve')
-                    ->label('Approve')
-                    ->color('success')
-                    ->action(function (AtkTransferStock $record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
-                        
-                        if ($approvalService->canApprove($record)) {
-                            if ($approvalService->approve($record)) {
-                                Notification::make()
-                                    ->title('Berhasil')
-                                    ->body('Permintaan transfer stok berhasil disetujui.')
-                                    ->success()
-                                    ->send();
-                            } else {
-                                Notification::make()
-                                    ->title('Error')
-                                    ->body('Gagal menyetujui permintaan transfer stok.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        } else {
-                            Notification::make()
-                                ->title('Akses Ditolak')
-                                ->body('Anda tidak memiliki hak untuk menyetujui langkah ini.')
-                                ->danger()
-                                ->send();
-                        }
-                    }),
-                Action::make('reject')
-                    ->label('Reject')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Tolak Permintaan Transfer Stok')
-                    ->modalDescription('Apakah Anda yakin ingin menolak permintaan transfer stok ini?')
-                    ->form([
-                        \Filament\Forms\Components\Textarea::make('rejection_reason')
-                            ->label('Alasan Penolakan')
-                            ->required()
-                            ->maxLength(65535),
-                    ])
-                    ->action(function (AtkTransferStock $record, array $data) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
-                        
-                        if ($approvalService->canApprove($record)) {
-                            if ($approvalService->reject($record, $data['rejection_reason'])) {
-                                Notification::make()
-                                    ->title('Berhasil')
-                                    ->body('Permintaan transfer stok berhasil ditolak.')
-                                    ->success()
-                                    ->send();
-                            } else {
-                                Notification::make()
-                                    ->title('Error')
-                                    ->body('Gagal menolak permintaan transfer stok.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        } else {
-                            Notification::make()
-                                ->title('Akses Ditolak')
-                                ->body('Anda tidak memiliki hak untuk menolak langkah ini.')
-                                ->danger()
-                                ->send();
-                        }
-                    }),
+                ApprovalAction::makeApprove(),
+                ApprovalAction::makeReject(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     //
                 ]),
             ]);
+    }
+
+    protected function getQuery(): Builder
+    {
+        // Get the current user
+        $user = Auth::user();
+        if (! $user) {
+            return AtkTransferStock::query()->whereRaw('0=1'); // Return empty query if no user
+        }
+
+        // Get all pending or partially approved AtkTransferStock records
+        $query = AtkTransferStock::query()
+            ->whereHas('approval', function ($query) {
+                $query->where('status', 'pending')
+                    ->orWhere('status', 'partially_approved');
+            })
+            ->with([
+                'requester',
+                'requestingDivision',
+                'sourceDivision',
+                'approval',
+            ]);
+
+        // Filter to only show records that the current user can approve
+        $approvableIds = [];
+
+        foreach (AtkTransferStock::whereHas('approval', function ($q) {
+            $q->where('status', 'pending')
+            ->orWhere('status', 'partially_approved');
+        })->get() as $transferStock) {
+            $approvalService = app(ApprovalService::class);
+            if ($approvalService->canUserApproveTransferStock($transferStock, $user)) {
+                $approvableIds[] = $transferStock->id;
+            }
+        }
+
+        return $query->whereIn('id', $approvableIds);
     }
 }

@@ -53,6 +53,10 @@ class StockUpdateService
                     $this->updateStockForReduction($model);
                     break;
 
+                case \App\Models\AtkTransferStock::class:
+                    $this->updateStockForTransfer($model);
+                    break;
+
                 // Add more cases as needed for other models
                 default:
                     // No stock update needed for this model type
@@ -604,6 +608,130 @@ class StockUpdateService
                 $model->division_id,
                 $totalCost,
                 $model->created_at->year ?? now()->year
+            );
+        }
+    }
+
+    /**
+     * Update division stock for stock transfer between divisions (AtkTransferStock)
+     * This reduces stock from source division and adds to requesting division
+     *
+     * @param  \App\Models\AtkTransferStock  $transferStock  The approved transfer stock request
+     */
+    private function updateStockForTransfer($transferStock): void
+    {
+        \Log::info('StockUpdateService: updateStockForTransfer called', [
+            'transfer_id' => $transferStock->id,
+            'transfer_number' => $transferStock->transfer_number,
+            'source_division_id' => $transferStock->source_division_id,
+            'requesting_division_id' => $transferStock->requesting_division_id,
+            'timestamp' => now()->toISOString()
+        ]);
+
+        // Load the transfer stock items to ensure they are available
+        $transferStock->load('transferStockItems.item');
+
+        // Loop through each transfer stock item and update the division stocks
+        foreach ($transferStock->transferStockItems as $transferItem) {
+            $quantity = $transferItem->quantity;
+            $itemId = $transferItem->item_id;
+            $sourceDivisionId = $transferStock->source_division_id;
+            $requestingDivisionId = $transferStock->requesting_division_id;
+
+            \Log::info('StockUpdateService: Processing transfer item', [
+                'transfer_id' => $transferStock->id,
+                'item_id' => $itemId,
+                'quantity' => $quantity,
+                'source_division_id' => $sourceDivisionId,
+                'requesting_division_id' => $requestingDivisionId
+            ]);
+
+            // Reduce stock from source division
+            $sourceStock = AtkDivisionStock::where('division_id', $sourceDivisionId)
+                ->where('item_id', $itemId)
+                ->first();
+
+            if ($sourceStock && $sourceStock->current_stock >= $quantity) {
+                $newQuantity = $sourceStock->current_stock - $quantity;
+                $sourceStock->update([
+                    'current_stock' => $newQuantity,
+                    // moving_average_cost remains unchanged for transfers
+                ]);
+
+                \Log::info('StockUpdateService: Updated source division stock', [
+                    'division_id' => $sourceDivisionId,
+                    'item_id' => $itemId,
+                    'old_stock' => $sourceStock->current_stock,
+                    'reduced_quantity' => $quantity,
+                    'new_quantity' => $newQuantity,
+                ]);
+
+                // Record the transfer out transaction (negative quantity for reduction)
+                $this->stockTransactionService->recordTransactionOnly(
+                    $sourceDivisionId,
+                    $itemId,
+                    'transfer',
+                    -$quantity,  // negative quantity to indicate a reduction
+                    $sourceStock->moving_average_cost ?? 0,
+                    $transferStock
+                );
+            } else {
+                // If source doesn't have enough stock, log an error
+                $sourceStockQuantity = $sourceStock ? $sourceStock->current_stock : 0;
+                \Log::error('Insufficient stock for transfer from source division', [
+                    'transfer_id' => $transferStock->id,
+                    'item_id' => $itemId,
+                    'required_quantity' => $quantity,
+                    'available_quantity' => $sourceStockQuantity,
+                    'source_division_id' => $sourceDivisionId,
+                    'transfer_number' => $transferStock->transfer_number
+                ]);
+
+                // Continue to the next item instead of stopping the whole process
+                continue;
+            }
+
+            // Add stock to requesting division
+            $item = $transferItem->item; // Load the item to get category_id
+            $categoryId = $item ? $item->category_id : null;
+
+            $requestingStock = AtkDivisionStock::firstOrCreate(
+                [
+                    'division_id' => $requestingDivisionId,
+                    'item_id' => $itemId,
+                ],
+                [
+                    'current_stock' => 0,
+                    'moving_average_cost' => 0, // Initialize to 0 for new records
+                    'category_id' => $categoryId,
+                ]
+            );
+
+            $newQuantity = $requestingStock->current_stock + $quantity;
+
+            // For transfers, we should NOT update the MAC at all
+            // The MAC should remain completely untouched - transfers don't change cost basis
+            $requestingStock->update([
+                'current_stock' => $newQuantity,
+                // moving_average_cost remains completely untouched (transfer doesn't change MAC)
+            ]);
+
+            \Log::info('StockUpdateService: Updated requesting division stock', [
+                'division_id' => $requestingDivisionId,
+                'item_id' => $itemId,
+                'old_stock' => $requestingStock->current_stock - $quantity,
+                'added_quantity' => $quantity,
+                'new_quantity' => $newQuantity,
+            ]);
+
+            // Record the transfer in transaction
+            $this->stockTransactionService->recordTransactionOnly(
+                $requestingDivisionId,
+                $itemId,
+                'transfer',
+                $quantity,  // positive quantity to indicate an addition
+                $sourceStock->moving_average_cost ?? 0,
+                $transferStock
             );
         }
     }
