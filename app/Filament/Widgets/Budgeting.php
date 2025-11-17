@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 
 class Budgeting extends StatsOverviewWidget
 {
+    protected ?string $heading = 'Budgetings';
+    protected static ?int $sort = 1;
     protected function getStats(): array
     {
         $user = Auth::user();

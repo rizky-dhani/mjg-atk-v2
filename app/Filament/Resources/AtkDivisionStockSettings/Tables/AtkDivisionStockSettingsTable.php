@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\AtkDivisionStockSettings\Tables;
 
+use App\Models\AtkCategory;
 use App\Models\AtkDivisionStockSetting;
+use App\Models\UserDivision;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -13,6 +15,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,11 +25,13 @@ class AtkDivisionStockSettingsTable
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if (auth()->user()->hasRole('Super Admin')) {
-                    AtkDivisionStockSetting::all();
+                $query->with(['division', 'item', 'item.category']);
+                $user = auth()->user();
+                
+                if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
+                    // Super Admin, Admin, or GA division users can see all records
                 } else {
-                    $query->where('division_id', auth()->user()->division_id);
-
+                    $query->where('division_id', $user->division_id);
                 }
             })
             ->columns([
@@ -38,13 +43,26 @@ class AtkDivisionStockSettingsTable
                     ->label('Category')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('max_limit')
                     ->label('Max Stock Limit')
                     ->numeric()
                     ->sortable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('division')
+                    ->relationship('division', 'name')
+                    ->label('Division')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('category')
+                    ->relationship('item.category', 'name')
+                    ->label('Item Category')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -88,9 +106,16 @@ class AtkDivisionStockSettingsTable
                             ->minValue(0),
                     ])
                     ->action(function (array $data) {
+                        $user = auth()->user();
+                        
                         // Update all stock settings for the current division
-                        AtkDivisionStockSetting::where('division_id', auth()->user()->division_id)
-                            ->update(['max_limit' => $data['max_limit']]);
+                        // If user is Super Admin, Admin, or from GA division, update all records
+                        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
+                            AtkDivisionStockSetting::update(['max_limit' => $data['max_limit']]);
+                        } else {
+                            AtkDivisionStockSetting::where('division_id', $user->division_id)
+                                ->update(['max_limit' => $data['max_limit']]);
+                        }
 
                         Notification::make()
                             ->title('Global maximum limit updated successfully')

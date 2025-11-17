@@ -58,11 +58,49 @@ class AtkStockUsage extends Model
         return $this->morphOne(Approval::class, 'approvable');
     }
 
+    public function approvalHistory()
+    {
+        return $this->morphMany(ApprovalHistory::class, 'approvable');
+    }
+
     /**
      * Generic items relationship for unified approval system
      */
     public function items()
     {
         return $this->hasMany(AtkStockUsageItem::class, 'usage_id');
+    }
+
+    /**
+     * Get the approval status from the latest approval history
+     */
+    public function getApprovalStatusAttribute()
+    {
+        $latestApproval = $this->approvalHistory()
+            ->orderBy('performed_at', 'desc')
+            ->first();
+
+        if (!$latestApproval) {
+            return 'pending'; // Default status if no approval history
+        }
+
+        return $latestApproval->action;
+    }
+
+    /**
+     * Get the user who approved the usage from the latest approval history
+     */
+    public function getApprovedByAttribute()
+    {
+        $latestApproval = $this->approvalHistory()
+            ->where('action', 'approved')
+            ->orderBy('performed_at', 'desc')
+            ->first();
+
+        if (!$latestApproval) {
+            return null;
+        }
+
+        return $latestApproval->user;
     }
 }
