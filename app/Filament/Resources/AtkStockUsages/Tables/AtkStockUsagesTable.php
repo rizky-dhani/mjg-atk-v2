@@ -22,7 +22,7 @@ class AtkStockUsagesTable
         return $table
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
-                    ->with(['requester', 'division'])
+                    ->with(['requester', 'division', 'approval', 'approvalHistory'])
                     ->where('division_id', auth()->user()->division_id)
                     ->orderByDesc('created_at'),
             )
@@ -39,45 +39,19 @@ class AtkStockUsagesTable
                 TextColumn::make('approval_status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(function ($record) {
-                        $approval = $record->approval;
-                        if (! $approval) {
-                            return 'Pending';
-                        }
-
-                        // Get the latest approval step approval
-                        $latestApproval = $approval
-                            ->approvalStepApprovals()
-                            ->with(['user', 'user.division'])
-                            ->latest('approved_at')
-                            ->first();
-
-                        if ($latestApproval) {
-                            $status = ucfirst($latestApproval->status);
-
-                            if ($latestApproval->user && $latestApproval->user->division) {
-                                // Get division's initial and user's first role name
-                                $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
-                                $roleNames = $latestApproval->user->getRoleNames();
-                                $role = $roleNames->first() ?? 'N/A';
-
-                                return "{$status} by {$divisionInitial} {$role}";
-                            } else {
-                                return $status;
-                            }
-                        }
-
-                        return $approval->status
-                            ? ucfirst($approval->status)
-                            : 'Pending';
-                    })
+                    ->getStateUsing(fn ($record) => $record->approval_status)
+                    ->formatStateUsing(fn ($state) => ucfirst($state))
                     ->color(
                         fn (string $state): string => match (true) {
-                            str_contains($state, 'approved') => 'success',
-                            str_contains($state, 'rejected') => 'danger',
+                            str_contains(strtolower($state), 'approved') => 'success',
+                            str_contains(strtolower($state), 'rejected') => 'danger',
                             default => 'warning',
                         },
                     ),
+                TextColumn::make('approved_by.name')
+                    ->label('Approved By')
+                    ->getStateUsing(fn ($record) => $record->approved_by?->name)
+                    ->searchable(),
             ])
             ->filters([
                 //

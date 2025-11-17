@@ -50,9 +50,12 @@ class ApprovalAtkStockRequest extends ListRecords
             })
             ->pluck('id');
 
-        // Get count of approval records that are pending and have steps matching the user's permissions
+        // Get count of approval records that are pending/partially_approved and have steps matching the user's permissions
         $count = Approval::whereIn('current_step', $matchingStepIds)
-            ->where('status', 'pending')
+            ->where(function ($query) {
+                $query->where('status', 'pending')
+                      ->orWhere('status', 'partially_approved');
+            })
             ->where('approvable_type', (new AtkStockRequest)->getMorphClass()) // Ensure it's for ATK Stock Requests
             ->count();
 
@@ -114,10 +117,11 @@ class ApprovalAtkStockRequest extends ListRecords
             return AtkStockRequest::query()->whereRaw('0=1'); // Return empty query if no user
         }
 
-        // Get all pending AtkStockRequest records
+        // Get all pending or partially approved AtkStockRequest records
         $query = AtkStockRequest::query()
             ->whereHas('approval', function ($query) {
-                $query->where('status', 'pending');
+                $query->where('status', 'pending')
+                    ->orWhere('status', 'partially_approved');
             })
             ->with([
                 'requester',
@@ -130,7 +134,8 @@ class ApprovalAtkStockRequest extends ListRecords
         $approvableIds = [];
 
         foreach (AtkStockRequest::whereHas('approval', function ($q) {
-            $q->where('status', 'pending');
+            $q->where('status', 'pending')
+            ->orWhere('status', 'partially_approved');
         })->get() as $stockRequest) {
             if ($approvalService->canUserApproveStockRequest($stockRequest, $user)) {
                 $approvableIds[] = $stockRequest->id;

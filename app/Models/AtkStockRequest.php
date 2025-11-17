@@ -52,4 +52,37 @@ class AtkStockRequest extends Model
     {
         return $this->hasMany(AtkStockRequestItem::class, 'request_id');
     }
+
+    /**
+     * Get the approval status from the latest approval history
+     */
+    public function getApprovalStatusAttribute()
+    {
+        $latestApproval = $this->approvalHistory()
+            ->orderBy('performed_at', 'desc')
+            ->first();
+
+        if (!$latestApproval) {
+            return 'pending'; // Default status if no approval history
+        }
+
+        return $latestApproval->action;
+    }
+
+    /**
+     * Get the user who approved the request from the latest approval history
+     */
+    public function getApprovedByAttribute()
+    {
+        $latestApproval = $this->approvalHistory()
+            ->where('action', 'approved')
+            ->orderBy('performed_at', 'desc')
+            ->first();
+
+        if (!$latestApproval) {
+            return null;
+        }
+
+        return $latestApproval->user;
+    }
 }
