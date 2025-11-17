@@ -62,43 +62,6 @@ class AtkTransferStockItemsRelationManager extends RelationManager
                             }
                         }
                     }),
-                Forms\Components\Select::make('source_division_id')
-                    ->label('Divisi Sumber')
-                    ->options(function (callable $get) {
-                        $itemId = $get('item_id');
-                        $quantity = $get('quantity') ?: 0;
-                        
-                        if (! $itemId) {
-                            return UserDivision::pluck('name', 'id');
-                        }
-
-                        // Get divisions that have the item with sufficient stock
-                        $sufficientDivisions = AtkDivisionStock::where('item_id', $itemId)
-                            ->where('current_stock', '>=', $quantity)
-                            ->pluck('current_stock', 'division_id')
-                            ->toArray();
-
-                        // Get division names with stock counts
-                        $divisionIds = array_keys($sufficientDivisions);
-                        $divisions = UserDivision::whereIn('id', $divisionIds)->get();
-
-                        // Create options with stock counts
-                        $options = [];
-                        foreach ($divisions as $division) {
-                            $stockCount = $sufficientDivisions[$division->id];
-                            $options[$division->id] = $division->name . " ({$stockCount} available)";
-                        }
-
-                        return $options;
-                    })
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->visible(function (): bool {
-                        $user = auth()->user();
-                        return $user && $user->roles->pluck('id')->contains(3) && $user->division_id == 5;
-                    })
-                    ->live(),
                 Forms\Components\TextInput::make('quantity')
                     ->label('Jumlah')
                     ->numeric()
@@ -116,10 +79,10 @@ class AtkTransferStockItemsRelationManager extends RelationManager
                     ->label('Kategori'),
                 Tables\Columns\TextColumn::make('item.name')
                     ->label('Nama Item'),
-                Tables\Columns\TextColumn::make('sourceDivision.name')
-                    ->label('Divisi Sumber'),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label('Jumlah'),
+                Tables\Columns\TextColumn::make('transferStock.sourceDivision.name')
+                    ->label('Divisi Sumber'),
             ])
             ->filters([
                 //

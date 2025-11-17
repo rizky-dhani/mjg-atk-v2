@@ -22,21 +22,6 @@ class AtkTransferStockForm
         return $schema
             ->columns(2)
             ->schema([
-                Section::make('Informasi Transfer Stok')
-                    ->description('Data permintaan transfer stok')
-                    ->schema([
-                        Textarea::make('notes')
-                            ->label('Catatan')
-                            ->maxLength(65535)
-                            ->columnSpanFull()
-                            ->visible(function (): bool {
-                                $user = auth()->user();
-
-                                return $user && $user->roles->pluck('id')->contains(3) && $user->division_id == 5;
-                            }),
-                    ])
-                    ->columns(2)
-                    ->columnSpanFull(),
                 Section::make('Transfer Items')
                     ->columnSpanFull()
                     ->schema([
@@ -55,7 +40,6 @@ class AtkTransferStockForm
                                         // Pre-populate with empty values for proper binding
                                         $newItem = [
                                             'item_id' => null,
-                                            'source_division_id' => null,
                                             'quantity' => null,
                                             'notes' => null,
                                         ];
@@ -106,42 +90,16 @@ class AtkTransferStockForm
                                                 $set('item_category_id', $item->category_id);
                                             }
                                         }
-                                    })
-                                    ->helperText(function (callable $get) {
-                                        $itemId = $get('item_id');
-                                        if (! $itemId) {
-                                            return '';
-                                        }
-
-                                        // Get current stock in requesting division (based on user's division)
-                                        $requestingDivisionId = auth()->user()->division_id ?? null;
-                                        if (! $requestingDivisionId) {
-                                            return '';
-                                        }
-
-                                        $stock = AtkDivisionStock::where('division_id', $requestingDivisionId)
-                                            ->where('item_id', $itemId)
-                                            ->first();
-
-                                        $currentStock = $stock ? $stock->current_stock : 0;
-
-                                        // Get max limit for this item in requesting division
-                                        $setting = AtkDivisionStockSetting::where('division_id', $requestingDivisionId)
-                                            ->where('item_id', $itemId)
-                                            ->first();
-
-                                        $maxLimit = $setting ? $setting->max_limit : 'unlimited';
-
-                                        return "Current: {$currentStock} | Max limit: {$maxLimit}";
                                     }),
                                 TextInput::make('quantity')
                                     ->label('Quantity to Transfer')
                                     ->required()
                                     ->numeric()
                                     ->minValue(1)
-                                    ->helperText(function (callable $get) {
+                                    ->helperText(function (callable $get, $state, $component) {
                                         $itemId = $get('item_id');
-                                        $sourceDivisionId = $get('source_division_id');
+                                        // Get the source division from the main form context using getContainer()
+                                        $sourceDivisionId = $component->getContainer()->getParentComponent()->getState()['source_division_id'] ?? null;
 
                                         if (! $itemId || ! $sourceDivisionId) {
                                             return '';
@@ -156,9 +114,10 @@ class AtkTransferStockForm
                                         return "Available in source: {$availableStock}";
                                     })
                                     ->live()
-                                    ->afterStateUpdated(function (callable $get, callable $set, $state) {
+                                    ->afterStateUpdated(function (callable $get, callable $set, $state, $component) {
                                         $itemId = $get('item_id');
-                                        $sourceDivisionId = $get('source_division_id');
+                                        // Get the source division from the main form context
+                                        $sourceDivisionId = $component->getContainer()->getParentComponent()->getState()['source_division_id'] ?? null;
 
                                         if (! $itemId || ! $sourceDivisionId || ! $state) {
                                             return;
@@ -193,9 +152,9 @@ class AtkTransferStockForm
                                                     return;
                                                 }
 
-                                                // Get the item_id and source_division_id for this repeater item
+                                                // Get the item_id and use the main record's source_division_id
                                                 $itemId = data_get($livewire, "data.transferStockItems.{$index}.item_id");
-                                                $sourceDivisionId = data_get($livewire, "data.transferStockItems.{$index}.source_division_id");
+                                                $sourceDivisionId = data_get($livewire, "data.source_division_id"); // Get from main record
 
                                                 if (! $itemId || ! $sourceDivisionId || ! $value) {
                                                     return;
@@ -212,100 +171,117 @@ class AtkTransferStockForm
                                                 }
                                             };
                                         },
-                                    ]),
-                                Select::make('source_division_id')
-                                    ->label('Divisi Sumber')
-                                    ->options(function (callable $get) {
-                                        $itemId = $get('item_id');
-                                        $quantity = $get('quantity');
-
-                                        if (! $itemId) {
-                                            return UserDivision::all()->pluck('name', 'id');
-                                        }
-
-                                        // Get divisions that have the item with sufficient stock
-                                        $sufficientDivisions = AtkDivisionStock::where('item_id', $itemId)
-                                            ->where('current_stock', '>=', $quantity ?: 0) // Use 0 if quantity is null
-                                            ->pluck('current_stock', 'division_id')
-                                            ->toArray();
-
-                                        // Get division names with stock counts
-                                        $divisionIds = array_keys($sufficientDivisions);
-                                        $divisions = UserDivision::whereIn('id', $divisionIds)->get();
-
-                                        // Create options with stock counts
-                                        $options = [];
-                                        foreach ($divisions as $division) {
-                                            $stockCount = $sufficientDivisions[$division->id];
-                                            $options[$division->id] = $division->name." ({$stockCount} available)";
-                                        }
-
-                                        return $options;
-                                    })
-                                    ->searchable()
-                                    ->preload()
-                                    ->required()
-                                    ->columnSpan(3)
-                                    ->visible(function (): bool {
-                                        $user = auth()->user();
-
-                                        return $user && $user->roles->pluck('id')->contains(3) && $user->division_id == 5;
-                                    })
-                                    ->helperText(function (callable $get) {
-                                        $sourceDivisionId = $get('source_division_id');
-                                        $itemId = $get('item_id');
-
-                                        if (! $sourceDivisionId || ! $itemId) {
-                                            return '';
-                                        }
-
-                                        $stock = AtkDivisionStock::where('division_id', $sourceDivisionId)
-                                            ->where('item_id', $itemId)
-                                            ->first();
-
-                                        $availableStock = $stock ? $stock->current_stock : 0;
-
-                                        return "Available in source: {$availableStock}";
-                                    })
-                                    ->live()
-                                    ->afterStateUpdated(function (callable $get, callable $set, $state) {
-                                        $itemId = $get('item_id');
-                                        $quantity = $get('quantity');
-
-                                        if (! $itemId || ! $state) {
-                                            return;
-                                        }
-
-                                        // Get source division stock
-                                        $stock = AtkDivisionStock::where('division_id', $state)
-                                            ->where('item_id', $itemId)
-                                            ->first();
-
-                                        $availableStock = $stock ? $stock->current_stock : 0;
-
-                                        // If the current quantity exceeds available stock, adjust it
-                                        if ($quantity && $quantity > $availableStock) {
-                                            $set('quantity', $availableStock);
-
-                                            // Show notification to user
-                                            Notification::make()
-                                                ->title('Quantity exceeds available stock')
-                                                ->body("Quantity requested exceeds available stock, maximum quantity available: {$availableStock}")
-                                                ->warning()
-                                                ->send();
-                                        }
-                                    }),
+                                        ]),
                             ])
                             ->columns(3)
                             ->minItems(1)
                             ->addActionLabel('Add Item')
                             ->reorderableWithButtons()
                             ->collapsible(),
-                        Textarea::make('notes')
-                            ->maxLength(1000)
-                            ->rows(1)
-                            ->autosize(),
                     ]),
+                Section::make('Informasi Transfer Stok')
+                    ->description('Data permintaan transfer stok')
+                    ->schema([
+                        Select::make('source_division_id')
+                            ->label('Divisi Sumber')
+                            ->columnSpanFull()
+                            ->options(function (callable $get) {
+                                $userDivisionId = auth()->user()?->division_id;
+
+                                // Get all items and their quantities from the repeater
+                                $transferItems = $get('transferStockItems') ?? [];
+
+                                if (empty($transferItems)) {
+                                    // If no items yet, return all divisions except user's division
+                                    $query = UserDivision::query();
+                                    if ($userDivisionId) {
+                                        $query->where('id', '!=', $userDivisionId);
+                                    }
+                                    return $query->pluck('name', 'id');
+                                }
+
+                                // Get all divisions that have sufficient stock for ALL items
+                                $validDivisionIds = collect();
+
+                                foreach ($transferItems as $index => $item) {
+                                    $itemId = $item['item_id'] ?? null;
+                                    $quantity = $item['quantity'] ?? 0;
+
+                                    if ($itemId && $quantity > 0) {
+                                        $divisionsWithSufficientStock = AtkDivisionStock::where('item_id', $itemId)
+                                            ->where('current_stock', '>=', $quantity)
+                                            ->pluck('division_id');
+
+                                        if ($validDivisionIds->isEmpty()) {
+                                            $validDivisionIds = collect($divisionsWithSufficientStock);
+                                        } else {
+                                            // Intersect with previous valid divisions (AND logic - divisions that have all items)
+                                            $validDivisionIds = $validDivisionIds->intersect($divisionsWithSufficientStock);
+                                        }
+                                    }
+                                }
+
+                                // If no items have been specified yet, return all divisions
+                                if ($validDivisionIds->isEmpty()) {
+                                    // If no divisions have all items, return empty options
+                                    // This will effectively block the form submission until user adjusts quantities or items
+                                    $validDivisionIds = collect();
+                                }
+
+                                // Filter out user's own division
+                                if ($userDivisionId) {
+                                    $validDivisionIds = $validDivisionIds->filter(function ($id) use ($userDivisionId) {
+                                        return $id != $userDivisionId;
+                                    });
+                                }
+
+                                // Get the transfer items again to build detailed options
+                                $transferItems = $get('transferStockItems') ?? [];
+
+                                // Build detailed options with stock information
+                                $detailedOptions = [];
+                                $validDivisions = UserDivision::whereIn('id', $validDivisionIds)->get();
+
+                                foreach ($validDivisions as $division) {
+                                    // Get stock information for each requested item in this division
+                                    $itemDetails = [];
+                                    $itemNumber = 1; // Use a counter for item numbering instead of relying on array keys
+                                    foreach ($transferItems as $index => $item) {
+                                        $itemId = $item['item_id'] ?? null;
+                                        if ($itemId) {
+                                            $divisionStock = AtkDivisionStock::where('division_id', $division->id)
+                                                ->where('item_id', $itemId)
+                                                ->first();
+
+                                            $stock = $divisionStock ? $divisionStock->current_stock : 0;
+
+                                            $atkItem = AtkItem::find($itemId);
+                                            $unitOfMeasure = $atkItem ? ($atkItem->unit_of_measure ?? 'pcs') : 'pcs';
+
+                                            // Format: Item #(number): (division's current_stock) (item's unit_of_measure)
+                                            $itemDetails[] = "Item #{$itemNumber}: {$stock} {$unitOfMeasure}";
+                                            $itemNumber++;
+                                        }
+                                    }
+
+                                    // Combine division name with item details
+                                    $detailedName = $division->name . ' [' . implode(' | ', $itemDetails) . ']';
+                                    $detailedOptions[$division->id] = $detailedName;
+                                }
+
+                                return $detailedOptions;
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->live() // Make it reactive
+                            ->required(),
+                        Textarea::make('notes')
+                            ->label('Catatan')
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
             ]);
     }
 }

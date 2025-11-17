@@ -16,12 +16,14 @@ class AtkTransferStock extends Model
         'transfer_number',
         'requester_id',
         'requesting_division_id',
+        'source_division_id',
         'notes',
     ];
 
     protected $casts = [
         'requester_id' => 'integer',
         'requesting_division_id' => 'integer',
+        'source_division_id' => 'integer',
     ];
 
     // Relationship with the requesting division
@@ -30,17 +32,17 @@ class AtkTransferStock extends Model
         return $this->belongsTo(UserDivision::class, 'requesting_division_id');
     }
 
-    // Relationship with the source divisions (from items)
+    // Relationship with the source division
+    public function sourceDivision(): BelongsTo
+    {
+        return $this->belongsTo(UserDivision::class, 'source_division_id');
+    }
+
+    // Relationship with the source divisions (for backward compatibility)
     public function sourceDivisions()
     {
-        return $this->hasManyThrough(
-            UserDivision::class,
-            AtkTransferStockItem::class,
-            'transfer_stock_id', // Foreign key on atk_transfer_stock_items table
-            'id',                // Foreign key on user_divisions table
-            'id',                // Local key on atk_transfer_stocks table
-            'source_division_id' // Local key on atk_transfer_stock_items table
-        )->distinct();
+        // Return a collection with just the single source division
+        return $this->sourceDivision ? collect([$this->sourceDivision]) : collect();
     }
 
     // Relationship with transfer stock items
@@ -64,7 +66,7 @@ class AtkTransferStock extends Model
     // Accessor to get unique source divisions count
     public function getSourceDivisionsUniqueCountAttribute()
     {
-        return $this->transferStockItems->pluck('source_division_id')->unique()->count();
+        return $this->sourceDivision ? 1 : 0; // Since we now have a single source division
     }
 
     // Accessor for approval status with detailed information

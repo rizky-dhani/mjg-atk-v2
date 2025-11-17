@@ -50,18 +50,48 @@ class ApprovalValidationService
         $userRoleIds = $user->roles->pluck('id')->toArray();
 
         if (is_null($currentStep->division_id)) {
-            // For null division_id steps, check if user's role matches and user's division matches model's division
-            if (in_array($currentStep->role_id, $userRoleIds) &&
-                isset($model->division_id) && $model->division_id !== null &&
-                $user->division_id == $model->division_id) {
+            // For null division_id steps, the logic depends on the model type
+            if (get_class($model) === \App\Models\AtkTransferStock::class) {
+                // For AtkTransferStock, check based on step name:
+                // - "Division Head": should match requesting division
+                // - "Source Division Head": should match source division
+                $canApprove = false;
+                
+                if ($currentStep->step_name == 'Division Head') {
+                    // Division Head step - check against requesting division
+                    $canApprove = isset($model->requesting_division_id) && 
+                                 $model->requesting_division_id !== null &&
+                                 $user->division_id == $model->requesting_division_id;
+                } elseif ($currentStep->step_name == 'Source Division Head') {
+                    // Source Division Head step - check against source division
+                    $canApprove = isset($model->source_division_id) && 
+                                 $model->source_division_id !== null &&
+                                 $user->division_id == $model->source_division_id;
+                }
+                
+                if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
+                    // Check if this step hasn't been approved yet by this user
+                    $existingApproval = $approval->approvalStepApprovals()
+                        ->where('step_id', $currentStep->id)
+                        ->where('user_id', $user->id)
+                        ->first();
 
-                // Check if this step hasn't been approved yet by this user
-                $existingApproval = $approval->approvalStepApprovals()
-                    ->where('step_id', $currentStep->id)
-                    ->where('user_id', $user->id)
-                    ->first();
+                    return ! $existingApproval;
+                }
+            } else {
+                // For other models, check if user's role matches and user's division matches model's division
+                if (in_array($currentStep->role_id, $userRoleIds) &&
+                    isset($model->division_id) && $model->division_id !== null &&
+                    $user->division_id == $model->division_id) {
 
-                return ! $existingApproval;
+                    // Check if this step hasn't been approved yet by this user
+                    $existingApproval = $approval->approvalStepApprovals()
+                        ->where('step_id', $currentStep->id)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    return ! $existingApproval;
+                }
             }
         } else {
             // For non-null division_id steps, check if both role and division match
@@ -117,19 +147,51 @@ class ApprovalValidationService
             $userRoleIds = $user->roles->pluck('id')->toArray();
 
             if (is_null($currentStep->division_id)) {
-                // For null division_id steps, check if user's role matches and user's division matches model's division
-                if (in_array($currentStep->role_id, $userRoleIds) &&
-                    isset($model->division_id) && $model->division_id !== null &&
-                    $user->division_id == $model->division_id) {
+                // For null division_id steps, the logic depends on the model type
+                if (get_class($model) === \App\Models\AtkTransferStock::class) {
+                    // For AtkTransferStock, check based on step name:
+                    // - "Division Head": should match requesting division
+                    // - "Source Division Head": should match source division
+                    $canApprove = false;
+                    
+                    if ($currentStep->step_name == 'Division Head') {
+                        // Division Head step - check against requesting division
+                        $canApprove = isset($model->requesting_division_id) && 
+                                     $model->requesting_division_id !== null &&
+                                     $user->division_id == $model->requesting_division_id;
+                    } elseif ($currentStep->step_name == 'Source Division Head') {
+                        // Source Division Head step - check against source division
+                        $canApprove = isset($model->source_division_id) && 
+                                     $model->source_division_id !== null &&
+                                     $user->division_id == $model->source_division_id;
+                    }
+                    
+                    if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
+                        // Check if this step hasn't been approved yet by this user
+                        $existingApproval = $approval->approvalStepApprovals()
+                            ->where('step_id', $currentStep->id)
+                            ->where('user_id', $user->id)
+                            ->first();
 
-                    // Check if this step hasn't been approved yet by this user
-                    $existingApproval = $approval->approvalStepApprovals()
-                        ->where('step_id', $currentStep->id)
-                        ->where('user_id', $user->id)
-                        ->first();
+                        if (! $existingApproval) {
+                            $eligibleSteps->push($currentStep);
+                        }
+                    }
+                } else {
+                    // For other models, check if user's role matches and user's division matches model's division
+                    if (in_array($currentStep->role_id, $userRoleIds) &&
+                        isset($model->division_id) && $model->division_id !== null &&
+                        $user->division_id == $model->division_id) {
 
-                    if (! $existingApproval) {
-                        $eligibleSteps->push($currentStep);
+                        // Check if this step hasn't been approved yet by this user
+                        $existingApproval = $approval->approvalStepApprovals()
+                            ->where('step_id', $currentStep->id)
+                            ->where('user_id', $user->id)
+                            ->first();
+
+                        if (! $existingApproval) {
+                            $eligibleSteps->push($currentStep);
+                        }
                     }
                 }
             } else {
@@ -207,5 +269,173 @@ class ApprovalValidationService
     public function getMatchingApprovalStepsForStockUsage(AtkStockUsage $stockUsage, User $user): Collection
     {
         return $this->getEligibleApprovalSteps($stockUsage, $user);
+    }
+
+    /**
+     * Check if a specific AtkTransferStock can be approved by the logged-in user
+     * For transfer stocks, approval logic is different as it involves source division
+     */
+    public function canUserApproveTransferStock(\App\Models\AtkTransferStock $transferStock, User $user): bool
+    {
+        // Find the active approval flow for this model type
+        $approvalFlow = ApprovalFlow::where('model_type', get_class($transferStock))
+            ->where('is_active', true)
+            ->first();
+
+        if (! $approvalFlow) {
+            return false;
+        }
+
+        // Get the approval record for this model, creating it if it doesn't exist
+        $approval = $transferStock->approval;
+        if (! $approval) {
+            // Create an approval record if one doesn't exist
+            $approval = $transferStock->approval()->create([
+                'flow_id' => $approvalFlow->id,
+                'current_step' => 1,
+                'status' => 'pending',
+            ]);
+        }
+
+        // Get the current step in the approval flow
+        $currentStepNumber = $approval->current_step;
+        $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
+
+        if (! $currentStep) {
+            // If there's no step for the current step number, return false
+            return false;
+        }
+
+        // Check if the current step matches the user's role and division
+        $userRoleIds = $user->roles->pluck('id')->toArray();
+
+        if (is_null($currentStep->division_id)) {
+            // For null division_id steps in transfer stock, check based on step name:
+            // - "Division Head": should match requesting division
+            // - "Source Division Head": should match source division
+            $canApprove = false;
+            
+            if ($currentStep->step_name == 'Division Head') {
+                // Division Head step - check against requesting division
+                $canApprove = isset($transferStock->requesting_division_id) && 
+                             $transferStock->requesting_division_id !== null &&
+                             $user->division_id == $transferStock->requesting_division_id;
+            } elseif ($currentStep->step_name == 'Source Division Head') {
+                // Source Division Head step - check against source division
+                $canApprove = isset($transferStock->source_division_id) && 
+                             $transferStock->source_division_id !== null &&
+                             $user->division_id == $transferStock->source_division_id;
+            }
+            
+            if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
+                // Check if this step hasn't been approved yet by this user
+                $existingApproval = $approval->approvalStepApprovals()
+                    ->where('step_id', $currentStep->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                return ! $existingApproval;
+            }
+        } else {
+            // For non-null division_id steps, check if both role and division match
+            // These users can approve requests from any division
+            if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
+
+                // Check if this step hasn't been approved yet by this user
+                $existingApproval = $approval->approvalStepApprovals()
+                    ->where('step_id', $currentStep->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                return ! $existingApproval;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get eligible approval steps for a user to approve a specific AtkTransferStock
+     */
+    public function getEligibleApprovalStepsForTransferStock(\App\Models\AtkTransferStock $transferStock, User $user): Collection
+    {
+        // Find the active approval flow for this model type
+        $approvalFlow = ApprovalFlow::where('model_type', get_class($transferStock))
+            ->where('is_active', true)
+            ->first();
+
+        if (! $approvalFlow) {
+            return collect();
+        }
+
+        // Get the approval record for this model, creating it if it doesn't exist
+        $approval = $transferStock->approval;
+        if (! $approval) {
+            // Create an approval record if one doesn't exist
+            $approval = $transferStock->approval()->create([
+                'flow_id' => $approvalFlow->id,
+                'current_step' => 1,
+                'status' => 'pending',
+            ]);
+        }
+
+        // Get the current step in the approval flow
+        $currentStepNumber = $approval->current_step;
+        $currentStep = $approvalFlow->approvalFlowSteps()->where('step_number', $currentStepNumber)->first();
+
+        $eligibleSteps = collect();
+
+        if ($currentStep) {
+            // Check if the current step matches the user's role and division
+            $userRoleIds = $user->roles->pluck('id')->toArray();
+
+            if (is_null($currentStep->division_id)) {
+                // For null division_id steps in transfer stock, check based on step name:
+                // - "Division Head": should match requesting division
+                // - "Source Division Head": should match source division
+                $canApprove = false;
+                
+                if ($currentStep->step_name == 'Division Head') {
+                    // Division Head step - check against requesting division
+                    $canApprove = isset($transferStock->requesting_division_id) && 
+                                 $transferStock->requesting_division_id !== null &&
+                                 $user->division_id == $transferStock->requesting_division_id;
+                } elseif ($currentStep->step_name == 'Source Division Head') {
+                    // Source Division Head step - check against source division
+                    $canApprove = isset($transferStock->source_division_id) && 
+                                 $transferStock->source_division_id !== null &&
+                                 $user->division_id == $transferStock->source_division_id;
+                }
+                
+                if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
+                    // Check if this step hasn't been approved yet by this user
+                    $existingApproval = $approval->approvalStepApprovals()
+                        ->where('step_id', $currentStep->id)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (! $existingApproval) {
+                        $eligibleSteps->push($currentStep);
+                    }
+                }
+            } else {
+                // For non-null division_id steps, check if both role and division match
+                // These users can approve requests from any division
+                if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
+
+                    // Check if this step hasn't been approved yet by this user
+                    $existingApproval = $approval->approvalStepApprovals()
+                        ->where('step_id', $currentStep->id)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (! $existingApproval) {
+                        $eligibleSteps->push($currentStep);
+                    }
+                }
+            }
+        }
+
+        return $eligibleSteps;
     }
 }

@@ -9,7 +9,6 @@ class AtkTransferStockItem extends Model
 {
     protected $fillable = [
         'transfer_stock_id',
-        'source_division_id', // Added for item-level source division
         'item_id', // Reference to the AtkItem model
         'item_category_id', // Added for item category
         'quantity',
@@ -21,10 +20,7 @@ class AtkTransferStockItem extends Model
         return $this->belongsTo(AtkTransferStock::class, 'transfer_stock_id');
     }
 
-    public function sourceDivision(): BelongsTo
-    {
-        return $this->belongsTo(UserDivision::class, 'source_division_id');
-    }
+
 
     public function itemCategory(): BelongsTo
     {

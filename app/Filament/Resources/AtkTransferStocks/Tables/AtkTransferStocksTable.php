@@ -34,26 +34,9 @@ class AtkTransferStocksTable
                     ->label('Divisi Pemohon')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('source_divisions_unique_count')
+                TextColumn::make('sourceDivision.name')
                     ->label('Divisi Sumber')
-                    ->placeholder('Belum dipilih')
-                    ->formatStateUsing(function ($record) {
-                        // Get unique source division IDs from transfer stock items
-                        $uniqueSourceDivisionIds = $record->transferStockItems
-                            ->pluck('source_division_id')
-                            ->unique()
-                            ->toArray();
-                        
-                        if (empty($uniqueSourceDivisionIds)) {
-                            return 'Belum dipilih';
-                        } elseif (count($uniqueSourceDivisionIds) === 1) {
-                            // Return the name of the single source division
-                            $division = \App\Models\UserDivision::find($uniqueSourceDivisionIds[0]);
-                            return $division ? $division->name : 'Unknown Division';
-                        } else {
-                            return count($uniqueSourceDivisionIds) . ' Divisi';
-                        }
-                    }),
+                    ->placeholder('Belum dipilih'),
                 TextColumn::make('approval_status')
                     ->label('Status')
                     ->badge()
