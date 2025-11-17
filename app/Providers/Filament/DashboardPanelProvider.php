@@ -130,7 +130,6 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                \App\Filament\Widgets\AccountWidget::class,
                 \App\Filament\Widgets\AtkStockRequestStatus::class,
                 \App\Filament\Widgets\AtkStockUsageStatus::class,
                 \App\Filament\Widgets\AtkTransferStockStatus::class,
