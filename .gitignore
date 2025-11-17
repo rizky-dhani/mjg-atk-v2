@@ -24,3 +24,6 @@ Homestead.yaml
 Thumbs.db
 app/Providers/AppServiceProvider.php
 public/.htaccess
+.github/
+AGENTS.md
+boost.json
