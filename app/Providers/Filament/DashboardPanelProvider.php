@@ -40,6 +40,8 @@ class DashboardPanelProvider extends PanelProvider
             ->login()
             ->spa()
             ->databaseTransactions()
+            ->brandLogo(fn() => asset('assets/images/LOGO-MEDQUEST-HD.png'))
+            ->brandLogoHeight('2em')
             ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Blue,
