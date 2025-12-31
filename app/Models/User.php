@@ -53,6 +53,11 @@ class User extends Authenticatable
     {
         return $this->hasRole('Super Admin');
     }
+
+    public function isGA()
+    {
+        return $this->division?->initial === 'GA' || $this->isSuperAdmin();
+    }
     
     public function division()
     {

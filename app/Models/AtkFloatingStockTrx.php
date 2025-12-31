@@ -1,0 +1,34 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class AtkFloatingStockTrx extends Model
+{
+    protected $table = 'atk_floating_stock_trx';
+
+    protected $fillable = [
+        'item_id',
+        'type',
+        'quantity',
+        'unit_cost',
+        'total_cost',
+        'mac_snapshot',
+        'balance_snapshot',
+        'trx_src_id',
+        'trx_src_type',
+    ];
+
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(AtkItem::class, 'item_id');
+    }
+
+    public function trx_src(): MorphTo
+    {
+        return $this->morphTo();
+    }
+}
