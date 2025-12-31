@@ -22,7 +22,7 @@ class AtkFloatingStockResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Stock Management';
+    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
     protected static ?string $navigationLabel = 'Floating Stock';
 
