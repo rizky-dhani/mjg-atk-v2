@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Pages;
 
-use App\Filament\Resources\AtkDivisionStocks\AtkDivisionStockResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use App\Filament\Actions\ImportStockAction;
+use App\Filament\Resources\AtkDivisionStocks\AtkDivisionStockResource;
 
 class ListAtkDivisionStocks extends ListRecords
 {
@@ -13,6 +14,8 @@ class ListAtkDivisionStocks extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportStockAction::make()
+                ->visible(fn() => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA' || auth()->user()->hasRole('Super Admin')),
             CreateAction::make(),
         ];
     }
