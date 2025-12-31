@@ -41,4 +41,9 @@ class UserDivision extends Model
     {
         return $this->hasMany(ApprovalFlowStep::class, 'division_id');
     }
+    
+    public function getNameWithInitialAttribute()
+    {
+        return $this->initial . ' - ' . $this->name;
+    }
 }
