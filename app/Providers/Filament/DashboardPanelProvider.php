@@ -42,6 +42,7 @@ class DashboardPanelProvider extends PanelProvider
             ->databaseTransactions()
             ->brandLogo(fn() => asset('assets/images/LOGO-MEDQUEST-HD.png'))
             ->brandLogoHeight('2em')
+            ->favicon(fn() => asset('assets/images/Medquest-Favicon.png'))
             ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Blue,
