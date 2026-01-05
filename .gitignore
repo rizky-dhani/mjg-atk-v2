@@ -27,3 +27,6 @@ public/.htaccess
 .github/
 AGENTS.md
 boost.json
+GEMINI.md
+opencode.json
+.gemini/settings.json
