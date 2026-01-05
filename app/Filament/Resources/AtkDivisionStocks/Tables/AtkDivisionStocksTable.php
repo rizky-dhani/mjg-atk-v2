@@ -2,17 +2,18 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 
-use App\Filament\Actions\ImportStockAction;
 use App\Models\AtkDivisionStockSetting;
+use App\Models\UserDivision;
 use App\Services\FloatingStockService;
 use App\Services\StockTransactionService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class AtkDivisionStocksTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->where('division_id', auth()->user()->division_id)->orderBy('category_id')->orderBy('created_at'))
+                fn (Builder $query) => $query->when(! (auth()->user()->hasRole('Admin') && auth()->user()->isGA()), fn ($q) => $q->where('division_id', auth()->user()->division_id))->orderBy('category_id')->orderBy('created_at'))
             ->columns([
                 TextColumn::make('item.name')->numeric()->sortable(),
                 TextColumn::make('category.name')->numeric()->sortable(),
@@ -76,10 +77,14 @@ class AtkDivisionStocksTable
                     }),
             ])
             ->filters([
-                //
+                SelectFilter::make('division_id')
+                    ->label('Division')
+                    ->options(UserDivision::pluck('name', 'id'))
+                    ->default(auth()->user()->division_id)
+                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->isGA()),
             ])
             ->recordActions([
-                ViewAction::make(), 
+                ViewAction::make(),
                 EditAction::make(),
                 Action::make('move_to_floating')
                     ->label('Move to Floating Stock')
