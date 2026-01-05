@@ -81,7 +81,7 @@ class AtkDivisionStocksTable
                     ->label('Division')
                     ->options(UserDivision::pluck('name', 'id'))
                     ->default(auth()->user()->division_id)
-                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->isGA()),
+                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->isGA() && auth()->user()->isSuperAdmin()),
             ])
             ->recordActions([
                 ViewAction::make(),
