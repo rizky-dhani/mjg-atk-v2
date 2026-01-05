@@ -16,10 +16,14 @@ class AtkDivisionStockForm
                 Select::make('division_id')
                     ->relationship('division', 'name')
                     ->required()
+                    ->preload()
+                    ->searchable()
                     ->getOptionLabelFromRecordUsing(fn (UserDivision $record): string => $record->getNameWithInitialAttribute()),
                 Select::make('item_id')
                     ->relationship('item', 'name')
-                    ->required(),
+                    ->required()
+                    ->preload()
+                    ->searchable(),
                 TextInput::make('quantity')
                     ->required()
                     ->numeric()
