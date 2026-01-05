@@ -10,7 +10,6 @@ use App\Filament\Resources\AtkDivisionStocks\Schemas\AtkDivisionStockInfolist;
 use App\Filament\Resources\AtkDivisionStocks\Tables\AtkDivisionStocksTable;
 use App\Models\AtkDivisionStock;
 use BackedEnum;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -33,7 +32,7 @@ class AtkDivisionStockResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $form): Schema
     {
         return AtkDivisionStockForm::configure($form);
     }
