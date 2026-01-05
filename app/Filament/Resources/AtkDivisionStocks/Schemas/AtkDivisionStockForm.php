@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Schemas;
 
+use App\Models\UserDivision;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -11,12 +13,13 @@ class AtkDivisionStockForm
     {
         return $schema
             ->components([
-                TextInput::make('division_id')
+                Select::make('division_id')
+                    ->relationship('division', 'name')
                     ->required()
-                    ->numeric(),
-                TextInput::make('item_id')
-                    ->required()
-                    ->numeric(),
+                    ->getOptionLabelFromRecordUsing(fn (UserDivision $record): string => $record->getNameWithInitialAttribute()),
+                Select::make('item_id')
+                    ->relationship('item', 'name')
+                    ->required(),
                 TextInput::make('quantity')
                     ->required()
                     ->numeric()
