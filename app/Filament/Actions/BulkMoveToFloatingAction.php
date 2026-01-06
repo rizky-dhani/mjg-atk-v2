@@ -2,16 +2,16 @@
 
 namespace App\Filament\Actions;
 
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Actions\BulkAction;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class BulkMoveToFloatingAction
 {
     public static function make(): BulkAction
     {
         return BulkAction::make('bulk_move_to_floating')
-            ->label('Move All to Floating Stock')
+            ->label('Move Selected to Floating Stock')
             ->icon('heroicon-o-arrow-right-circle')
             ->color('warning')
             ->requiresConfirmation()
