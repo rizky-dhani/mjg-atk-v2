@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AtkFloatingStocks\Tables;
 
+use App\Filament\Actions\BulkTransferFloatingStockAction;
 use App\Services\FloatingStockService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -71,6 +72,7 @@ class AtkFloatingStocksTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkTransferFloatingStockAction::make(),
                     DeleteBulkAction::make(),
                 ]),
             ]);
