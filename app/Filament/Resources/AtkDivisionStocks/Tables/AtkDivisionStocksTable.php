@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 
+use App\Filament\Actions\BulkMoveToFloatingAction;
 use App\Models\AtkDivisionStockSetting;
 use App\Models\UserDivision;
 use App\Services\FloatingStockService;
@@ -12,6 +13,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -103,38 +105,28 @@ class AtkDivisionStocksTable
                             ->required()
                             ->maxValue(fn ($record) => $record->current_stock),
                     ])
-                    ->action(function ($record, array $data, FloatingStockService $floatingService, StockTransactionService $divisionService) {
-                        DB::transaction(function () use ($record, $data, $floatingService, $divisionService) {
-                            $quantity = (int) $data['quantity'];
-                            $unitCost = $record->moving_average_cost;
+                    ->action(function ($record, array $data) {
+                        try {
+                            $record->moveToFloating((int) $data['quantity']);
 
-                            // 1. Reduce from Division Stock
-                            $newDivisionStock = $record->current_stock - $quantity;
-                            $record->update(['current_stock' => $newDivisionStock]);
-
-                            // 2. Record Division Transaction
-                            $divisionService->recordTransactionOnly(
-                                $record->division_id,
-                                $record->item_id,
-                                'transfer',
-                                -$quantity,
-                                $unitCost,
-                                $record
-                            );
-
-                            // 3. Add to Floating Stock
-                            $floatingService->recordTransaction(
-                                $record->item_id,
-                                'transfer',
-                                $quantity,
-                                $unitCost,
-                                $record
-                            );
-                        });
+                            Notification::make()
+                                ->title('Stock moved to floating successfully')
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Error moving stock')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([DeleteBulkAction::make()]),
+                BulkActionGroup::make([
+                    BulkMoveToFloatingAction::make(),
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 }
