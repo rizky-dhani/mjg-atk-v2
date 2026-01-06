@@ -115,7 +115,7 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
         return [
             'name' => 'required|string|max:255',
             'quantity' => 'nullable|integer|min:0',
-            'stok_umum' => 'required|integer|min:0',
+            'stok_umum' => 'nullable|integer|min:0',
             'satuan' => 'nullable|string|max:50',
             'deskripsi' => 'nullable|string',
         ];
@@ -128,7 +128,6 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
             'name.string' => 'The name field must be a string.',
             'quantity.integer' => 'The Quantity field must be an integer.',
             'quantity.min' => 'The Quantity field must be at least 0.',
-            'stok_umum.required' => 'The Stok Umum field is required.',
             'stok_umum.integer' => 'The Stok Umum field must be an integer.',
             'stok_umum.min' => 'The Stok Umum field must be at least 0.',
             'satuan.string' => 'The Satuan field must be a string.',
