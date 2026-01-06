@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Auth;
+use Filament\Notifications\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportStockAction
@@ -38,10 +39,34 @@ class ImportStockAction
                     ->visibility('private'),
             ])
             ->action(function (array $data) {
-                $import = new AtkDivisionStockImport($data['division_id']);
-                Excel::import($import, $data['excel_file']);
-                
-                return redirect()->back();
+                try {
+                    $import = new AtkDivisionStockImport($data['division_id']);
+                    Excel::import($import, $data['excel_file'], 'local');
+
+                    Notification::make()
+                        ->title('Stock imported successfully')
+                        ->body("Processed: {$import->processedCount} records. Skipped: {$import->skippedCount} records.")
+                        ->success()
+                        ->send();
+                } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+                    $failures = $e->failures();
+                    $errorMessages = [];
+                    foreach ($failures as $failure) {
+                        $errorMessages[] = "Row {$failure->row()}: " . implode(', ', $failure->errors());
+                    }
+
+                    Notification::make()
+                        ->title('Validation Error during import')
+                        ->body(implode('<br>', array_slice($errorMessages, 0, 5)) . (count($errorMessages) > 5 ? '<br>...' : ''))
+                        ->danger()
+                        ->send();
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->title('Error importing stock')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
+                }
             });
     }
 }
