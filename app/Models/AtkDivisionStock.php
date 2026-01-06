@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Services\FloatingStockService;
+use App\Services\StockTransactionService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class AtkDivisionStock extends Model
 {
@@ -20,6 +23,48 @@ class AtkDivisionStock extends Model
         'current_stock' => 'integer',
         'moving_average_cost' => 'integer',
     ];
+
+    /**
+     * Move stock from division to floating stock
+     *
+     * @param int $quantity
+     * @return void
+     */
+    public function moveToFloating(int $quantity): void
+    {
+        if ($quantity <= 0 || $quantity > $this->current_stock) {
+            throw new \InvalidArgumentException('Invalid quantity to move.');
+        }
+
+        DB::transaction(function () use ($quantity) {
+            $floatingService = app(FloatingStockService::class);
+            $divisionService = app(StockTransactionService::class);
+            
+            $unitCost = $this->moving_average_cost;
+
+            // 1. Reduce from Division Stock
+            $this->update(['current_stock' => $this->current_stock - $quantity]);
+
+            // 2. Record Division Transaction
+            $divisionService->recordTransactionOnly(
+                $this->division_id,
+                $this->item_id,
+                'transfer',
+                -$quantity,
+                $unitCost,
+                $this
+            );
+
+            // 3. Add to Floating Stock
+            $floatingService->recordTransaction(
+                $this->item_id,
+                'transfer',
+                $quantity,
+                $unitCost,
+                $this
+            );
+        });
+    }
 
     public function division(): BelongsTo
     {
