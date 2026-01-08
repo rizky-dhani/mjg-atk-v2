@@ -40,8 +40,8 @@ The MJG ATK Management System is a comprehensive inventory management solution f
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/mjg-atk-v2.git
-   cd mjg-atk-v2
+   git clone https://github.com/your-username/mjg-atk.git
+   cd mjg-atk
    ```
 
 2. Install PHP dependencies:
