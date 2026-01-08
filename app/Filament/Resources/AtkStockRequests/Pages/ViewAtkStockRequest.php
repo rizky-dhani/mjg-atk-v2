@@ -16,7 +16,8 @@ class ViewAtkStockRequest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('ATK stock request updated'),
             ApprovalAction::makeApprove()->successNotification(
                 Notification::make()
                     ->title("Permintaan ATK berhasil disetujui!")

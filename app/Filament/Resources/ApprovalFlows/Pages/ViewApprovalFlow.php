@@ -14,7 +14,8 @@ class ViewApprovalFlow extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('Approval flow updated'),
             DuplicateAction::make(),
         ];
     }

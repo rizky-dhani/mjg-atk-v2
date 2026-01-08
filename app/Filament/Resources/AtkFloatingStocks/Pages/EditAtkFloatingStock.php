@@ -13,7 +13,8 @@ class EditAtkFloatingStock extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->successNotificationTitle('ATK Floating Stock deleted'),
         ];
     }
 }

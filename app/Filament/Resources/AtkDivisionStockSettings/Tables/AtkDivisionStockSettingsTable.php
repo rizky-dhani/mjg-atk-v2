@@ -66,12 +66,15 @@ class AtkDivisionStockSettingsTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('ATK Division Stock Setting updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('ATK Division Stock Setting deleted'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Division Stock Settings deleted'),
                     BulkAction::make('set_max_limit')
                         ->label('Set Max')
                         ->icon('heroicon-o-adjustments-horizontal')

@@ -13,7 +13,8 @@ class ManageUserDivisions extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->successNotificationTitle('User Division created'),
         ];
     }
 }

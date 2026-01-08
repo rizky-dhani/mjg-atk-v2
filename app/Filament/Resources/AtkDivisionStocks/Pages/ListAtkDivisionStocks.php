@@ -16,7 +16,8 @@ class ListAtkDivisionStocks extends ListRecords
         return [
             ImportStockAction::make()
                 ->visible(fn() => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA' || auth()->user()->hasRole('Super Admin')),
-            CreateAction::make(),
+            CreateAction::make()
+                ->successNotificationTitle('ATK Division Stock created'),
         ];
     }
 }

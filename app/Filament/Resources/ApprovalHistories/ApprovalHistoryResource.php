@@ -178,11 +178,13 @@ class ApprovalHistoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->successNotificationTitle('Approval History updated'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->successNotificationTitle('Approval Histories deleted'),
                 ]),
             ])
             ->defaultSort('performed_at', 'desc');

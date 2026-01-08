@@ -13,7 +13,8 @@ class ViewRole extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('Role successfully updated'),
         ];
     }
 }

@@ -13,7 +13,8 @@ class ViewPermission extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('Permission updated'),
         ];
     }
 }

@@ -15,6 +15,7 @@ class ListAtkTransferStocks extends ListRecords
     {
         return [
             Actions\CreateAction::make()
+                ->successNotificationTitle('ATK Stock Transfer created')
                 ->modalWidth(Width::SevenExtraLarge),
         ];
     }

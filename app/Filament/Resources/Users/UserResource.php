@@ -77,12 +77,15 @@ class UserResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('User updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('User deleted'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Users deleted'),
                 ]),
             ]);
     }

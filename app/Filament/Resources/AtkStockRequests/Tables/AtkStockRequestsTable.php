@@ -66,15 +66,16 @@ class AtkStockRequestsTable
                     $user = auth()->user();
 
                     return $user && $user->id === $record->requester_id;
-                }),
+                })
+                ->successNotificationTitle('ATK stock request updated'),
                 ApprovalAction::makeApprove()->successNotification(
                     Notification::make()
-                        ->title('Permintaan ATK berhasil disetujui!')
+                        ->title('ATK stock request approved successfully')
                         ->success(),
                 ),
                 ApprovalAction::makeReject()->successNotification(
                     Notification::make()
-                        ->title('Permintaan ATK berhasil ditolak!')
+                        ->title('ATK stock request rejected successfully')
                         ->success(),
                 ),
                 ResubmitAction::make()
@@ -88,8 +89,14 @@ class AtkStockRequestsTable
                         fn (Schema $schema) => AtkStockRequestForm::configure(
                             $schema,
                         ),
-                    ),
+                    )
+                    ->successNotificationTitle('ATK stock request resubmitted'),
             ])
-            ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK stock requests deleted'),
+                ])
+            ]);
     }
 }

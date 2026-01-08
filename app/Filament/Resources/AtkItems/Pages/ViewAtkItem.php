@@ -14,7 +14,8 @@ class ViewAtkItem extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('ATK Item updated'),
         ];
     }
 

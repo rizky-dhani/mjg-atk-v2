@@ -21,7 +21,8 @@ class PermissionsRelationManager extends RelationManager
     {
         return $table
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->successNotificationTitle('Permission assigned to role'),
                 GenerateModelPermissionsAction::make(),
             ]);
     }
