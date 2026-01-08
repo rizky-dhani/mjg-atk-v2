@@ -2,19 +2,22 @@
 
 namespace App\Services;
 
+use App\Mail\AtkStockRequestMail;
 use App\Models\Approval;
 use App\Models\ApprovalHistory;
-use App\Models\AtkDivisionStock;
 use App\Models\AtkStockRequest;
-use App\Models\AtkStockUsage;
-use App\Models\MarketingMediaStockRequest;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class ApprovalProcessingService
 {
     protected ApprovalValidationService $validationService;
+
     protected ApprovalHistoryService $historyService;
+
     protected StockUpdateService $stockUpdateService;
 
     public function __construct(
@@ -84,11 +87,16 @@ class ApprovalProcessingService
             // Synchronize approval status
             $this->syncApprovalStatus($approvable);
 
+            // Notify about rejection
+            if ($approvable instanceof AtkStockRequest) {
+                $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
+            }
+
             return false; // Approval is not completed due to rejection
         } else {
             // Check if all required steps are now approved
-            $allSteps = $approval->approvalFlow->approvalFlowSteps->sortBy('step_number');
-            $approvedSteps = $approval->approvalStepApprovals->pluck('step_id');
+            $allSteps = $approval->approvalFlow->approvalFlowSteps()->get()->sortBy('step_number');
+            $approvedSteps = $approval->approvalStepApprovals()->pluck('step_id');
 
             $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
                 return ! $approvedSteps->contains($step->id);
@@ -97,10 +105,10 @@ class ApprovalProcessingService
             // If no unapproved steps remain, mark the overall approval as approved
             if ($unapprovedSteps->isEmpty() && $approval->status !== 'approved') {
                 // Use a database transaction to ensure atomicity and prevent race conditions
-                \DB::transaction(function () use ($approval, $approvable, $user, $allSteps) {
+                DB::transaction(function () use ($approval, $approvable, $user, $allSteps) {
                     // Re-fetch the approval to ensure we have the latest status
                     $approval->refresh();
-                    
+
                     // Double-check that it's not already approved to prevent race conditions
                     if ($approval->status !== 'approved') {
                         $approval->update([
@@ -127,12 +135,17 @@ class ApprovalProcessingService
                 // Synchronize approval status
                 $this->syncApprovalStatus($approvable);
 
+                // Notify about overall approval
+                if ($approvable instanceof AtkStockRequest) {
+                    $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
+                }
+
                 return true; // Approval is completed
             } else {
-                // Update to the next step number and set status to 'partially_approved'
+                // Update to the next step number and keep status as 'pending'
                 $nextStep = $unapprovedSteps->first();
                 $approval->update([
-                    'status' => 'partially_approved', // Set status to partially approved since some steps are approved
+                    'status' => 'pending', // Keep as pending in DB since enum doesn't support partially_approved
                     'current_step' => $nextStep?->step_number ?? $allSteps->last()?->step_number,
                 ]);
 
@@ -149,6 +162,11 @@ class ApprovalProcessingService
 
                 // Synchronize approval status
                 $this->syncApprovalStatus($approvable);
+
+                // Notify about partial approval / moving to next step
+                if ($approvable instanceof AtkStockRequest) {
+                    $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
+                }
 
                 return false; // Approval is not yet completed
             }
@@ -181,8 +199,18 @@ class ApprovalProcessingService
                 'status' => 'pending',
             ]);
 
+            // Set the relation on the model so history logging can find it
+            $model->setRelation('approval', $approval);
+
             // Log initial submission to history
-            $this->historyService->logNewApproval($model, auth()->user());
+            /** @var User $currentUser */
+            $currentUser = Auth::user();
+            $this->historyService->logNewApproval($model, $currentUser);
+
+            // Notify about submission
+            if ($model instanceof AtkStockRequest) {
+                $this->notifyStockRequest($model, 'submitted', $currentUser);
+            }
         }
 
         return $approval;
@@ -242,6 +270,11 @@ class ApprovalProcessingService
             'Request resubmitted for approval',
             null // No specific step for resubmission
         );
+
+        // Notify about submission
+        if ($approval->approvable instanceof AtkStockRequest) {
+            $this->notifyStockRequest($approval->approvable, 'submitted', $user);
+        }
     }
 
     /**
@@ -262,8 +295,8 @@ class ApprovalProcessingService
 
         // Check if approval flow is complete
         $approvalFlow = $approval->approvalFlow;
-        $allSteps = $approvalFlow->approvalFlowSteps->sortBy('step_number');
-        $approvedSteps = $approval->approvalStepApprovals->pluck('step_id');
+        $allSteps = $approvalFlow->approvalFlowSteps()->get()->sortBy('step_number');
+        $approvedSteps = $approval->approvalStepApprovals()->pluck('step_id');
         $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
             return ! $approvedSteps->contains($step->id);
         });
@@ -273,7 +306,7 @@ class ApprovalProcessingService
             $approval->update([
                 'status' => 'approved',
             ]);
-        } 
+        }
         // Otherwise, if there are still unapproved steps but some are approved, status should be 'partially_approved'
         // If no steps are approved yet, status should remain 'pending'
         else {
@@ -281,10 +314,10 @@ class ApprovalProcessingService
             $hasApprovedSteps = $approval->approvalStepApprovals()
                 ->where('status', 'approved')
                 ->exists();
-                
+
             if ($hasApprovedSteps) {
                 $approval->update([
-                    'status' => 'partially_approved',
+                    'status' => 'pending',
                 ]);
             } else {
                 $approval->update([
@@ -292,5 +325,77 @@ class ApprovalProcessingService
                 ]);
             }
         }
+    }
+
+    /**
+     * Notify relevant parties about ATK Stock Request updates
+     */
+    protected function notifyStockRequest(AtkStockRequest $stockRequest, string $actionStatus, ?User $actor = null, ?string $notes = null, ?Approval $approval = null): void
+    {
+        $recipients = collect();
+
+        // Submitter is always a recipient
+        if ($stockRequest->requester) {
+            $recipients->push($stockRequest->requester->email);
+        }
+
+        // Next approvers if status is pending or partially_approved (or submitted)
+        if (in_array($actionStatus, ['submitted', 'partially_approved'])) {
+            $approval = $approval ?? $stockRequest->approval()->first();
+            if ($approval) {
+                $nextApprovers = $this->getNextApprovers($approval);
+                foreach ($nextApprovers as $approver) {
+                    $recipients->push($approver->email);
+                }
+            }
+        }
+
+        $recipients = $recipients->unique()->filter();
+
+        if ($recipients->isNotEmpty()) {
+            $mail = Mail::to($recipients);
+
+            // CC to division's email - to be added later
+            // if ($stockRequest->division && $stockRequest->division->email) {
+            //     $mail->cc($stockRequest->division->email);
+            // }
+
+            $mail->send(new AtkStockRequestMail($stockRequest, $actionStatus, $actor, $notes));
+        }
+    }
+
+    /**
+     * Get potential approvers for the current step of an approval
+     */
+    protected function getNextApprovers(Approval $approval): Collection
+    {
+        $currentStepNumber = $approval->current_step;
+        $flow = $approval->approvalFlow;
+        $nextStep = $flow->approvalFlowSteps()
+            ->where('step_number', $currentStepNumber)
+            ->first();
+
+        if (! $nextStep) {
+            return collect();
+        }
+
+        $approvers = User::query();
+
+        if ($nextStep->division_id) {
+            $approvers->where('division_id', $nextStep->division_id);
+        } else {
+            $approvable = $approval->approvable;
+            if (isset($approvable->division_id)) {
+                $approvers->where('division_id', $approvable->division_id);
+            }
+        }
+
+        if ($nextStep->role_id) {
+            $approvers->whereHas('roles', function ($query) use ($nextStep) {
+                $query->where('id', $nextStep->role_id);
+            });
+        }
+
+        return $approvers->get();
     }
 }

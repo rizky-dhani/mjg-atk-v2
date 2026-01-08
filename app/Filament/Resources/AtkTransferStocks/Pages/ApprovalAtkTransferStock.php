@@ -2,25 +2,21 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Pages;
 
-use UnitEnum;
-use BackedEnum;
+use App\Filament\Actions\ApprovalAction;
+use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Models\Approval;
-use Filament\Tables\Table;
-use Filament\Actions\Action;
 use App\Models\ApprovalFlowStep;
 use App\Models\AtkTransferStock;
 use App\Services\ApprovalService;
-use Filament\Resources\Pages\Page;
-use Illuminate\Support\Facades\DB;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Auth;
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
-use Filament\Tables\Columns\TextColumn;
-use App\Filament\Actions\ApprovalAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
+use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 
 class ApprovalAtkTransferStock extends ListRecords
 {
@@ -28,13 +24,13 @@ class ApprovalAtkTransferStock extends ListRecords
 
     protected static ?string $slug = 'atk/transfer-stocks/approval';
 
-    protected static ?string $navigationLabel = 'Transfer Stok ATK';
+    protected static ?string $navigationLabel = 'Persetujuan Transfer Stok ATK';
 
     protected static string|UnitEnum|null $navigationGroup = 'Approval Permintaan';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
 
-    protected static ?string $title = 'Transfer Stok ATK';
+    protected static ?string $title = 'Persetujuan Transfer Stok ATK';
 
     public static function getNavigationBadge(): ?string
     {
@@ -140,7 +136,7 @@ class ApprovalAtkTransferStock extends ListRecords
 
         foreach (AtkTransferStock::whereHas('approval', function ($q) {
             $q->where('status', 'pending')
-            ->orWhere('status', 'partially_approved');
+                ->orWhere('status', 'partially_approved');
         })->get() as $transferStock) {
             $approvalService = app(ApprovalService::class);
             if ($approvalService->canUserApproveTransferStock($transferStock, $user)) {

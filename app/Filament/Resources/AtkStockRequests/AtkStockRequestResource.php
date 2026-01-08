@@ -34,6 +34,8 @@ class AtkStockRequestResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'request_number';
 
+    protected static ?int $navigationSort = 1;
+
     public static function form(Schema $schema): Schema
     {
         return AtkStockRequestForm::configure($schema);
@@ -54,11 +56,6 @@ class AtkStockRequestResource extends Resource
         return [
             \App\Filament\Resources\AtkStockRequests\RelationManagers\AtkStockRequestItemsRelationManager::class,
         ];
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
     }
 
     public static function getPages(): array

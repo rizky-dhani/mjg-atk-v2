@@ -25,10 +25,6 @@ class AtkFloatingStock extends Model
 
     /**
      * Distribute stock from floating to a specific division
-     *
-     * @param int $divisionId
-     * @param int $quantity
-     * @return void
      */
     public function distributeToDivision(int $divisionId, int $quantity): void
     {
@@ -39,7 +35,7 @@ class AtkFloatingStock extends Model
         DB::transaction(function () use ($divisionId, $quantity) {
             $floatingService = app(FloatingStockService::class);
             $divisionService = app(StockTransactionService::class);
-            
+
             $unitCost = $this->moving_average_cost;
 
             // 1. Reduce from Floating Stock
@@ -75,7 +71,7 @@ class AtkFloatingStock extends Model
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(AtkFloatingStockTrx::class, 'item_id', 'item_id');
+        return $this->hasMany(AtkFloatingStockTransactionHistory::class, 'item_id', 'item_id');
     }
 
     public function getTotalStockValue(): float

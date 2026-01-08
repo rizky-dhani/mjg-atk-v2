@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\AtkFloatingStock;
-use App\Models\AtkFloatingStockTrx;
+use App\Models\AtkFloatingStockTransactionHistory;
 use Illuminate\Support\Facades\DB;
 
 class FloatingStockService
@@ -11,7 +11,7 @@ class FloatingStockService
     /**
      * Record a stock transaction and update the moving average cost
      */
-    public function recordTransaction(int $itemId, string $type, int $quantity, int $unitCost, $transactionSource = null): AtkFloatingStockTrx
+    public function recordTransaction(int $itemId, string $type, int $quantity, int $unitCost, $transactionSource = null): AtkFloatingStockTransactionHistory
     {
         return DB::transaction(function () use ($itemId, $type, $quantity, $unitCost, $transactionSource) {
             // Get the current floating stock record
@@ -50,7 +50,7 @@ class FloatingStockService
             ]);
 
             // Create the transaction record
-            return AtkFloatingStockTrx::create([
+            return AtkFloatingStockTransactionHistory::create([
                 'item_id' => $itemId,
                 'type' => $type,
                 'quantity' => $quantity,
@@ -75,7 +75,7 @@ class FloatingStockService
 
         $totalValue = ($oldStock * $oldMac) + ($incomingStock * $incomingUnitCost);
         $totalQuantity = $oldStock + $incomingStock;
-        
+
         return (int) round($totalValue / $totalQuantity);
     }
 }

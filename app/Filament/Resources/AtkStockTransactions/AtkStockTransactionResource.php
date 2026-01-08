@@ -2,35 +2,37 @@
 
 namespace App\Filament\Resources\AtkStockTransactions;
 
-use App\Filament\Resources\AtkTransferStocks\Pages\ApprovalAtkTransferStock;
-use UnitEnum;
-use BackedEnum;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use App\Models\AtkStockTransaction;
-use Filament\Support\Icons\Heroicon;
-use App\Filament\Resources\AtkStockTransactions\Pages\ViewAtkStockTransaction;
 use App\Filament\Resources\AtkStockTransactions\Pages\ListAtkStockTransactions;
+use App\Filament\Resources\AtkStockTransactions\Pages\ViewAtkStockTransaction;
 use App\Filament\Resources\AtkStockTransactions\Schemas\AtkStockTransactionForm;
-use App\Filament\Resources\AtkStockTransactions\Tables\AtkStockTransactionsTable;
 use App\Filament\Resources\AtkStockTransactions\Schemas\AtkStockTransactionInfolist;
+use App\Filament\Resources\AtkStockTransactions\Tables\AtkStockTransactionsTable;
+use App\Filament\Resources\AtkTransferStocks\Pages\ApprovalAtkTransferStock;
+use App\Models\AtkStockTransaction;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use UnitEnum;
 
 class AtkStockTransactionResource extends Resource
 {
     protected static ?string $model = AtkStockTransaction::class;
 
-    protected static ?string $navigationLabel = 'Transaksi Stok';
+    protected static ?string $navigationLabel = 'Riwayat Transfer';
 
     protected static ?string $slug = 'atk/stock-transactions';
 
-    protected static ?string $modelLabel = 'Transaksi Stok';
+    protected static ?string $modelLabel = 'Riwayat Transfer';
 
-    protected static ?string $pluralModelLabel = 'Transaksi Stok';
+    protected static ?string $pluralModelLabel = 'Riwayat Transfer';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
+
+    protected static ?string $navigationParentItem = 'Transfer Stok ATK';
 
     public static function form(Schema $schema): Schema
     {
@@ -59,7 +61,7 @@ class AtkStockTransactionResource extends Resource
         return [
             'index' => ListAtkStockTransactions::route('/'),
             'view' => ViewAtkStockTransaction::route('/view/{record}'),
-            'approval' => ApprovalAtkTransferStock::route('/approval')
+            'approval' => ApprovalAtkTransferStock::route('/approval'),
         ];
     }
 }

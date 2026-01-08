@@ -20,7 +20,7 @@ class AtkTransferStockResource extends Resource
 {
     protected static ?string $model = AtkTransferStock::class;
 
-    protected static ?string $navigationLabel = 'Transfer Stok';
+    protected static ?string $navigationLabel = 'Transfer Stok ATK';
 
     protected static ?string $slug = 'atk/transfer-stocks';
 
@@ -33,6 +33,8 @@ class AtkTransferStockResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
     protected static ?string $recordTitleAttribute = 'transfer_number';
+
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {
@@ -54,11 +56,6 @@ class AtkTransferStockResource extends Resource
         return [
             \App\Filament\Resources\AtkTransferStocks\RelationManagers\AtkTransferStockItemsRelationManager::class,
         ];
-    }
-
-    public static function shouldRegisterNavigation(): bool
-    {
-        return false;
     }
 
     public static function getPages(): array

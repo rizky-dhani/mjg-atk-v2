@@ -10,11 +10,11 @@ use App\Filament\Resources\AtkFloatingStocks\Schemas\AtkFloatingStockForm;
 use App\Filament\Resources\AtkFloatingStocks\Tables\AtkFloatingStocksTable;
 use App\Models\AtkFloatingStock;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class AtkFloatingStockResource extends Resource
 {
@@ -24,9 +24,11 @@ class AtkFloatingStockResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
-    protected static ?string $navigationLabel = 'Floating Stock';
+    protected static ?string $navigationLabel = 'Stok Umum';
 
-    protected static ?string $modelLabel = 'Floating Stock';
+    protected static ?int $navigationSort = 4;
+
+    protected static ?string $modelLabel = 'Stok Umum';
 
     public static function form(Schema $schema): Schema
     {

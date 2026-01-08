@@ -3,10 +3,10 @@
 namespace App\Filament\Actions;
 
 use App\Models\UserDivision;
-use Filament\Tables\Actions\BulkAction;
-use Illuminate\Database\Eloquent\Collection;
-use Filament\Notifications\Notification;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
 
 class BulkTransferFloatingStockAction
 {
