@@ -53,11 +53,13 @@ class AtkItemPricesTable
             ])
             ->actions([
                 \Filament\Actions\ViewAction::make(),
-                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\EditAction::make()
+                    ->successNotificationTitle('ATK Item Price updated'),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make(),
+                    \Filament\Actions\DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Item Prices deleted'),
                 ]),
             ]);
     }

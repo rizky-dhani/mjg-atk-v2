@@ -77,12 +77,15 @@ class ApprovalResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('Approval updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('Approval deleted'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Approvals deleted'),
                 ]),
             ]);
     }

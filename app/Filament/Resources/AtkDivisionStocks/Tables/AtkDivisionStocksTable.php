@@ -92,7 +92,8 @@ class AtkDivisionStocksTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('ATK Division Stock updated'),
                 Action::make('move_to_floating')
                     ->label('Move to Floating Stock')
                     ->icon('heroicon-o-arrow-right-circle')
@@ -125,7 +126,8 @@ class AtkDivisionStocksTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkMoveToFloatingAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Division Stocks deleted'),
                 ]),
             ]);
     }

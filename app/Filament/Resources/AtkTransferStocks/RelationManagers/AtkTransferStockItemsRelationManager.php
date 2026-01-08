@@ -88,15 +88,19 @@ class AtkTransferStockItemsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->successNotificationTitle('Transfer stock item added'),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('Transfer stock item updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('Transfer stock item deleted'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Transfer stock items deleted'),
                 ]),
             ]);
     }

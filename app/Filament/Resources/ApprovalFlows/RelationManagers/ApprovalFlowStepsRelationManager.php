@@ -87,18 +87,22 @@ class ApprovalFlowStepsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->successNotificationTitle('Approval flow step created'),
                 AssociateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('Approval flow step updated'),
                 DissociateAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->successNotificationTitle('Approval flow step deleted'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Approval flow steps deleted'),
                 ]),
             ]);
     }

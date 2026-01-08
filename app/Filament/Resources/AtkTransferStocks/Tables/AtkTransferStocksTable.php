@@ -122,6 +122,7 @@ class AtkTransferStocksTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->successNotificationTitle('ATK Stock Transfer updated')
                     ->modalWidth(Width::SevenExtraLarge)
                     ->visible(function ($record) {
                         $user = \Illuminate\Support\Facades\Auth::user();
@@ -220,7 +221,8 @@ class AtkTransferStocksTable
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Stock Transfers deleted'),
                 ]),
             ]);
     }

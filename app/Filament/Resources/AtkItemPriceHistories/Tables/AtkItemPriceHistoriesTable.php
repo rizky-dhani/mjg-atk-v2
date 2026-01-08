@@ -45,7 +45,8 @@ class AtkItemPriceHistoriesTable
             ])
             ->bulkActions([
                 \Filament\Tables\Actions\BulkActionGroup::make([
-                    \Filament\Tables\Actions\DeleteBulkAction::make(),
+                    \Filament\Tables\Actions\DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Item Price Histories deleted'),
                 ]),
             ]);
     }

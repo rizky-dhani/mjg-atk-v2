@@ -29,11 +29,16 @@ class AtkCategoriesTable
                 //
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('ATK Category updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('ATK Category deleted'),
             ])
             ->bulkActions([
-                BulkActionGroup::make([DeleteBulkAction::make()]),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Categories deleted'),
+                ]),
             ]);
     }
 }

@@ -15,7 +15,8 @@ class ViewAtkStockUsage extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            EditAction::make()
+                ->successNotificationTitle('ATK stock usage updated'),
             ApprovalAction::makeApprove(),
             ApprovalAction::makeReject(),
             ResubmitAction::make(),

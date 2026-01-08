@@ -68,12 +68,14 @@ class AtkFloatingStocksTable
                             (int) $data['unit_cost']
                         );
                     }),
-                EditAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('ATK Floating Stock updated'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkTransferFloatingStockAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK Floating Stocks deleted'),
                 ]),
             ]);
     }

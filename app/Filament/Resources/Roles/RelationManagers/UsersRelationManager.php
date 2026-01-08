@@ -20,7 +20,8 @@ class UsersRelationManager extends RelationManager
     {
         return $table
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->successNotificationTitle('User assigned to role'),
             ]);
     }
 }

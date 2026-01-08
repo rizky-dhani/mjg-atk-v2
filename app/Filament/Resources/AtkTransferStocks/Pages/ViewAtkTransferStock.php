@@ -37,6 +37,7 @@ class ViewAtkTransferStock extends ViewRecord
         $actions = [];
         if ($canEdit) {
             $actions[] = \Filament\Actions\EditAction::make()
+                ->successNotificationTitle('ATK Stock Transfer updated')
                 ->modalWidth(Width::SevenExtraLarge);
         }
         

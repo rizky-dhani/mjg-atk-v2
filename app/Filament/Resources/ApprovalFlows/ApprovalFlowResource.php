@@ -77,13 +77,16 @@ class ApprovalFlowResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('Approval flow updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('Approval flow deleted'),
                 DuplicateAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Approval flows deleted'),
                 ]),
             ]);
     }

@@ -58,7 +58,9 @@ class AtkStockUsagesTable
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make()->authorize(static function ($record) {
+                EditAction::make()
+                    ->successNotificationTitle('ATK stock usage updated')
+                    ->authorize(static function ($record) {
                     $user = auth()->user();
 
                     return $user && $user->id === $record->requester_id;
@@ -86,6 +88,11 @@ class AtkStockUsagesTable
                         ),
                     ),
             ])
-            ->bulkActions([BulkActionGroup::make([DeleteBulkAction::make()])]);
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('ATK stock usages deleted'),
+                ]),
+            ]);
     }
 }

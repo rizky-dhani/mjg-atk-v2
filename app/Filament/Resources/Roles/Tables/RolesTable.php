@@ -33,7 +33,8 @@ class RolesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Roles successfully deleted'),
                 ]),
             ]);
     }

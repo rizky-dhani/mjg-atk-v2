@@ -51,7 +51,8 @@ class AtkBudgetingsTable
                 //
             ])
             ->actions([
-                EditAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('ATK Budgeting updated'),
                 ViewAction::make(),
             ])
             ->bulkActions([

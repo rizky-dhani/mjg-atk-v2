@@ -74,18 +74,22 @@ class ApprovalStepApprovalsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->successNotificationTitle('Approval step created'),
                 AssociateAction::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('Approval step updated'),
                 DissociateAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->successNotificationTitle('Approval step deleted'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DissociateBulkAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('Approval steps deleted'),
                 ]),
             ]);
     }

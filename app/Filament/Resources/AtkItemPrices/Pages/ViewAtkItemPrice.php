@@ -12,7 +12,8 @@ class ViewAtkItemPrice extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\EditAction::make(),
+            \Filament\Actions\EditAction::make()
+                ->successNotificationTitle('ATK Item Price updated'),
         ];
     }
 }

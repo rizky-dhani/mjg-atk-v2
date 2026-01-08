@@ -52,12 +52,15 @@ class UserDivisionResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->successNotificationTitle('User Division updated'),
+                DeleteAction::make()
+                    ->successNotificationTitle('User Division deleted'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->successNotificationTitle('User Divisions deleted'),
                 ]),
             ]);
     }
