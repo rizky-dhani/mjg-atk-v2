@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class AtkFloatingStockTrx extends Model
+class AtkFloatingStockTransactionHistory extends Model
 {
     protected $table = 'atk_floating_stock_trx';
 

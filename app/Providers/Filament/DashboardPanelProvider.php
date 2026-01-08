@@ -20,13 +20,12 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class DashboardPanelProvider extends PanelProvider
@@ -40,71 +39,60 @@ class DashboardPanelProvider extends PanelProvider
             ->login()
             ->spa()
             ->databaseTransactions()
-            ->brandLogo(fn() => asset('assets/images/LOGO-MEDQUEST-HD.png'))
+            ->brandLogo(fn () => asset('assets/images/LOGO-MEDQUEST-HD.png'))
             ->brandLogoHeight('2em')
-            ->favicon(fn() => asset('assets/images/Medquest-Favicon.png'))
+            ->favicon(fn () => asset('assets/images/Medquest-Favicon.png'))
             ->maxContentWidth(Width::Full)
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->navigationGroups([
+                'Alat Tulis Kantor',
+                'Marketing Media',
+                'Approval Permintaan',
+                'Settings',
+            ])
             ->navigationItems([
-                // Alat Tulis Kantor
-                NavigationItem::make('Permintaan ATK')
-                    ->icon(fn () => Heroicon::ArrowDownTray)
-                    ->url(fn () => AtkStockRequestResource::getUrl('index'))
-                    ->group('Alat Tulis Kantor')
-                    ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('index')),
-                NavigationItem::make('Pengeluaran ATK')
-                    ->icon(fn () => Heroicon::ArrowUpTray)
-                    ->url(fn () => AtkStockUsageResource::getUrl('index'))
-                    ->group('Alat Tulis Kantor')
-                    ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('index')),
-                NavigationItem::make('Transfer Stok ATK')
-                    ->icon(fn () => Heroicon::ArrowsRightLeft)
-                    ->url(fn () => AtkTransferStockResource::getUrl('index'))
-                    ->group('Alat Tulis Kantor')
-                    ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('index')),
-
                 // Marketing Media
                 NavigationItem::make('Permintaan Marketing Media')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => MarketingMediaStockRequestResource::getUrl('index'))
                     ->group('Marketing Media')
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockRequestResource::getUrl('index'))
-                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division && stripos(auth()->user()->division->name, 'Marketing') !== false || auth()->user()->hasRole('Super Admin')),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
                 NavigationItem::make('Pengeluaran Marketing Media')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => MarketingMediaStockUsageResource::getUrl('index'))
                     ->group('Marketing Media')
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockUsageResource::getUrl('index'))
-                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division && stripos(auth()->user()->division->name, 'Marketing') !== false || auth()->user()->hasRole('Super Admin')),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
 
                 // Approval Permintaan
-                NavigationItem::make('Permintaan ATK')
+                NavigationItem::make('Persetujuan Permintaan ATK')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Pengeluaran ATK')
+                NavigationItem::make('Persetujuan Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Transfer Stok ATK')
+                NavigationItem::make('Persetujuan Transfer Stok ATK')
                     ->icon(fn () => Heroicon::ArrowsRightLeft)
                     ->url(fn () => AtkTransferStockResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Permintaan Marketing Media')
+                NavigationItem::make('Persetujuan Permintaan Marketing Media')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => MarketingMediaStockRequestResource::getUrl('approval'))
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Pengeluaran Marketing Media')
+                NavigationItem::make('Persetujuan Pengeluaran Marketing Media')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => MarketingMediaStockUsageResource::getUrl('approval'))
                     ->group('Approval Permintaan')
@@ -117,13 +105,13 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => AtkItemResource::getUrl('index'))
                     ->group('Settings')
                     ->isActiveWhen(fn () => request()->url() === AtkItemResource::getUrl('index'))
-                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA'),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
                 NavigationItem::make('Item Inventaris - Marketing Media')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => MarketingMediaItemResource::getUrl('index'))
                     ->group('Settings')
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaItemResource::getUrl('index'))
-                    ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->division->initial === 'GA'),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -160,7 +148,7 @@ class DashboardPanelProvider extends PanelProvider
      */
     private function canUserSeeApprovalNav(): bool
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         if (! $user) {
             return false;
