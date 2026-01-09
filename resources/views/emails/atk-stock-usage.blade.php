@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>ATK Stock Request Update</title>
+    <title>ATK Stock Usage Update</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,7 +40,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>ATK Stock Request Update</h2>
+        <h2>ATK Stock Usage Update</h2>
         <p>Dear {{ $recipientName ?? 'User' }},</p>
 
         @php
@@ -53,25 +53,18 @@
             };
             
             $actorName = $actor ? $actor->name : 'System';
-            $isApprover = false;
-            
-            // Check for the custom header we added in the service
-            if (isset($this->callbacks)) {
-                // This is a bit hacky for Blade but we can check the status and context
-                // Alternatively, we could have passed $isApprover as a prop to the mailable
-            }
         @endphp
 
         @if($actionStatus === 'submitted')
-            <p>The following ATK Stock Request has been <strong>Submitted</strong> by <strong>{{ $stockRequest->requester->name }}</strong>.</p>
-            @if(($recipientName ?? '') !== ($stockRequest->requester->name ?? ''))
-                <p>Please review this request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            <p>The following ATK Stock Usage has been <strong>Submitted</strong> by <strong>{{ $stockUsage->requester->name }}</strong>.</p>
+            @if(($recipientName ?? '') !== ($stockUsage->requester->name ?? ''))
+                <p>Please review this usage request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
             @endif
         @elseif($actionStatus === 'partially_approved')
-            <p>The following ATK Stock Request has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong> and is now awaiting your action.</p>
-            <p>Please review this request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            <p>The following ATK Stock Usage has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong> and is now awaiting your action.</p>
+            <p>Please review this usage request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
         @else
-            <p>The following ATK Stock Request has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong>.</p>
+            <p>The following ATK Stock Usage has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong>.</p>
         @endif
         
         @if($actionStatus === 'rejected' && $notes)
@@ -80,29 +73,29 @@
 
         <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin-top: 20px;">
             <ul style="list-style: none; padding: 0;">
-                <li><strong>Request Number:</strong> {{ $stockRequest->request_number }}</li>
-                <li><strong>Requester:</strong> {{ $stockRequest->requester->name }} ({{ $stockRequest->division->name }})</li>
+                <li><strong>Request Number:</strong> {{ $stockUsage->request_number }}</li>
+                <li><strong>Requester:</strong> {{ $stockUsage->requester->name }} ({{ $stockUsage->division->name }})</li>
             </ul>
         </div>
 
         @if($viewUrl)
-            <a href="{{ $viewUrl }}" class="button">View Request Details</a>
+            <a href="{{ $viewUrl }}" class="button">View Usage Details</a>
         @endif
 
-        <h3>Request Items:</h3>
+        <h3>Usage Items:</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
                     <th>Category</th>
+                    <th>Item</th>
                     <th style="text-align: center;">Quantity</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($stockRequest->atkStockRequestItems as $item)
+                @foreach($stockUsage->atkStockUsageItems as $item)
                     <tr>
-                        <td>{{ $item->item->name }}</td>
                         <td>{{ $item->category->name }}</td>
+                        <td>{{ $item->item->name }}</td>
                         <td style="text-align: center;">{{ $item->quantity }}</td>
                     </tr>
                 @endforeach

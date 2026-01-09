@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AtkStockUsages\Pages;
 
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
+use App\Models\AtkStockUsage;
+use App\Services\ApprovalProcessingService;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -35,11 +37,14 @@ class ListAtkStockUsages extends ListRecords
 
                     return $data;
                 })
+                ->after(function (AtkStockUsage $record) {
+                    app(ApprovalProcessingService::class)->createApproval($record, AtkStockUsage::class);
+                })
                 ->visible(fn () => auth()->user()->hasRole('Admin'))
                 ->modalWidth(Width::SevenExtraLarge)
                 ->successNotification(
                     Notification::make()
-                        ->title('Request Pengeluaran ATK berhasil dibuat!')
+                        ->title('Penggunaan stok ATK berhasil dibuat')
                         ->success()
                 ),
         ];
