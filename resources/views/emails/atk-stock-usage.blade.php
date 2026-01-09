@@ -57,12 +57,14 @@
 
         @if($actionStatus === 'submitted')
             <p>The following ATK Stock Usage has been <strong>Submitted</strong> by <strong>{{ $stockUsage->requester->name }}</strong>.</p>
-            @if(($recipientName ?? '') !== ($stockUsage->requester->name ?? ''))
+            @if($isApprover)
                 <p>Please review this usage request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
             @endif
         @elseif($actionStatus === 'partially_approved')
             <p>The following ATK Stock Usage has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong> and is now awaiting your action.</p>
-            <p>Please review this usage request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            @if($isApprover)
+                <p>Please review this usage request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            @endif
         @else
             <p>The following ATK Stock Usage has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong>.</p>
         @endif
