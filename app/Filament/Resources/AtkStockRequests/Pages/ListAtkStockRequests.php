@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AtkStockRequests\Pages;
 
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
+use App\Models\AtkStockRequest;
+use App\Services\ApprovalProcessingService;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -21,6 +23,9 @@ class ListAtkStockRequests extends ListRecords
                     $data['requester_id'] = auth()->user()->id;
 
                     return $data;
+                })
+                ->after(function (AtkStockRequest $record) {
+                    app(ApprovalProcessingService::class)->createApproval($record, AtkStockRequest::class);
                 })
                 ->visible(fn () => auth()->user()->hasRole('Admin'))
                 ->modalWidth(Width::SevenExtraLarge)
