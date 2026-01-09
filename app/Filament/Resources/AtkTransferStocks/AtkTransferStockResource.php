@@ -10,6 +10,7 @@ use App\Filament\Resources\AtkTransferStocks\Schemas\AtkTransferStockInfolist;
 use App\Filament\Resources\AtkTransferStocks\Tables\AtkTransferStocksTable;
 use App\Models\AtkTransferStock;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -35,6 +36,18 @@ class AtkTransferStockResource extends Resource
     protected static ?string $recordTitleAttribute = 'transfer_number';
 
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make(static::getNavigationLabel())
+                ->group(static::getNavigationGroup())
+                ->icon(static::getNavigationIcon())
+                ->isActiveWhen(fn () => ! request()->routeIs(static::getRouteBaseName().'.approval') && request()->routeIs(static::getRouteBaseName().'.*'))
+                ->sort(static::getNavigationSort())
+                ->url(static::getNavigationUrl()),
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {
