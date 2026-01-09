@@ -61,21 +61,21 @@ class AtkStockRequestsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                ->modalWidth(Width::SevenExtraLarge)
-                ->authorize(static function ($record) {
-                    $user = auth()->user();
+                    ->modalWidth(Width::SevenExtraLarge)
+                    ->authorize(static function ($record) {
+                        $user = auth()->user();
 
-                    return $user && $user->id === $record->requester_id;
-                })
-                ->successNotificationTitle('ATK stock request updated'),
+                        return $user && $user->id === $record->requester_id;
+                    })
+                    ->successNotificationTitle('Permintaan stok ATK berhasil diperbarui'),
                 ApprovalAction::makeApprove()->successNotification(
                     Notification::make()
-                        ->title('ATK stock request approved successfully')
+                        ->title('Permintaan stok ATK berhasil disetujui')
                         ->success(),
                 ),
                 ApprovalAction::makeReject()->successNotification(
                     Notification::make()
-                        ->title('ATK stock request rejected successfully')
+                        ->title('Permintaan stok ATK berhasil ditolak')
                         ->success(),
                 ),
                 ResubmitAction::make()
@@ -90,13 +90,13 @@ class AtkStockRequestsTable
                             $schema,
                         ),
                     )
-                    ->successNotificationTitle('ATK stock request resubmitted'),
+                    ->successNotificationTitle('Permintaan stok ATK berhasil dikirim ulang'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK stock requests deleted'),
-                ])
+                        ->successNotificationTitle('Permintaan stok ATK berhasil dihapus'),
+                ]),
             ]);
     }
 }

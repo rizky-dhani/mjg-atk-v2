@@ -4,11 +4,10 @@ namespace App\Filament\Resources\AtkFloatingStocks\Tables;
 
 use App\Filament\Actions\BulkTransferFloatingStockAction;
 use App\Services\FloatingStockService;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -69,13 +68,13 @@ class AtkFloatingStocksTable
                         );
                     }),
                 EditAction::make()
-                    ->successNotificationTitle('ATK Floating Stock updated'),
+                    ->successNotificationTitle('Stok Umum ATK berhasil diperbarui'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkTransferFloatingStockAction::make(),
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Floating Stocks deleted'),
+                        ->successNotificationTitle('Stok Umum ATK berhasil dihapus'),
                 ]),
             ]);
     }

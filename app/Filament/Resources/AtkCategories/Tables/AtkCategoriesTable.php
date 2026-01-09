@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\AtkCategories\Tables;
 
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class AtkCategoriesTable
 {
@@ -15,12 +15,12 @@ class AtkCategoriesTable
     {
         return $table
             ->columns([
-                TextColumn::make("name")->searchable(),
-                TextColumn::make("created_at")
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make("updated_at")
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -30,14 +30,14 @@ class AtkCategoriesTable
             ])
             ->actions([
                 EditAction::make()
-                    ->successNotificationTitle('ATK Category updated'),
+                    ->successNotificationTitle('Kategori ATK berhasil diperbarui'),
                 DeleteAction::make()
-                    ->successNotificationTitle('ATK Category deleted'),
+                    ->successNotificationTitle('Kategori ATK berhasil dihapus'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Categories deleted'),
+                        ->successNotificationTitle('Kategori ATK berhasil dihapus'),
                 ]),
             ]);
     }
