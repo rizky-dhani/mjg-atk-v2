@@ -6,7 +6,6 @@ use App\Services\FloatingStockService;
 use App\Services\StockTransactionService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class AtkDivisionStock extends Model
@@ -26,9 +25,6 @@ class AtkDivisionStock extends Model
 
     /**
      * Move stock from division to floating stock
-     *
-     * @param int $quantity
-     * @return void
      */
     public function moveToFloating(int $quantity): void
     {
@@ -39,7 +35,7 @@ class AtkDivisionStock extends Model
         DB::transaction(function () use ($quantity) {
             $floatingService = app(FloatingStockService::class);
             $divisionService = app(StockTransactionService::class);
-            
+
             $unitCost = $this->moving_average_cost;
 
             // 1. Reduce from Division Stock
@@ -87,8 +83,8 @@ class AtkDivisionStock extends Model
     public function getSetting()
     {
         return AtkDivisionStockSetting::where('division_id', $this->division_id)
-                    ->where('item_id', $this->item_id)
-                    ->first();
+            ->where('item_id', $this->item_id)
+            ->first();
     }
 
     /**
@@ -98,15 +94,16 @@ class AtkDivisionStock extends Model
     public function stockTransactions()
     {
         return $this->hasMany(AtkStockTransaction::class, 'item_id')
-                    ->where('division_id', $this->division_id);
+            ->where('division_id', $this->division_id);
     }
-    
+
     /**
      * Get the max_stock_limit from the setting
      */
     public function getMaxStockLimitAttribute(): int
     {
         $setting = $this->getSetting();
+
         return $setting ? $setting->max_limit : 0;
     }
 
@@ -117,14 +114,23 @@ class AtkDivisionStock extends Model
     {
         $setting = $this->getSetting();
         $maxLimit = $setting ? $setting->max_limit : 0;
+
         return $this->current_stock >= $maxLimit;
     }
-    
+
     /**
      * Calculate the total value of current stock
      */
     public function getTotalStockValue(): float
     {
         return $this->current_stock * $this->moving_average_cost;
+    }
+
+    /**
+     * Get the import action for this model
+     */
+    public static function getImportAction(): \Filament\Actions\Action
+    {
+        return \App\Filament\Actions\ImportStockAction::make();
     }
 }

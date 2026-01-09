@@ -15,7 +15,11 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValidation
 {
     protected $divisionId;
+
+    protected $currentCategoryId;
+
     public int $processedCount = 0;
+
     public int $skippedCount = 0;
 
     public function __construct($divisionId = null)
@@ -29,16 +33,33 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
     public function collection(Collection $rows)
     {
         $defaultCategory = AtkCategory::where('name', 'Lain-Lain')->first() ?? AtkCategory::first();
+        $this->currentCategoryId = $defaultCategory?->id;
 
         foreach ($rows as $row) {
-            $itemName = isset($row['name']) ? trim($row['name']) : null;
-            $unit = isset($row['satuan']) ? trim($row['satuan']) : 'Pcs';
-            $notes = isset($row['deskripsi']) ? trim($row['deskripsi']) : null;
+            $no = isset($row['no']) ? trim((string) $row['no']) : null;
+            $itemDescription = isset($row['item_description']) ? trim($row['item_description']) : null;
+            $uom = isset($row['uom']) ? trim($row['uom']) : null;
 
-            if (!$itemName) {
-                $this->skippedCount++;
+            // Check if it's a category row (A, B, C...)
+            if ($no && preg_match('/^[A-Z]$/', $no) && $itemDescription && ! $uom) {
+                $category = AtkCategory::where('name', 'like', '%'.$itemDescription.'%')->first();
+                if ($category) {
+                    $this->currentCategoryId = $category->id;
+                }
+
                 continue;
             }
+
+            // Map fields, supporting both old and new formats
+            $itemName = $itemDescription ?: (isset($row['name']) ? trim($row['name']) : null);
+
+            // If still no item name, or it's a category row we already handled/skipped
+            if (! $itemName || ($no && preg_match('/^[A-Z]$/', $no))) {
+                continue;
+            }
+
+            $unit = $uom ?: (isset($row['satuan']) ? trim($row['satuan']) : 'Pcs');
+            $notes = isset($row['deskripsi']) ? trim($row['deskripsi']) : null;
 
             // Find or create the item
             $item = AtkItem::where('name', $itemName)
@@ -51,13 +72,14 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
                     'slug' => Str::slug($itemName),
                     'unit_of_measure' => $unit,
                     'notes' => $notes,
-                    'category_id' => $defaultCategory->id,
+                    'category_id' => $this->currentCategoryId ?: $defaultCategory->id,
                 ]);
             } else {
-                // Update unit and notes for existing items if provided in excel
+                // Update unit and notes for existing items if provided
                 $item->update([
                     'unit_of_measure' => $unit,
                     'notes' => $notes,
+                    'category_id' => $this->currentCategoryId ?: $item->category_id,
                 ]);
             }
 
@@ -76,7 +98,7 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
             );
 
             if ($atkDivisionStock && isset($row['quantity']) && $row['quantity'] !== '') {
-                // Update the current_stock with the "Quantity" from Excel
+                // Update the current_stock with the "Quantity" from Excel if present
                 $atkDivisionStock->update([
                     'current_stock' => $row['quantity'],
                 ]);
@@ -95,25 +117,25 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
             );
 
             if ($atkFloatingStock && isset($row['stok_umum']) && $row['stok_umum'] !== '') {
-                // Update the current_stock with the "Stok Umum" from Excel
+                // Update the current_stock with the "Stok Umum" from Excel if present
                 $atkFloatingStock->update([
                     'current_stock' => $row['stok_umum'],
                 ]);
                 $updated = true;
             }
 
-            if ($updated) {
-                $this->processedCount++;
-            } else {
-                $this->skippedCount++;
-            }
+            // Even if no stock was updated, we count it as processed if the item was created/found
+            $this->processedCount++;
         }
     }
 
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'no' => 'nullable',
+            'item_description' => 'nullable|string|max:255',
+            'uom' => 'nullable|string|max:50',
+            'name' => 'nullable|string|max:255',
             'quantity' => 'nullable|integer|min:0',
             'stok_umum' => 'nullable|integer|min:0',
             'satuan' => 'nullable|string|max:50',
@@ -124,14 +146,12 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
     public function customValidationMessages()
     {
         return [
-            'name.required' => 'The name field is required.',
+            'item_description.string' => 'The Item Description field must be a string.',
             'name.string' => 'The name field must be a string.',
             'quantity.integer' => 'The Quantity field must be an integer.',
             'quantity.min' => 'The Quantity field must be at least 0.',
             'stok_umum.integer' => 'The Stok Umum field must be an integer.',
             'stok_umum.min' => 'The Stok Umum field must be at least 0.',
-            'satuan.string' => 'The Satuan field must be a string.',
-            'deskripsi.string' => 'The Deskripsi field must be a string.',
         ];
     }
 }
