@@ -23,7 +23,8 @@ class AtkStockRequestMail extends Mailable
         public ?User $actor = null,
         public ?string $notes = null,
         public ?string $recipientName = null,
-        public ?string $viewUrl = null
+        public ?string $viewUrl = null,
+        public bool $isApprover = false
     ) {}
 
     /**

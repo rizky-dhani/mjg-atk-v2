@@ -382,15 +382,9 @@ class ApprovalProcessingService
                     $actor,
                     $notes,
                     $recipient['name'],
-                    $viewUrl
+                    $viewUrl,
+                    $recipient['is_approver']
                 );
-
-                // Add call to action info for the template to distinguish
-                if ($recipient['is_approver']) {
-                    $mailable->withSymfonyMessage(function ($message) {
-                        $message->getHeaders()->addTextHeader('X-Is-Approver', 'true');
-                    });
-                }
 
                 // Monitoring headers
                 if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
@@ -456,15 +450,9 @@ class ApprovalProcessingService
                     $actor,
                     $notes,
                     $recipient['name'],
-                    $viewUrl
+                    $viewUrl,
+                    $recipient['is_approver']
                 );
-
-                // Add call to action info for the template to distinguish
-                if ($recipient['is_approver']) {
-                    $mailable->withSymfonyMessage(function ($message) {
-                        $message->getHeaders()->addTextHeader('X-Is-Approver', 'true');
-                    });
-                }
 
                 // Monitoring headers
                 if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {

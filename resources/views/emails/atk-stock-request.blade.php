@@ -53,23 +53,18 @@
             };
             
             $actorName = $actor ? $actor->name : 'System';
-            $isApprover = false;
-            
-            // Check for the custom header we added in the service
-            if (isset($this->callbacks)) {
-                // This is a bit hacky for Blade but we can check the status and context
-                // Alternatively, we could have passed $isApprover as a prop to the mailable
-            }
         @endphp
 
         @if($actionStatus === 'submitted')
             <p>The following ATK Stock Request has been <strong>Submitted</strong> by <strong>{{ $stockRequest->requester->name }}</strong>.</p>
-            @if(($recipientName ?? '') !== ($stockRequest->requester->name ?? ''))
+            @if($isApprover)
                 <p>Please review this request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
             @endif
         @elseif($actionStatus === 'partially_approved')
             <p>The following ATK Stock Request has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong> and is now awaiting your action.</p>
-            <p>Please review this request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            @if($isApprover)
+                <p>Please review this request to <strong>Approve</strong> or <strong>Reject</strong>.</p>
+            @endif
         @else
             <p>The following ATK Stock Request has been <strong>{{ $statusText }}</strong> by <strong>{{ $actorName }}</strong>.</p>
         @endif
