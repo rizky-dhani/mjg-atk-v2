@@ -38,6 +38,7 @@ class MonitoringEmailResource extends Resource
         return $schema
             ->components([
                 Section::make('Email Details')
+                    ->columnSpanFull()
                     ->components([
                         TextEntry::make('created_at')
                             ->label('Sent At')
@@ -51,6 +52,7 @@ class MonitoringEmailResource extends Resource
                         TextEntry::make('subject'),
                     ])->columns(2),
                 Section::make('Action Details')
+                    ->columnSpanFull()
                     ->components([
                         TextEntry::make('action_type')
                             ->label('Action')
@@ -71,6 +73,7 @@ class MonitoringEmailResource extends Resource
                             ->color(fn (?int $state): string => $state === 250 ? 'success' : ($state ? 'danger' : 'gray')),
                     ])->columns(4),
                 Section::make('Content')
+                    ->columnSpanFull()
                     ->components([
                         TextEntry::make('content_html')
                             ->label('HTML Content')
