@@ -65,7 +65,11 @@ class MonitoringEmailResource extends Resource
                         TextEntry::make('action_at')
                             ->label('Action At')
                             ->dateTime(),
-                    ])->columns(3),
+                        TextEntry::make('status_code')
+                            ->label('Status Code')
+                            ->badge()
+                            ->color(fn (?int $state): string => $state === 250 ? 'success' : ($state ? 'danger' : 'gray')),
+                    ])->columns(4),
                 Section::make('Content')
                     ->components([
                         TextEntry::make('content_html')
@@ -104,6 +108,10 @@ class MonitoringEmailResource extends Resource
                     }),
                 TextColumn::make('actionBy.name')
                     ->label('By'),
+                TextColumn::make('status_code')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (?int $state): string => $state === 250 ? 'success' : ($state ? 'danger' : 'gray')),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
