@@ -334,9 +334,13 @@ class ApprovalProcessingService
     {
         $recipients = collect();
 
-        // Submitter is always a recipient
+        // Submitter
         if ($stockRequest->requester) {
-            $recipients->push($stockRequest->requester->email);
+            $recipients->push([
+                'email' => $stockRequest->requester->email,
+                'name' => $stockRequest->requester->name,
+                'is_approver' => false,
+            ]);
         }
 
         // Next approvers if status is pending or partially_approved (or submitted)
@@ -345,32 +349,55 @@ class ApprovalProcessingService
             if ($approval) {
                 $nextApprovers = $this->getNextApprovers($approval);
                 foreach ($nextApprovers as $approver) {
-                    $recipients->push($approver->email);
+                    $recipients->push([
+                        'email' => $approver->email,
+                        'name' => $approver->name,
+                        'is_approver' => true,
+                    ]);
                 }
             }
         }
 
-        $recipients = $recipients->unique()->filter();
+        $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
 
-        if ($recipients->isNotEmpty()) {
-            $mailable = new AtkStockRequestMail($stockRequest, $actionStatus, $actor, $notes);
+        if ($uniqueRecipients->isNotEmpty()) {
+            $viewUrl = \App\Filament\Resources\AtkStockRequests\AtkStockRequestResource::getUrl('view', ['record' => $stockRequest]);
 
-            if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
-                $type = match ($actionStatus) {
-                    'approved', 'partially_approved' => 'Approve',
-                    'rejected' => 'Reject',
-                    default => null,
-                };
+            foreach ($uniqueRecipients as $recipient) {
+                $mailable = new AtkStockRequestMail(
+                    $stockRequest,
+                    $actionStatus,
+                    $actor,
+                    $notes,
+                    $recipient['name'],
+                    $viewUrl
+                );
 
-                if ($type) {
-                    $mailable->withSymfonyMessage(function ($message) use ($type, $actor) {
-                        $message->getHeaders()->addTextHeader('X-Action-Type', $type);
-                        $message->getHeaders()->addTextHeader('X-Action-By-Id', $actor->id);
+                // Add call to action info for the template to distinguish
+                if ($recipient['is_approver']) {
+                    $mailable->withSymfonyMessage(function ($message) {
+                        $message->getHeaders()->addTextHeader('X-Is-Approver', 'true');
                     });
                 }
-            }
 
-            Mail::to($recipients)->send($mailable);
+                // Monitoring headers
+                if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
+                    $type = match ($actionStatus) {
+                        'approved', 'partially_approved' => 'Approve',
+                        'rejected' => 'Reject',
+                        default => null,
+                    };
+
+                    if ($type) {
+                        $mailable->withSymfonyMessage(function ($message) use ($type, $actor) {
+                            $message->getHeaders()->addTextHeader('X-Action-Type', $type);
+                            $message->getHeaders()->addTextHeader('X-Action-By-Id', $actor->id);
+                        });
+                    }
+                }
+
+                Mail::to($recipient['email'])->send($mailable);
+            }
         }
     }
 

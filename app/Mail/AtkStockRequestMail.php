@@ -21,7 +21,9 @@ class AtkStockRequestMail extends Mailable
         public AtkStockRequest $stockRequest,
         public string $actionStatus, // 'submitted', 'approved', 'rejected', 'partially_approved'
         public ?User $actor = null,
-        public ?string $notes = null
+        public ?string $notes = null,
+        public ?string $recipientName = null,
+        public ?string $viewUrl = null
     ) {}
 
     /**

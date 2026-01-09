@@ -2,18 +2,18 @@
 
 namespace App\Filament\Resources\MonitoringEmails;
 
-use App\Filament\Resources\MonitoringEmails\Pages\ManageMonitoringEmails;
-use App\Models\MonitoringEmail;
+use UnitEnum;
 use BackedEnum;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use App\Models\MonitoringEmail;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
-use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use UnitEnum;
+use Filament\Schemas\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\MonitoringEmails\Pages\ManageMonitoringEmails;
 
 class MonitoringEmailResource extends Resource
 {
