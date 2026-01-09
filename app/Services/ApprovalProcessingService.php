@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Mail\AtkStockRequestMail;
+use App\Mail\AtkStockUsageMail;
 use App\Models\Approval;
 use App\Models\ApprovalHistory;
 use App\Models\AtkStockRequest;
+use App\Models\AtkStockUsage;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -90,6 +92,8 @@ class ApprovalProcessingService
             // Notify about rejection
             if ($approvable instanceof AtkStockRequest) {
                 $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
+            } elseif ($approvable instanceof AtkStockUsage) {
+                $this->notifyStockUsage($approvable, 'rejected', $user, $notes, $approval);
             }
 
             return false; // Approval is not completed due to rejection
@@ -138,6 +142,8 @@ class ApprovalProcessingService
                 // Notify about overall approval
                 if ($approvable instanceof AtkStockRequest) {
                     $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
+                } elseif ($approvable instanceof AtkStockUsage) {
+                    $this->notifyStockUsage($approvable, 'approved', $user, $notes, $approval);
                 }
 
                 return true; // Approval is completed
@@ -166,6 +172,8 @@ class ApprovalProcessingService
                 // Notify about partial approval / moving to next step
                 if ($approvable instanceof AtkStockRequest) {
                     $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
+                } elseif ($approvable instanceof AtkStockUsage) {
+                    $this->notifyStockUsage($approvable, 'partially_approved', $user, $notes, $approval);
                 }
 
                 return false; // Approval is not yet completed
@@ -210,6 +218,8 @@ class ApprovalProcessingService
             // Notify about submission
             if ($model instanceof AtkStockRequest) {
                 $this->notifyStockRequest($model, 'submitted', $currentUser);
+            } elseif ($model instanceof AtkStockUsage) {
+                $this->notifyStockUsage($model, 'submitted', $currentUser);
             }
         }
 
@@ -274,6 +284,8 @@ class ApprovalProcessingService
         // Notify about submission
         if ($approval->approvable instanceof AtkStockRequest) {
             $this->notifyStockRequest($approval->approvable, 'submitted', $user);
+        } elseif ($approval->approvable instanceof AtkStockUsage) {
+            $this->notifyStockUsage($approval->approvable, 'submitted', $user);
         }
     }
 
@@ -366,6 +378,80 @@ class ApprovalProcessingService
             foreach ($uniqueRecipients as $recipient) {
                 $mailable = new AtkStockRequestMail(
                     $stockRequest,
+                    $actionStatus,
+                    $actor,
+                    $notes,
+                    $recipient['name'],
+                    $viewUrl
+                );
+
+                // Add call to action info for the template to distinguish
+                if ($recipient['is_approver']) {
+                    $mailable->withSymfonyMessage(function ($message) {
+                        $message->getHeaders()->addTextHeader('X-Is-Approver', 'true');
+                    });
+                }
+
+                // Monitoring headers
+                if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
+                    $type = match ($actionStatus) {
+                        'approved', 'partially_approved' => 'Approve',
+                        'rejected' => 'Reject',
+                        default => null,
+                    };
+
+                    if ($type) {
+                        $mailable->withSymfonyMessage(function ($message) use ($type, $actor) {
+                            $message->getHeaders()->addTextHeader('X-Action-Type', $type);
+                            $message->getHeaders()->addTextHeader('X-Action-By-Id', $actor->id);
+                        });
+                    }
+                }
+
+                Mail::to($recipient['email'])->send($mailable);
+            }
+        }
+    }
+
+    /**
+     * Notify relevant parties about ATK Stock Usage updates
+     */
+    protected function notifyStockUsage(AtkStockUsage $stockUsage, string $actionStatus, ?User $actor = null, ?string $notes = null, ?Approval $approval = null): void
+    {
+        $recipients = collect();
+
+        // Submitter
+        if ($stockUsage->requester) {
+            $recipients->push([
+                'email' => $stockUsage->requester->email,
+                'name' => $stockUsage->requester->name,
+                'is_approver' => false,
+            ]);
+        }
+
+        // Next approvers if status is pending or partially_approved (or submitted)
+        if (in_array($actionStatus, ['submitted', 'partially_approved'])) {
+            $approval = $approval ?? $stockUsage->approval()->first();
+            if ($approval) {
+                $nextApprovers = $this->getNextApprovers($approval);
+                foreach ($nextApprovers as $approver) {
+                    $recipients->push([
+                        'email' => $approver->email,
+                        'name' => $approver->name,
+                        'is_approver' => true,
+                    ]);
+                }
+            }
+        }
+
+        $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
+
+        if ($uniqueRecipients->isNotEmpty()) {
+            $viewUrl = \App\Filament\Resources\AtkStockUsages\AtkStockUsageResource::getUrl('view', ['record' => $stockUsage]);
+
+            foreach ($uniqueRecipients as $recipient) {
+                $mailable = new AtkStockUsageMail(
+                    $stockUsage,
                     $actionStatus,
                     $actor,
                     $notes,
