@@ -32,7 +32,7 @@ class AtkItemsTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('ATK Item updated')
+                    ->successNotificationTitle('Item ATK berhasil diperbarui')
                     ->using(function ($record, array $data) {
                         $selectedDivisions = $data['divisions'] ?? [];
                         unset($data['divisions']);
@@ -66,12 +66,12 @@ class AtkItemsTable
                         return $record;
                     }),
                 DeleteAction::make()
-                    ->successNotificationTitle('ATK Item deleted'),
+                    ->successNotificationTitle('Item ATK berhasil dihapus'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Items deleted'),
+                        ->successNotificationTitle('Item ATK berhasil dihapus'),
                 ]),
             ]);
     }

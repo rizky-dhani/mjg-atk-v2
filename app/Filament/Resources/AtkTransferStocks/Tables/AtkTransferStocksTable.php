@@ -2,15 +2,15 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Tables;
 
-use Filament\Tables\Table;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\Width;
-use Filament\Tables\Filters\Filter;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class AtkTransferStocksTable
@@ -18,7 +18,7 @@ class AtkTransferStocksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function(Builder $query){
+            ->modifyQueryUsing(function (Builder $query) {
                 $query->where('requesting_division_id', auth()->user()->division_id)->orderByDesc('created_at');
             })
             ->columns([
@@ -122,7 +122,7 @@ class AtkTransferStocksTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('ATK Stock Transfer updated')
+                    ->successNotificationTitle('Transfer stok ATK berhasil diperbarui')
                     ->modalWidth(Width::SevenExtraLarge)
                     ->visible(function ($record) {
                         $user = \Illuminate\Support\Facades\Auth::user();
@@ -137,7 +137,7 @@ class AtkTransferStocksTable
                             // Can edit if user is the requester, GA division user, or has admin role
                             $canEdit = $isRequester || $hasDivision || $hasRole;
                         }
-                        
+
                         return $canEdit;
                     }),
                 \Filament\Actions\Action::make('approve')
@@ -145,22 +145,22 @@ class AtkTransferStocksTable
                     ->color('success')
                     ->icon('heroicon-o-check-circle')
                     ->requiresConfirmation()
-                    ->modalHeading('Approve Transfer Stock')
-                    ->modalDescription('Are you sure you want to approve this transfer stock request?')
+                    ->modalHeading('Setujui Transfer Stok')
+                    ->modalDescription('Apakah Anda yakin ingin menyetujui permintaan transfer stok ini?')
                     ->action(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
-                        
+                        $approvalService = new \App\Services\TransferStockApprovalService;
+
                         if ($approvalService->canApprove($record)) {
                             if ($approvalService->approve($record)) {
                                 \Filament\Notifications\Notification::make()
-                                    ->title('Success')
-                                    ->body('Transfer stock request has been approved successfully.')
+                                    ->title('Berhasil')
+                                    ->body('Permintaan transfer stok berhasil disetujui.')
                                     ->success()
                                     ->send();
                             } else {
                                 \Filament\Notifications\Notification::make()
-                                    ->title('Error')
-                                    ->body('Failed to approve transfer stock request.')
+                                    ->title('Kesalahan')
+                                    ->body('Gagal menyetujui permintaan transfer stok.')
                                     ->danger()
                                     ->send();
                             }
@@ -173,7 +173,8 @@ class AtkTransferStocksTable
                         }
                     })
                     ->visible(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
+                        $approvalService = new \App\Services\TransferStockApprovalService;
+
                         return $approvalService->canApprove($record);
                     }),
                 \Filament\Actions\Action::make('reject')
@@ -181,28 +182,28 @@ class AtkTransferStocksTable
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
                     ->requiresConfirmation()
-                    ->modalHeading('Reject Transfer Stock')
-                    ->modalDescription('Are you sure you want to reject this transfer stock request?')
+                    ->modalHeading('Tolak Transfer Stok')
+                    ->modalDescription('Apakah Anda yakin ingin menolak permintaan transfer stok ini?')
                     ->form([
                         \Filament\Forms\Components\Textarea::make('rejection_reason')
-                            ->label('Reason for Rejection')
+                            ->label('Alasan Penolakan')
                             ->required()
                             ->maxLength(65535),
                     ])
                     ->action(function ($record, array $data) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
-                        
+                        $approvalService = new \App\Services\TransferStockApprovalService;
+
                         if ($approvalService->canApprove($record)) {
                             if ($approvalService->reject($record, $data['rejection_reason'])) {
                                 \Filament\Notifications\Notification::make()
-                                    ->title('Success')
-                                    ->body('Transfer stock request has been rejected successfully.')
+                                    ->title('Berhasil')
+                                    ->body('Permintaan transfer stok berhasil ditolak.')
                                     ->success()
                                     ->send();
                             } else {
                                 \Filament\Notifications\Notification::make()
-                                    ->title('Error')
-                                    ->body('Failed to reject transfer stock request.')
+                                    ->title('Kesalahan')
+                                    ->body('Gagal menolak permintaan transfer stok.')
                                     ->danger()
                                     ->send();
                             }
@@ -215,14 +216,15 @@ class AtkTransferStocksTable
                         }
                     })
                     ->visible(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService();
+                        $approvalService = new \App\Services\TransferStockApprovalService;
+
                         return $approvalService->canApprove($record);
                     }),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Stock Transfers deleted'),
+                        ->successNotificationTitle('Transfer stok ATK berhasil dihapus'),
                 ]),
             ]);
     }

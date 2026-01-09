@@ -5,8 +5,6 @@ namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 use App\Filament\Actions\BulkMoveToFloatingAction;
 use App\Models\AtkDivisionStockSetting;
 use App\Models\UserDivision;
-use App\Services\FloatingStockService;
-use App\Services\StockTransactionService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -18,7 +16,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 
 class AtkDivisionStocksTable
 {
@@ -35,7 +32,7 @@ class AtkDivisionStocksTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('division.name')
-                    ->visible(fn() => auth()->user()->isGA() || auth()->user()->isSuperAdmin()),
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin()),
                 TextColumn::make('current_stock')->numeric()->sortable(),
                 TextColumn::make('moving_average_cost')
                     ->label('Average Cost')
@@ -93,7 +90,7 @@ class AtkDivisionStocksTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('ATK Division Stock updated'),
+                    ->successNotificationTitle('Stok Divisi ATK berhasil diperbarui'),
                 Action::make('move_to_floating')
                     ->label('Move to Floating Stock')
                     ->icon('heroicon-o-arrow-right-circle')
@@ -127,7 +124,7 @@ class AtkDivisionStocksTable
                 BulkActionGroup::make([
                     BulkMoveToFloatingAction::make(),
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Division Stocks deleted'),
+                        ->successNotificationTitle('Stok Divisi ATK berhasil dihapus'),
                 ]),
             ]);
     }

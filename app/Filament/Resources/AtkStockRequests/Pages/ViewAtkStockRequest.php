@@ -4,9 +4,9 @@ namespace App\Filament\Resources\AtkStockRequests\Pages;
 
 use App\Filament\Actions\ApprovalAction;
 use App\Filament\Actions\ResubmitAction;
-use Filament\Notifications\Notification;
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewAtkStockRequest extends ViewRecord
@@ -17,15 +17,15 @@ class ViewAtkStockRequest extends ViewRecord
     {
         return [
             EditAction::make()
-                ->successNotificationTitle('ATK stock request updated'),
+                ->successNotificationTitle('Permintaan stok ATK berhasil diperbarui'),
             ApprovalAction::makeApprove()->successNotification(
                 Notification::make()
-                    ->title("Permintaan ATK berhasil disetujui!")
+                    ->title('Permintaan stok ATK berhasil disetujui')
                     ->success(),
             ),
             ApprovalAction::makeReject()->successNotification(
                 Notification::make()
-                    ->title("Permintaan ATK berhasil ditolak!")
+                    ->title('Permintaan stok ATK berhasil ditolak')
                     ->success(),
             ),
             ResubmitAction::make(),

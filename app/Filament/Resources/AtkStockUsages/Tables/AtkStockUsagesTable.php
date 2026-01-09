@@ -59,20 +59,20 @@ class AtkStockUsagesTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('ATK stock usage updated')
+                    ->successNotificationTitle('Penggunaan stok ATK berhasil diperbarui')
                     ->authorize(static function ($record) {
-                    $user = auth()->user();
+                        $user = auth()->user();
 
-                    return $user && $user->id === $record->requester_id;
-                }),
+                        return $user && $user->id === $record->requester_id;
+                    }),
                 ApprovalAction::makeApprove()->successNotification(
                     Notification::make()
-                        ->title('Penggunaan ATK berhasil disetujui!')
+                        ->title('Penggunaan stok ATK berhasil disetujui')
                         ->success(),
                 ),
                 ApprovalAction::makeReject()->successNotification(
                     Notification::make()
-                        ->title('Penggunaan ATK berhasil ditolak!')
+                        ->title('Penggunaan stok ATK berhasil ditolak')
                         ->success(),
                 ),
                 ResubmitAction::make()
@@ -91,7 +91,7 @@ class AtkStockUsagesTable
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK stock usages deleted'),
+                        ->successNotificationTitle('Penggunaan stok ATK berhasil dihapus'),
                 ]),
             ]);
     }
