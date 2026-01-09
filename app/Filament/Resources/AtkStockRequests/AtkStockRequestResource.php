@@ -10,6 +10,7 @@ use App\Filament\Resources\AtkStockRequests\Schemas\AtkStockRequestInfolist;
 use App\Filament\Resources\AtkStockRequests\Tables\AtkStockRequestsTable;
 use App\Models\AtkStockRequest;
 use BackedEnum;
+use Filament\Navigation\NavigationItem;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -35,6 +36,18 @@ class AtkStockRequestResource extends Resource
     protected static ?string $recordTitleAttribute = 'request_number';
 
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationItems(): array
+    {
+        return [
+            NavigationItem::make(static::getNavigationLabel())
+                ->group(static::getNavigationGroup())
+                ->icon(static::getNavigationIcon())
+                ->isActiveWhen(fn () => ! request()->routeIs(static::getRouteBaseName().'.approval') && request()->routeIs(static::getRouteBaseName().'.*'))
+                ->sort(static::getNavigationSort())
+                ->url(static::getNavigationUrl()),
+        ];
+    }
 
     public static function form(Schema $schema): Schema
     {
