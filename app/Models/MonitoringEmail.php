@@ -20,6 +20,7 @@ class MonitoringEmail extends Model
         'action_type',
         'action_by_id',
         'action_at',
+        'status_code',
     ];
 
     protected $casts = [

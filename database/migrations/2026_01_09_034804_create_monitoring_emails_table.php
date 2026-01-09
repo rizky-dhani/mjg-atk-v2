@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sent_emails', function (Blueprint $table) {
+        Schema::create('monitoring_emails', function (Blueprint $table) {
             $table->id();
             $table->string('from')->nullable();
             $table->text('to')->nullable();
             $table->text('cc')->nullable();
             $table->text('bcc')->nullable();
             $table->string('subject')->nullable();
+            $table->string('action_type')->nullable(); // e.g., 'Approve', 'Reject'
+            $table->foreignId('action_by_id')->nullable()->constrained('users');
+            $table->timestamp('action_at')->nullable();
+            $table->integer('status_code')->nullable();
             $table->longText('content_html')->nullable();
             $table->longText('content_text')->nullable();
             $table->timestamps();
@@ -29,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sent_emails');
+        Schema::dropIfExists('monitoring_emails');
     }
 };
