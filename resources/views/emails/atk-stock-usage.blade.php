@@ -80,7 +80,7 @@
             </ul>
         </div>
 
-        @if($viewUrl)
+        @if($viewUrl && $isApprover)
             <a href="{{ $viewUrl }}" class="button">View Usage Details</a>
         @endif
 
