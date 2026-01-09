@@ -353,14 +353,24 @@ class ApprovalProcessingService
         $recipients = $recipients->unique()->filter();
 
         if ($recipients->isNotEmpty()) {
-            $mail = Mail::to($recipients);
+            $mailable = new AtkStockRequestMail($stockRequest, $actionStatus, $actor, $notes);
 
-            // CC to division's email - to be added later
-            // if ($stockRequest->division && $stockRequest->division->email) {
-            //     $mail->cc($stockRequest->division->email);
-            // }
+            if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
+                $type = match ($actionStatus) {
+                    'approved', 'partially_approved' => 'Approve',
+                    'rejected' => 'Reject',
+                    default => null,
+                };
 
-            $mail->send(new AtkStockRequestMail($stockRequest, $actionStatus, $actor, $notes));
+                if ($type) {
+                    $mailable->withSymfonyMessage(function ($message) use ($type, $actor) {
+                        $message->getHeaders()->addTextHeader('X-Action-Type', $type);
+                        $message->getHeaders()->addTextHeader('X-Action-By-Id', $actor->id);
+                    });
+                }
+            }
+
+            Mail::to($recipients)->send($mailable);
         }
     }
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\SentEmails;
+namespace App\Filament\Resources\MonitoringEmails;
 
-use App\Filament\Resources\SentEmails\Pages\ManageSentEmails;
-use App\Models\SentEmail;
+use App\Filament\Resources\MonitoringEmails\Pages\ManageMonitoringEmails;
+use App\Models\MonitoringEmail;
 use BackedEnum;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
@@ -15,9 +15,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use UnitEnum;
 
-class SentEmailResource extends Resource
+class MonitoringEmailResource extends Resource
 {
-    protected static ?string $model = SentEmail::class;
+    protected static ?string $model = MonitoringEmail::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Envelope;
 
@@ -50,6 +50,22 @@ class SentEmailResource extends Resource
                             ->placeholder('No BCC'),
                         TextEntry::make('subject'),
                     ])->columns(2),
+                Section::make('Action Details')
+                    ->components([
+                        TextEntry::make('action_type')
+                            ->label('Action')
+                            ->badge()
+                            ->color(fn (string $state): string => match ($state) {
+                                'Approve' => 'success',
+                                'Reject' => 'danger',
+                                default => 'gray',
+                            }),
+                        TextEntry::make('actionBy.name')
+                            ->label('Action By'),
+                        TextEntry::make('action_at')
+                            ->label('Action At')
+                            ->dateTime(),
+                    ])->columns(3),
                 Section::make('Content')
                     ->components([
                         TextEntry::make('content_html')
@@ -77,7 +93,17 @@ class SentEmailResource extends Resource
                     ->limit(30),
                 TextColumn::make('subject')
                     ->searchable()
-                    ->limit(50),
+                    ->limit(30),
+                TextColumn::make('action_type')
+                    ->label('Action')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Approve' => 'success',
+                        'Reject' => 'danger',
+                        default => 'gray',
+                    }),
+                TextColumn::make('actionBy.name')
+                    ->label('By'),
             ])
             ->defaultSort('created_at', 'desc')
             ->recordActions([
@@ -88,7 +114,7 @@ class SentEmailResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ManageSentEmails::route('/'),
+            'index' => ManageMonitoringEmails::route('/'),
         ];
     }
 }

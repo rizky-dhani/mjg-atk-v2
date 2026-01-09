@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
-use App\Models\SentEmail;
+use App\Models\MonitoringEmail;
 use App\Models\User;
 
-class SentEmailPolicy
+class MonitoringEmailPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -18,7 +18,7 @@ class SentEmailPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, SentEmail $sentEmail): bool
+    public function view(User $user, MonitoringEmail $monitoringEmail): bool
     {
         return $user->isSuperAdmin();
     }
@@ -34,7 +34,7 @@ class SentEmailPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, SentEmail $sentEmail): bool
+    public function update(User $user, MonitoringEmail $monitoringEmail): bool
     {
         return false;
     }
@@ -42,7 +42,7 @@ class SentEmailPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, SentEmail $sentEmail): bool
+    public function delete(User $user, MonitoringEmail $monitoringEmail): bool
     {
         return false;
     }
@@ -50,7 +50,7 @@ class SentEmailPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, SentEmail $sentEmail): bool
+    public function restore(User $user, MonitoringEmail $monitoringEmail): bool
     {
         return false;
     }
@@ -58,7 +58,7 @@ class SentEmailPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, SentEmail $sentEmail): bool
+    public function forceDelete(User $user, MonitoringEmail $monitoringEmail): bool
     {
         return false;
     }
