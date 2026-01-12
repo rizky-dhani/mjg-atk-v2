@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Refine the ATK Stock Request Approval Workflow
+## [~] Track: Refine the ATK Stock Request Approval Workflow
 *Link: [./conductor/tracks/atk_approval_20260112/](./conductor/tracks/atk_approval_20260112/)*

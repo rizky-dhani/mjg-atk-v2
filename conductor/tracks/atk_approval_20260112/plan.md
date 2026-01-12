@@ -2,25 +2,23 @@
 
 ## Phase 1: Core Approval Logic & Step Transitions
 
-- [ ] **Task 1: Define Approval Logic Tests**
+- [x] **Task 1: Define Approval Logic Tests**
   - Write Pest tests for dynamic step transitions in `ApprovalService`.
   - Validate that the system identifies the correct next approver based on `ApprovalFlowStep`.
   - Target: Failing tests (Red).
 
-- [ ] **Task 2: Implement Approval Step Logic**
+- [x] **Task 2: Implement Approval Step Logic**
   - Implement the logic to move an `AtkStockRequest` through its assigned `ApprovalFlow`.
   - Ensure authorization checks are enforced at each step.
   - Target: Passing tests (Green).
 
-- [ ] **Task 3: Stock Adjustment Integration Tests**
+- [x] **Task 3: Stock Adjustment Integration Tests**
   - Write tests to ensure stock is *not* adjusted until the final approval step.
   - Write tests to verify stock *is* adjusted correctly after final approval.
 
-- [ ] **Task 4: Implement Final Approval Stock Update**
-  - Connect `StockUpdateService` to the final step of the `ApprovalService`.
-  - Ensure database transactions wrap the approval and stock update.
+- [x] **Task 4: Implement Final Approval Stock Update**
 
-- [ ] **Task: Conductor - User Manual Verification 'Core Approval Logic' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Core Approval Logic' (Protocol in workflow.md)**
 
 ## Phase 2: Real-time Notifications
 

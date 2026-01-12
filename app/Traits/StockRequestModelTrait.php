@@ -36,11 +36,14 @@ trait StockRequestModelTrait
             if ($approvalFlow) {
                 // Create an approval record associated with this model if one doesn't exist yet
                 if (! $model->approval) {
-                    $model->approval()->create([
+                    $approval = $model->approval()->create([
                         'flow_id' => $approvalFlow->id,
                         'current_step' => 1, // Start with the first step
                         'status' => 'pending', // Initially pending
                     ]);
+                    
+                    // Set the relation on the model so it's not cached as null
+                    $model->setRelation('approval', $approval);
                 }
 
                 // Get the first step of the approval flow to determine who should approve first

@@ -43,73 +43,72 @@ class ApprovalProcessingService
      */
     public function processApprovalStep(Approval $approval, User $user, string $action, ?string $notes = null): bool
     {
-        $approvable = $approval->approvable;
+        return DB::transaction(function () use ($approval, $user, $action, $notes) {
+            $approvable = $approval->approvable;
 
-        // Get eligible approval steps for this user
-        $eligibleSteps = $this->validationService->getEligibleApprovalSteps($approvable, $user);
+            // Get eligible approval steps for this user
+            $eligibleSteps = $this->validationService->getEligibleApprovalSteps($approvable, $user);
 
-        if ($eligibleSteps->isEmpty()) {
-            throw new \Exception('No eligible approval steps found for this user.');
-        }
-
-        // Process the first eligible step (in case there are multiple)
-        $step = $eligibleSteps->first();
-
-        // Determine status based on action
-        $status = $action === 'approve' ? 'approved' : 'rejected';
-
-        // Create the approval step record
-        \App\Models\ApprovalStepApproval::create([
-            'approval_id' => $approval->id,
-            'step_id' => $step->id,
-            'user_id' => $user->id,
-            'status' => $status,
-            'approved_at' => now(),
-            'notes' => $notes ?? null,
-        ]);
-
-        // Log to approval history
-        $this->historyService->logApprovalAction(
-            $approvable,
-            $user,
-            $status, // 'approved' or 'rejected'
-            null, // document_id will be auto-generated
-            $action === 'reject' ? ($notes ?? 'No reason provided') : null, // rejection_reason
-            $notes ?? ($action === 'approve' ? 'Request approved at step '.$step->step_number.': '.$step->step_name : 'Request rejected'),
-            $step->id
-        );
-
-        // If rejected, mark the overall approval as rejected
-        if ($status === 'rejected') {
-            $approval->update([
-                'status' => 'rejected',
-                'current_step' => $step->step_number,
-            ]);
-
-            // Synchronize approval status
-            $this->syncApprovalStatus($approvable);
-
-            // Notify about rejection
-            if ($approvable instanceof AtkStockRequest) {
-                $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
-            } elseif ($approvable instanceof AtkStockUsage) {
-                $this->notifyStockUsage($approvable, 'rejected', $user, $notes, $approval);
+            if ($eligibleSteps->isEmpty()) {
+                throw new \Exception('No eligible approval steps found for this user.');
             }
 
-            return false; // Approval is not completed due to rejection
-        } else {
-            // Check if all required steps are now approved
-            $allSteps = $approval->approvalFlow->approvalFlowSteps()->get()->sortBy('step_number');
-            $approvedSteps = $approval->approvalStepApprovals()->pluck('step_id');
+            // Process the first eligible step (in case there are multiple)
+            $step = $eligibleSteps->first();
 
-            $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
-                return ! $approvedSteps->contains($step->id);
-            });
+            // Determine status based on action
+            $status = $action === 'approve' ? 'approved' : 'rejected';
 
-            // If no unapproved steps remain, mark the overall approval as approved
-            if ($unapprovedSteps->isEmpty() && $approval->status !== 'approved') {
-                // Use a database transaction to ensure atomicity and prevent race conditions
-                DB::transaction(function () use ($approval, $approvable, $user, $allSteps) {
+            // Create the approval step record
+            \App\Models\ApprovalStepApproval::create([
+                'approval_id' => $approval->id,
+                'step_id' => $step->id,
+                'user_id' => $user->id,
+                'status' => $status,
+                'approved_at' => now(),
+                'notes' => $notes ?? null,
+            ]);
+
+            // Log to approval history
+            $this->historyService->logApprovalAction(
+                $approvable,
+                $user,
+                $status, // 'approved' or 'rejected'
+                null, // document_id will be auto-generated
+                $action === 'reject' ? ($notes ?? 'No reason provided') : null, // rejection_reason
+                $notes ?? ($action === 'approve' ? 'Request approved at step '.$step->step_number.': '.$step->step_name : 'Request rejected'),
+                $step->id
+            );
+
+            // If rejected, mark the overall approval as rejected
+            if ($status === 'rejected') {
+                $approval->update([
+                    'status' => 'rejected',
+                    'current_step' => $step->step_number,
+                ]);
+
+                // Synchronize approval status
+                $this->syncApprovalStatus($approvable);
+
+                // Notify about rejection
+                if ($approvable instanceof AtkStockRequest) {
+                    $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
+                } elseif ($approvable instanceof AtkStockUsage) {
+                    $this->notifyStockUsage($approvable, 'rejected', $user, $notes, $approval);
+                }
+
+                return false; // Approval is not completed due to rejection
+            } else {
+                // Check if all required steps are now approved
+                $allSteps = $approval->approvalFlow->approvalFlowSteps()->get()->sortBy('step_number');
+                $approvedSteps = $approval->approvalStepApprovals()->pluck('step_id');
+
+                $unapprovedSteps = $allSteps->filter(function ($step) use ($approvedSteps) {
+                    return ! $approvedSteps->contains($step->id);
+                });
+
+                // If no unapproved steps remain, mark the overall approval as approved
+                if ($unapprovedSteps->isEmpty() && $approval->status !== 'approved') {
                     // Re-fetch the approval to ensure we have the latest status
                     $approval->refresh();
 
@@ -134,51 +133,51 @@ class ApprovalProcessingService
                         // If this is a model that requires stock updates when approved, handle it
                         $this->stockUpdateService->handleStockUpdates($approvable);
                     }
-                });
 
-                // Synchronize approval status
-                $this->syncApprovalStatus($approvable);
+                    // Synchronize approval status
+                    $this->syncApprovalStatus($approvable);
 
-                // Notify about overall approval
-                if ($approvable instanceof AtkStockRequest) {
-                    $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
-                } elseif ($approvable instanceof AtkStockUsage) {
-                    $this->notifyStockUsage($approvable, 'approved', $user, $notes, $approval);
+                    // Notify about overall approval
+                    if ($approvable instanceof AtkStockRequest) {
+                        $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
+                    } elseif ($approvable instanceof AtkStockUsage) {
+                        $this->notifyStockUsage($approvable, 'approved', $user, $notes, $approval);
+                    }
+
+                    return true; // Approval is completed
+                } else {
+                    // Update to the next step number and keep status as 'pending'
+                    $nextStep = $unapprovedSteps->first();
+                    $approval->update([
+                        'status' => 'pending', // Keep as pending in DB since enum doesn't support partially_approved
+                        'current_step' => $nextStep?->step_number ?? $allSteps->last()?->step_number,
+                    ]);
+
+                    // Log progress to history
+                    $this->historyService->logApprovalAction(
+                        $approvable,
+                        $user,
+                        'pending', // Still pending further approvals
+                        null, // document_id will be auto-generated
+                        null, // rejection_reason
+                        'Request awaiting next approval step: '.($nextStep?->step_number ?? 'unknown'),
+                        $nextStep?->id
+                    );
+
+                    // Synchronize approval status
+                    $this->syncApprovalStatus($approvable);
+
+                    // Notify about partial approval / moving to next step
+                    if ($approvable instanceof AtkStockRequest) {
+                        $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
+                    } elseif ($approvable instanceof AtkStockUsage) {
+                        $this->notifyStockUsage($approvable, 'partially_approved', $user, $notes, $approval);
+                    }
+
+                    return false; // Approval is not yet completed
                 }
-
-                return true; // Approval is completed
-            } else {
-                // Update to the next step number and keep status as 'pending'
-                $nextStep = $unapprovedSteps->first();
-                $approval->update([
-                    'status' => 'pending', // Keep as pending in DB since enum doesn't support partially_approved
-                    'current_step' => $nextStep?->step_number ?? $allSteps->last()?->step_number,
-                ]);
-
-                // Log progress to history
-                $this->historyService->logApprovalAction(
-                    $approvable,
-                    $user,
-                    'pending', // Still pending further approvals
-                    null, // document_id will be auto-generated
-                    null, // rejection_reason
-                    'Request awaiting next approval step: '.($nextStep?->step_number ?? 'unknown'),
-                    $nextStep?->id
-                );
-
-                // Synchronize approval status
-                $this->syncApprovalStatus($approvable);
-
-                // Notify about partial approval / moving to next step
-                if ($approvable instanceof AtkStockRequest) {
-                    $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
-                } elseif ($approvable instanceof AtkStockUsage) {
-                    $this->notifyStockUsage($approvable, 'partially_approved', $user, $notes, $approval);
-                }
-
-                return false; // Approval is not yet completed
             }
-        }
+        });
     }
 
     /**
