@@ -3,10 +3,9 @@
 namespace App\Filament\Resources\Roles\Schemas;
 
 use Filament\Forms\Components\Select;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Grid;
 use Filament\Forms\Components\TextInput;
-use Spatie\Permission\Models\Permission;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 
 class RoleForm
 {
@@ -22,7 +21,7 @@ class RoleForm
                             ->required()
                             ->options([
                                 'web' => 'web',
-                                'api' => 'api'
+                                'api' => 'api',
                             ])
                             ->label('Guard Name'),
                         Select::make('permissions')

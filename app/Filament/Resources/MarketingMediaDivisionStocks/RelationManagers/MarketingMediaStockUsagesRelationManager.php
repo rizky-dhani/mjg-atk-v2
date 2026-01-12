@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\MarketingMediaDivisionStocks\RelationManagers;
 
-use App\Models\MarketingMediaStockUsage;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -82,7 +81,7 @@ class MarketingMediaStockUsagesRelationManager extends RelationManager
                 // Filter usages that contain items related to this division stock's item
                 $record = $this->getOwnerRecord();
                 $itemId = $record->item_id;
-                
+
                 $query->whereHas('marketingMediaStockUsageItems', function ($q) use ($itemId) {
                     $q->where('item_id', $itemId);
                 });

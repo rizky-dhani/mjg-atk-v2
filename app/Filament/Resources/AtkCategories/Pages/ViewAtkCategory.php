@@ -5,7 +5,6 @@ namespace App\Filament\Resources\AtkCategories\Pages;
 use App\Filament\Resources\AtkCategories\AtkCategoryResource;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Schema;
 
 class ViewAtkCategory extends ViewRecord
 {

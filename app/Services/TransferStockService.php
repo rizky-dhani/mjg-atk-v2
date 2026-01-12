@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\AtkTransferStock;
 use App\Models\AtkDivisionStock;
 use App\Models\AtkDivisionStockSetting;
+use App\Models\AtkTransferStock;
 use Illuminate\Support\Facades\DB;
 
 class TransferStockService
@@ -22,7 +22,7 @@ class TransferStockService
         return DB::transaction(function () use ($transferStock) {
             foreach ($transferStock->transferStockItems as $item) {
                 // Validate that source division is set for the item
-                if (!$item->sourceDivision) {
+                if (! $item->sourceDivision) {
                     throw new \Exception("Source division must be specified for item ID {$item->item_id}");
                 }
 
@@ -79,8 +79,9 @@ class TransferStockService
 
         foreach ($transferStock->transferStockItems as $item) {
             // Check if source division has been specified for the item
-            if (!$item->sourceDivision) {
+            if (! $item->sourceDivision) {
                 $errors[] = "Source division must be specified for item ID {$item->item_id}";
+
                 continue;
             }
 
@@ -89,8 +90,9 @@ class TransferStockService
                 ->where('item_id', $item->item_id)
                 ->first();
 
-            if (!$sourceStock) {
+            if (! $sourceStock) {
                 $errors[] = "No stock record found for item ID {$item->item_id} in source division";
+
                 continue;
             }
 

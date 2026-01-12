@@ -52,28 +52,28 @@ class FloatingStockService
             // Logic for source and destination based on type
             if ($type === 'in') {
                 // Incoming to Floating: From Division (Source) to Floating (Null Destination)
-                if (is_null($sourceDivisionId) && !is_null($transactionSource)) {
-                    $sourceDivisionId = $transactionSource->division_id ?? 
-                                       $transactionSource->source_division_id ?? 
-                                       $transactionSource->requesting_division_id ?? 
+                if (is_null($sourceDivisionId) && ! is_null($transactionSource)) {
+                    $sourceDivisionId = $transactionSource->division_id ??
+                                       $transactionSource->source_division_id ??
+                                       $transactionSource->requesting_division_id ??
                                        null;
                 }
                 $destinationDivisionId = null;
             } elseif ($type === 'out') {
                 // Outgoing from Floating: From Floating (Null Source) to Division (Destination)
                 $sourceDivisionId = null;
-                if (is_null($destinationDivisionId) && !is_null($transactionSource)) {
-                    $destinationDivisionId = $transactionSource->division_id ?? 
-                                            $transactionSource->requesting_division_id ?? 
-                                            $transactionSource->destination_division_id ?? 
+                if (is_null($destinationDivisionId) && ! is_null($transactionSource)) {
+                    $destinationDivisionId = $transactionSource->division_id ??
+                                            $transactionSource->requesting_division_id ??
+                                            $transactionSource->destination_division_id ??
                                             null;
                 }
             } else {
                 // For other types (adjustment, transfer between floating pools if any), use provided IDs
-                if (is_null($sourceDivisionId) && !is_null($transactionSource)) {
+                if (is_null($sourceDivisionId) && ! is_null($transactionSource)) {
                     $sourceDivisionId = $transactionSource->division_id ?? $transactionSource->source_division_id ?? null;
                 }
-                if (is_null($destinationDivisionId) && !is_null($transactionSource)) {
+                if (is_null($destinationDivisionId) && ! is_null($transactionSource)) {
                     $destinationDivisionId = $transactionSource->destination_division_id ?? $transactionSource->requesting_division_id ?? null;
                 }
             }

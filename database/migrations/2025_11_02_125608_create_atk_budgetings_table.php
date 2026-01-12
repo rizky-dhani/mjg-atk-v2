@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('remaining_amount')->default(0);
             $table->year('fiscal_year');
             $table->timestamps();
-            
+
             $table->unique(['division_id', 'fiscal_year']); // Each division can have only one budget per fiscal year
         });
     }

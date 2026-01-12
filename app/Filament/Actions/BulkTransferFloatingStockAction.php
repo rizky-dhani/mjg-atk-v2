@@ -2,9 +2,11 @@
 
 namespace App\Filament\Actions;
 
+use App\Models\AtkFloatingStock;
 use App\Models\UserDivision;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -19,33 +21,38 @@ class BulkTransferFloatingStockAction
             ->form([
                 Select::make('division_id')
                     ->label('Target Division')
-                    ->options(UserDivision::all()->mapWithKeys(fn ($division) => [$division->id => "{$division->initial} - {$division->name}"])->toArray())
+                    ->options(fn () => UserDivision::all()->pluck('name_with_initial', 'id'))
                     ->required()
                     ->searchable(),
+                Textarea::make('notes')
+                    ->label('Notes')
+                    ->rows(3),
             ])
             ->action(function (Collection $records, array $data) {
-                $processedCount = 0;
-                $skippedCount = 0;
-                $divisionId = (int) $data['division_id'];
+                try {
+                    $items = $records->map(fn ($record) => [
+                        'item_id' => $record->item_id,
+                        'quantity' => $record->current_stock,
+                    ])->toArray();
 
-                foreach ($records as $record) {
-                    if ($record->current_stock > 0) {
-                        try {
-                            $record->distributeToDivision($divisionId, $record->current_stock);
-                            $processedCount++;
-                        } catch (\Exception $e) {
-                            $skippedCount++;
-                        }
-                    } else {
-                        $skippedCount++;
-                    }
+                    AtkFloatingStock::distributeBulkToDivision(
+                        $items,
+                        (int) $data['division_id'],
+                        $data['notes'] ?? null
+                    );
+
+                    Notification::make()
+                        ->title('Transfer Berhasil')
+                        ->body('Berhasil mentransfer '.count($items).' item ke divisi yang dipilih.')
+                        ->success()
+                        ->send();
+                } catch (\Exception $e) {
+                    Notification::make()
+                        ->title('Transfer Gagal')
+                        ->body($e->getMessage())
+                        ->danger()
+                        ->send();
                 }
-
-                Notification::make()
-                    ->title('Bulk transfer completed')
-                    ->body("Successfully transferred {$processedCount} items. Skipped {$skippedCount} items.")
-                    ->success()
-                    ->send();
             });
     }
 }

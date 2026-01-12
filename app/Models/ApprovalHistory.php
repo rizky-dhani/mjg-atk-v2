@@ -18,7 +18,7 @@ class ApprovalHistory extends Model
         'rejection_reason',
         'notes',
         'performed_at',
-        'metadata'
+        'metadata',
     ];
 
     protected $casts = [
@@ -60,7 +60,7 @@ class ApprovalHistory extends Model
     public function scopeForApprovable($query, string $type, int $id)
     {
         return $query->where('approvable_type', $type)
-                    ->where('approvable_id', $id);
+            ->where('approvable_id', $id);
     }
 
     // Scope to filter by document ID

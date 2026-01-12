@@ -2,9 +2,8 @@
 
 namespace App\Filament\Resources\AtkItemPrices\Schemas;
 
-use App\Models\AtkItem;
 use App\Models\AtkCategory;
-use Filament\Forms\Components\Component;
+use App\Models\AtkItem;
 use Filament\Schemas\Schema;
 
 class AtkItemPriceForm
@@ -26,10 +25,10 @@ class AtkItemPriceForm
                 ->label('Item')
                 ->options(function (callable $get) {
                     $categoryId = $get('category_id');
-                    if (!$categoryId) {
+                    if (! $categoryId) {
                         return AtkItem::all()->pluck('name', 'id');
                     }
-                    
+
                     return AtkItem::where('category_id', $categoryId)->pluck('name', 'id');
                 })
                 ->required()

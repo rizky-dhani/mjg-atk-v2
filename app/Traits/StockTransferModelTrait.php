@@ -6,8 +6,6 @@ use App\Helpers\StockNumberGenerator;
 use App\Models\Approval;
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalHistory;
-use App\Models\AtkTransferStock;
-use Illuminate\Support\Facades\Auth;
 
 trait StockTransferModelTrait
 {
@@ -20,12 +18,12 @@ trait StockTransferModelTrait
             if (empty($model->requester_id) && auth()->check()) {
                 $model->requester_id = auth()->id();
             }
-            
+
             if (empty($model->requesting_division_id) && auth()->check()) {
                 $model->requesting_division_id = auth()->user()->division_id;
             }
 
-            if (empty($model->transfer_number) && !empty($model->requesting_division_id)) {
+            if (empty($model->transfer_number) && ! empty($model->requesting_division_id)) {
                 // Generate transfer number using the appropriate helper
                 $model->transfer_number = StockNumberGenerator::generateTransferStockNumber($model->requesting_division_id);
             }

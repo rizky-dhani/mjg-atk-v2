@@ -11,9 +11,9 @@ class MarketingMediaDivisionStockSetting extends Model
         'division_id',
         'item_id',
         'category_id',
-        'max_limit'
+        'max_limit',
     ];
-    
+
     protected $casts = [
         'max_limit' => 'integer',
     ];

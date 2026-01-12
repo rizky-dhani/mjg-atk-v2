@@ -21,10 +21,10 @@ class AtkBudgetAllocationService
     public function allocateBudget(int $divisionId, float $amount, int $fiscalYear): AtkBudgeting
     {
         $fiscalYear = $fiscalYear ?: now()->year;
-        
+
         // Validate division exists
         $division = UserDivision::find($divisionId);
-        if (!$division) {
+        if (! $division) {
             throw new \Exception("Division with ID {$divisionId} not found");
         }
 
@@ -39,16 +39,16 @@ class AtkBudgetAllocationService
     {
         $fiscalYear = $fiscalYear ?: now()->year;
         $results = [];
-        
+
         DB::transaction(function () use ($budgetData, $fiscalYear, &$results) {
             foreach ($budgetData as $data) {
                 $divisionId = $data['division_id'];
                 $amount = $data['amount'];
-                
+
                 $results[] = $this->allocateBudget($divisionId, $amount, $fiscalYear);
             }
         });
-        
+
         return $results;
     }
 
@@ -58,7 +58,7 @@ class AtkBudgetAllocationService
     public function getAllDivisionBudgets(int $fiscalYear): \Illuminate\Support\Collection
     {
         $fiscalYear = $fiscalYear ?: now()->year;
-        
+
         return AtkBudgeting::with('division')
             ->where('fiscal_year', $fiscalYear)
             ->get();
@@ -70,15 +70,15 @@ class AtkBudgetAllocationService
     public function updateBudgetAllocation(int $budgetingId, float $newAmount): AtkBudgeting
     {
         $budgeting = AtkBudgeting::findOrFail($budgetingId);
-        
+
         // Calculate the difference to adjust used_amount accordingly
         $difference = $newAmount - $budgeting->budget_amount;
-        
+
         // Update the budget amount
         $budgeting->budget_amount = $newAmount;
         $budgeting->remaining_amount = $budgeting->calculateRemainingAmount();
         $budgeting->save();
-        
+
         return $budgeting;
     }
 }

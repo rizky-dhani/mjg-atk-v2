@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Pages;
 
+use App\Filament\Resources\AtkDivisionStocks\AtkDivisionStockResource;
 use App\Models\AtkDivisionStock;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\AtkDivisionStocks\AtkDivisionStockResource;
 
 class ListAtkDivisionStocks extends ListRecords
 {

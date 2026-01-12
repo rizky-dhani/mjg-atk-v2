@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\MarketingMediaCategories\Schemas;
 
-use Filament\Schemas\Schema;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
 
 class MarketingMediaCategoryForm
 {

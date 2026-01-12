@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\MarketingMediaItems\Schemas;
 
-use Filament\Schemas\Schema;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 
 class MarketingMediaItemInfolist
 {
@@ -31,7 +31,7 @@ class MarketingMediaItemInfolist
                             ->placeholder('N/A'),
                     ])
                     ->columns(2),
-                
+
                 Section::make('Timestamps')
                     ->schema([
                         TextEntry::make('created_at')
@@ -42,9 +42,9 @@ class MarketingMediaItemInfolist
                     ->columns(2),
             ]);
     }
-    
+
     public static function configureInfolist(Infolist $infolist): Infolist
     {
-        return $infolist->schema(static::configure(new Schema())->components);
+        return $infolist->schema(static::configure(new Schema)->components);
     }
 }

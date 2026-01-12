@@ -9,7 +9,7 @@ class UserDivision extends Model
     protected $fillable = [
         'name',
         'description',
-        'initial'
+        'initial',
     ];
 
     public function users()
@@ -41,9 +41,9 @@ class UserDivision extends Model
     {
         return $this->hasMany(ApprovalFlowStep::class, 'division_id');
     }
-    
+
     public function getNameWithInitialAttribute()
     {
-        return $this->initial . ' - ' . $this->name;
+        return $this->initial.' - '.$this->name;
     }
 }

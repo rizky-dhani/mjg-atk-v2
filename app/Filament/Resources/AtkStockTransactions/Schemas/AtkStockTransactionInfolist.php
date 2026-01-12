@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\AtkStockTransactions\Schemas;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class AtkStockTransactionInfolist
 {

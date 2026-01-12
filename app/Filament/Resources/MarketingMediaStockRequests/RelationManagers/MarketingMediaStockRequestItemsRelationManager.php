@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\MarketingMediaStockRequests\RelationManagers;
 
+use App\Models\MarketingMediaCategory;
+use App\Models\MarketingMediaItem;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -9,8 +11,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use App\Models\MarketingMediaCategory;
-use App\Models\MarketingMediaItem;
 
 class MarketingMediaStockRequestItemsRelationManager extends RelationManager
 {

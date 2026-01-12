@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('effective_date');
             $table->unsignedBigInteger('changed_by')->nullable(); // User ID who made the change
             $table->timestamps();
-            
+
             $table->foreign('item_id')->references('id')->on('atk_items')->onDelete('cascade');
             $table->foreign('changed_by')->references('id')->on('users')->onDelete('set null');
         });

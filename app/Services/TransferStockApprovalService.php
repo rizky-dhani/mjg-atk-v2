@@ -2,15 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\AtkTransferStock;
 use App\Models\Approval;
-use App\Models\ApprovalFlowStep;
 use App\Models\ApprovalStepApproval;
+use App\Models\AtkTransferStock;
 use Illuminate\Support\Facades\Auth;
-use App\Services\ApprovalValidationService;
-use App\Services\ApprovalHistoryService;
-use App\Services\ApprovalProcessingService;
-use App\Services\StockUpdateService;
 
 class TransferStockApprovalService
 {
@@ -22,7 +17,7 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval || ($approval->status !== 'pending' && $approval->status !== 'partially_approved')) {
+        if (! $approval || ($approval->status !== 'pending' && $approval->status !== 'partially_approved')) {
             return false;
         }
 
@@ -31,7 +26,7 @@ class TransferStockApprovalService
             ->where('step_number', $approval->current_step)
             ->first();
 
-        if (!$currentStep) {
+        if (! $currentStep) {
             return false;
         }
 
@@ -70,7 +65,7 @@ class TransferStockApprovalService
                 ->where('step_id', $currentStep->id)
                 ->where('user_id', $user->id)
                 ->first();
-                
+
             if ($existingApproval) {
                 $canApprove = false;
             }
@@ -87,13 +82,13 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval) {
+        if (! $approval) {
             return false;
         }
 
         // Use the general ApprovalProcessingService to handle the approval
-        $validationService = new ApprovalValidationService();
-        $historyService = new ApprovalHistoryService();
+        $validationService = new ApprovalValidationService;
+        $historyService = new ApprovalHistoryService;
         $stockUpdateService = app(StockUpdateService::class);
         $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
         $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
@@ -115,13 +110,13 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval) {
+        if (! $approval) {
             return false;
         }
 
         // Use the general ApprovalProcessingService to handle the rejection
-        $validationService = new ApprovalValidationService();
-        $historyService = new ApprovalHistoryService();
+        $validationService = new ApprovalValidationService;
+        $historyService = new ApprovalHistoryService;
         $stockUpdateService = app(StockUpdateService::class);
         $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
         $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
@@ -134,7 +129,7 @@ class TransferStockApprovalService
 
         return true;
     }
-    
+
     /**
      * Check if the user is the last approver in the approval flow
      */
@@ -143,7 +138,7 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval) {
+        if (! $approval) {
             return false;
         }
 
@@ -153,14 +148,14 @@ class TransferStockApprovalService
         // Check if the current step is the last step
         $isCurrentStepLast = ($approval->current_step == $totalSteps);
 
-        if (!$isCurrentStepLast) {
+        if (! $isCurrentStepLast) {
             return false;
         }
 
         // Check if this user can approve the current (last) step
         return $this->canApprove($transferStock);
     }
-    
+
     /**
      * Check if the user is the first approver in the approval flow
      */
@@ -169,28 +164,28 @@ class TransferStockApprovalService
         $user = Auth::user();
         $approval = $transferStock->approval;
 
-        if (!$approval) {
+        if (! $approval) {
             return false;
         }
 
         // Check if the current step is the first step
         $isCurrentStepFirst = ($approval->current_step == 1);
 
-        if (!$isCurrentStepFirst) {
+        if (! $isCurrentStepFirst) {
             return false;
         }
 
         // Check if this user can approve the current (first) step
         return $this->canApprove($transferStock);
     }
-    
-    
+
     /**
      * Check if the user is the requester of the transfer stock
      */
     public function isRequester(AtkTransferStock $transferStock): bool
     {
         $user = Auth::user();
+
         return $user && $user->id == $transferStock->requester_id;
     }
 }

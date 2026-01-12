@@ -3,12 +3,16 @@
 namespace App\Filament\Resources\AtkFloatingStocks\Tables;
 
 use App\Filament\Actions\BulkTransferFloatingStockAction;
+use App\Models\UserDivision;
 use App\Services\FloatingStockService;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -44,6 +48,48 @@ class AtkFloatingStocksTable
                 //
             ])
             ->recordActions([
+                Action::make('transfer')
+                    ->label('Transfer to Division')
+                    ->icon('heroicon-o-truck')
+                    ->color('success')
+                    ->form([
+                        Select::make('division_id')
+                            ->label('Target Division')
+                            ->options(fn () => UserDivision::all()->pluck('name_with_initial', 'id'))
+                            ->required()
+                            ->searchable(),
+                        TextInput::make('quantity')
+                            ->label('Transfer Quantity')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1)
+                            ->maxValue(fn ($record) => $record?->current_stock ?? 1000)
+                            ->default(fn ($record) => $record?->current_stock),
+                        Textarea::make('notes')
+                            ->label('Notes')
+                            ->rows(3),
+                    ])
+                    ->action(function ($record, array $data) {
+                        try {
+                            $record->distributeToDivision(
+                                (int) $data['division_id'],
+                                (int) $data['quantity'],
+                                $data['notes'] ?? null
+                            );
+
+                            Notification::make()
+                                ->title('Transfer Berhasil')
+                                ->body("Berhasil mentransfer {$data['quantity']} unit ke divisi yang dipilih.")
+                                ->success()
+                                ->send();
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Transfer Gagal')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
                 Action::make('adjust')
                     ->label('Adjust Stock')
                     ->icon('heroicon-o-adjustments-horizontal')

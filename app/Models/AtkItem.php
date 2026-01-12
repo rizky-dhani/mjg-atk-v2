@@ -44,19 +44,19 @@ class AtkItem extends Model
     {
         return $this->hasMany(AtkItemPriceHistory::class, 'item_id');
     }
-    
+
     // Relationship for active price
     public function activePrice()
     {
         return $this->hasOne(AtkItemPrice::class, 'item_id')
-                    ->where('is_active', true)
-                    ->latest('effective_date');
+            ->where('is_active', true)
+            ->latest('effective_date');
     }
-    
+
     // Relationship for latest price (by date)
     public function latestPrice()
     {
         return $this->hasOne(AtkItemPrice::class, 'item_id')
-                    ->latest('effective_date');
+            ->latest('effective_date');
     }
 }

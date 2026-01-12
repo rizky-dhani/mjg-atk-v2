@@ -4,7 +4,6 @@ namespace App\Filament\Resources\AtkItemPriceHistories\Schemas;
 
 use App\Models\AtkItem;
 use App\Models\User;
-use Filament\Forms\Components\Component;
 use Filament\Schemas\Schema;
 
 class AtkItemPriceHistoryForm
@@ -22,13 +21,13 @@ class AtkItemPriceHistoryForm
                 ->required()
                 ->numeric()
                 ->minValue(0)
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
             \Filament\Forms\Components\TextInput::make('new_price')
                 ->label('New Price')
                 ->required()
                 ->numeric()
                 ->minValue(0)
-                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
             \Filament\Forms\Components\DatePicker::make('effective_date')
                 ->label('Effective Date')
                 ->required(),

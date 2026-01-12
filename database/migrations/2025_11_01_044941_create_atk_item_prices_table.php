@@ -19,7 +19,7 @@ return new class extends Migration
             $table->date('effective_date');
             $table->boolean('is_active')->default(false);
             $table->timestamps();
-            
+
             $table->foreign('item_id')->references('id')->on('atk_items')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('atk_categories')->onDelete('cascade');
         });

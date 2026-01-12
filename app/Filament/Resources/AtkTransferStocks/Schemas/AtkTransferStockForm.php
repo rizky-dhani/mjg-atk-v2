@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\AtkTransferStocks\Schemas;
 
 use App\Models\AtkDivisionStock;
-use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkItem;
 use App\Models\UserDivision;
 use Filament\Actions\Action;
@@ -154,7 +153,7 @@ class AtkTransferStockForm
 
                                                 // Get the item_id and use the main record's source_division_id
                                                 $itemId = data_get($livewire, "data.transferStockItems.{$index}.item_id");
-                                                $sourceDivisionId = data_get($livewire, "data.source_division_id"); // Get from main record
+                                                $sourceDivisionId = data_get($livewire, 'data.source_division_id'); // Get from main record
 
                                                 if (! $itemId || ! $sourceDivisionId || ! $value) {
                                                     return;
@@ -171,7 +170,7 @@ class AtkTransferStockForm
                                                 }
                                             };
                                         },
-                                        ]),
+                                    ]),
                             ])
                             ->columns(3)
                             ->minItems(1)
@@ -197,6 +196,7 @@ class AtkTransferStockForm
                                     if ($userDivisionId) {
                                         $query->where('id', '!=', $userDivisionId);
                                     }
+
                                     return $query->pluck('name', 'id');
                                 }
 
@@ -265,7 +265,7 @@ class AtkTransferStockForm
                                     }
 
                                     // Combine division name with item details
-                                    $detailedName = $division->name . ' [' . implode(' | ', $itemDetails) . ']';
+                                    $detailedName = $division->name.' ['.implode(' | ', $itemDetails).']';
                                     $detailedOptions[$division->id] = $detailedName;
                                 }
 

@@ -5,8 +5,11 @@ namespace App\Services;
 class ApprovalService
 {
     protected ApprovalValidationService $validationService;
+
     protected ApprovalProcessingService $processingService;
+
     protected ApprovalHistoryService $historyService;
+
     protected StockUpdateService $stockUpdateService;
 
     public function __construct(

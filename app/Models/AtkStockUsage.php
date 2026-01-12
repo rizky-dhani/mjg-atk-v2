@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class AtkStockUsage extends Model
 {
     use StockUsageModelTrait;
-    
+
     protected $fillable = [
         'request_number',
         'requester_id',
@@ -21,19 +21,19 @@ class AtkStockUsage extends Model
     protected $casts = [
         'potential_cost' => 'integer',
     ];
-    
+
     /**
      * Update potential_cost based on associated items
      */
     public function updatePotentialCost(): void
     {
         $items = $this->atkStockUsageItems;
-        
+
         $potentialCost = 0;
         foreach ($items as $item) {
             $potentialCost += ($item->quantity * $item->moving_average_cost);
         }
-        
+
         $this->potential_cost = $potentialCost;
         $this->save();
     }
@@ -80,7 +80,7 @@ class AtkStockUsage extends Model
             ->orderBy('performed_at', 'desc')
             ->first();
 
-        if (!$latestApproval) {
+        if (! $latestApproval) {
             return 'pending'; // Default status if no approval history
         }
 
@@ -97,7 +97,7 @@ class AtkStockUsage extends Model
             ->orderBy('performed_at', 'desc')
             ->first();
 
-        if (!$latestApproval) {
+        if (! $latestApproval) {
             return null;
         }
 

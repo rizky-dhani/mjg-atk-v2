@@ -4,8 +4,6 @@ namespace App\Filament\Resources\AtkItemPrices;
 
 use App\Filament\Resources\AtkItemPrices\Pages\ListAtkItemPrices;
 use App\Filament\Resources\AtkItemPrices\Pages\ViewAtkItemPrice;
-use App\Filament\Resources\AtkItemPrices\Pages\CreateAtkItemPrice;
-use App\Filament\Resources\AtkItemPrices\Pages\EditAtkItemPrice;
 use App\Filament\Resources\AtkItemPrices\Schemas\AtkItemPriceForm;
 use App\Filament\Resources\AtkItemPrices\Schemas\AtkItemPriceInfolist;
 use App\Filament\Resources\AtkItemPrices\Tables\AtkItemPricesTable;

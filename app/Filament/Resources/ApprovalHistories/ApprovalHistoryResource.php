@@ -3,10 +3,8 @@
 namespace App\Filament\Resources\ApprovalHistories;
 
 use App\Filament\Resources\ApprovalHistories\ApprovalHistoryResource\Pages;
-use App\Filament\Resources\ApprovalHistories\ApprovalHistoryResource\RelationManagers;
-use UnitEnum;
-use BackedEnum;
 use App\Models\ApprovalHistory;
+use BackedEnum;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -14,6 +12,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
 class ApprovalHistoryResource extends Resource
 {
@@ -38,21 +37,21 @@ class ApprovalHistoryResource extends Resource
                         'App\Models\AtkStockUsage' => 'Stock Usage',
                     ])
                     ->required(),
-                
+
                 Forms\Components\TextInput::make('approvable_id')
                     ->label('Approvable ID')
                     ->required()
                     ->numeric(),
-                
+
                 Forms\Components\TextInput::make('document_id')
                     ->label('Document ID')
                     ->maxLength(255),
-                
+
                 Forms\Components\Select::make('user_id')
                     ->relationship('user', 'name')
                     ->searchable()
                     ->required(),
-                
+
                 Forms\Components\Select::make('action')
                     ->options([
                         'approved' => 'Approved',
@@ -62,16 +61,16 @@ class ApprovalHistoryResource extends Resource
                         'returned' => 'Returned',
                     ])
                     ->required(),
-                
+
                 Forms\Components\Textarea::make('rejection_reason')
                     ->label('Rejection Reason')
                     ->rows(3)
                     ->maxLength(65535),
-                
+
                 Forms\Components\Textarea::make('notes')
                     ->rows(3)
                     ->maxLength(65535),
-                
+
                 Forms\Components\DateTimePicker::make('performed_at')
                     ->required(),
             ]);
@@ -85,7 +84,7 @@ class ApprovalHistoryResource extends Resource
                     ->label('Document ID')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('approvable_type')
                     ->label('Document Type')
                     ->formatStateUsing(function ($state) {
@@ -93,36 +92,38 @@ class ApprovalHistoryResource extends Resource
                             'App\Models\AtkStockRequest' => 'Stock Request',
                             'App\Models\AtkStockUsage' => 'Stock Usage',
                         ];
+
                         return $types[$state] ?? $state;
                     })
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('approvable_id')
                     ->label('Document #')
                     ->url(function ($record) {
                         $model = $record->approvable;
                         if ($model) {
-                            $resourceClass = match(get_class($model)) {
+                            $resourceClass = match (get_class($model)) {
                                 'App\Models\AtkStockRequest' => \App\Filament\Resources\AtkStockRequests\AtkStockRequestResource::class,
                                 'App\Models\AtkStockUsage' => \App\Filament\Resources\AtkStockUsages\AtkStockUsageResource::class,
                                 default => null
                             };
-                            
+
                             if ($resourceClass) {
                                 return $resourceClass::getUrl('view', ['record' => $model]);
                             }
                         }
+
                         return null;
                     }, true)
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Approver')
                     ->searchable()
                     ->sortable(),
-                
+
                 Tables\Columns\TextColumn::make('action')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -136,7 +137,7 @@ class ApprovalHistoryResource extends Resource
                     ->formatStateUsing(function ($state) {
                         return ucfirst($state);
                     }),
-                
+
                 Tables\Columns\TextColumn::make('performed_at')
                     ->label('Date & Time')
                     ->dateTime()
@@ -151,14 +152,14 @@ class ApprovalHistoryResource extends Resource
                         'submitted' => 'Submitted',
                         'returned' => 'Returned',
                     ]),
-                
+
                 Tables\Filters\SelectFilter::make('approvable_type')
                     ->label('Document Type')
                     ->options([
                         'App\Models\AtkStockRequest' => 'Stock Request',
                         'App\Models\AtkStockUsage' => 'Stock Usage',
                     ]),
-                
+
                 Tables\Filters\Filter::make('performed_at')
                     ->form([
                         Forms\Components\DatePicker::make('performed_from')

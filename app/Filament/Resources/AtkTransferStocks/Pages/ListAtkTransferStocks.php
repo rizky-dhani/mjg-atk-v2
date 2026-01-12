@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Pages;
 
-use Filament\Actions;
-use Filament\Support\Enums\Width;
-use Filament\Resources\Pages\ListRecords;
 use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 
 class ListAtkTransferStocks extends ListRecords
 {

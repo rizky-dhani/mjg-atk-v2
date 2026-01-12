@@ -38,7 +38,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to view stocks
-        return $user->division && 
+        return $user->division &&
                $user->division->id === $marketingMediaDivisionStock->division_id;
     }
 
@@ -77,7 +77,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to update stocks
-        return $user->division && 
+        return $user->division &&
                $user->division->id === $marketingMediaDivisionStock->division_id;
     }
 
@@ -97,7 +97,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to delete stocks
-        return $user->division && 
+        return $user->division &&
                $user->division->id === $marketingMediaDivisionStock->division_id;
     }
 

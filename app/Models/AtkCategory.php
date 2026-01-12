@@ -8,7 +8,7 @@ class AtkCategory extends Model
 {
     protected $fillable = [
         'name',
-        'description'
+        'description',
     ];
 
     public function atkItems()

@@ -62,7 +62,7 @@ class AtkTransferStock extends Model
     {
         return $this->sourceDivisions()->count();
     }
-    
+
     // Accessor to get unique source divisions count
     public function getSourceDivisionsUniqueCountAttribute()
     {

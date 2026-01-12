@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class AtkStockRequest extends Model
 {
     use StockRequestModelTrait;
-    
+
     protected $fillable = [
         'request_number',
         'requester_id',
@@ -62,7 +62,7 @@ class AtkStockRequest extends Model
             ->orderBy('performed_at', 'desc')
             ->first();
 
-        if (!$latestApproval) {
+        if (! $latestApproval) {
             return 'pending'; // Default status if no approval history
         }
 
@@ -79,7 +79,7 @@ class AtkStockRequest extends Model
             ->orderBy('performed_at', 'desc')
             ->first();
 
-        if (!$latestApproval) {
+        if (! $latestApproval) {
             return null;
         }
 

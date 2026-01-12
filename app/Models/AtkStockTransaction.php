@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AtkStockTransaction extends Model
 {
-    protected $table = "atk_stock_trx";
+    protected $table = 'atk_stock_trx';
+
     protected $fillable = [
         'division_id',
         'item_id',
@@ -48,13 +49,13 @@ class AtkStockTransaction extends Model
     {
         return $this->morphTo('trx_src');
     }
-    
+
     /**
      * Scope to get transactions for a specific division and item
      */
     public function scopeForDivisionAndItem(Builder $query, int $divisionId, int $itemId): Builder
     {
         return $query->where('division_id', $divisionId)
-                     ->where('item_id', $itemId);
+            ->where('item_id', $itemId);
     }
 }

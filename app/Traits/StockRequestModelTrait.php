@@ -19,7 +19,7 @@ trait StockRequestModelTrait
             if (empty($model->request_number)) {
                 // Generate request number using the appropriate helper based on model type
                 $modelClass = get_class($model);
-                
+
                 if ($modelClass === AtkStockRequest::class) {
                     $model->request_number = StockNumberGenerator::generateOfficeStationeryRequestNumber($model->division_id);
                 } elseif ($modelClass === MarketingMediaStockRequest::class) {
@@ -41,7 +41,7 @@ trait StockRequestModelTrait
                         'current_step' => 1, // Start with the first step
                         'status' => 'pending', // Initially pending
                     ]);
-                    
+
                     // Set the relation on the model so it's not cached as null
                     $model->setRelation('approval', $approval);
                 }

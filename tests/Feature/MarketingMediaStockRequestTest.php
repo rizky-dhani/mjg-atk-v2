@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\MarketingMediaItem;
+use App\Models\Approval;
 use App\Models\MarketingMediaCategory;
+use App\Models\MarketingMediaDivisionStock;
+use App\Models\MarketingMediaItem;
 use App\Models\MarketingMediaStockRequest;
 use App\Models\MarketingMediaStockRequestItem;
 use App\Models\User;
 use App\Models\UserDivision;
-use App\Models\Approval;
-use App\Models\MarketingMediaDivisionStock;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,18 +15,18 @@ class MarketingMediaStockRequestTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testMarketingMediaStockRequestFullFlow()
+    public function test_marketing_media_stock_request_full_flow()
     {
         // Step 1: Setup
         echo "Step 1: Setting up test data...\n";
-        
+
         // Create MBB Division if it doesn't exist
         $division = UserDivision::firstOrCreate([
             'name' => 'MBB Division',
-            'initial' => 'MBB'
+            'initial' => 'MBB',
         ], [
             'name' => 'MBB Division',
-            'initial' => 'MBB'
+            'initial' => 'MBB',
         ]);
 
         // Create an admin user in MBB Division
@@ -34,7 +34,7 @@ class MarketingMediaStockRequestTest extends TestCase
             'name' => 'Admin MBB',
             'email' => 'admin@mbb.test',
             'division_id' => $division->id,
-            'initial' => 'ADM'  // Add the required initial field
+            'initial' => 'ADM',  // Add the required initial field
         ]);
 
         // Create a marketing media category
@@ -42,7 +42,7 @@ class MarketingMediaStockRequestTest extends TestCase
             'name' => 'Test Category',
         ], [
             'name' => 'Test Category',
-            'description' => 'Test category for stock request'
+            'description' => 'Test category for stock request',
         ]);
 
         // Create a marketing media item
@@ -50,13 +50,13 @@ class MarketingMediaStockRequestTest extends TestCase
             'name' => 'Test Item',
             'slug' => 'test-item',
             'unit_of_measure' => 'unit',  // Add required unit_of_measure field
-            'category_id' => $category->id
+            'category_id' => $category->id,
         ], [
             'name' => 'Test Item',
             'slug' => 'test-item',  // Add required slug field
             'unit_of_measure' => 'unit',  // Add required unit_of_measure field
             'description' => 'Test item for stock request',
-            'category_id' => $category->id
+            'category_id' => $category->id,
         ]);
 
         echo "✓ Setup completed\n";
@@ -65,11 +65,11 @@ class MarketingMediaStockRequestTest extends TestCase
         echo "Step 2: Creating MarketingMediaStockRequest...\n";
 
         $stockRequest = MarketingMediaStockRequest::create([
-            'request_number' => 'MMB-' . now()->format('Ymd') . '-001',
+            'request_number' => 'MMB-'.now()->format('Ymd').'-001',
             'requester_id' => $admin->id,
             'division_id' => $division->id,
             'notes' => 'Test stock request for MBB division',
-            'request_type' => 'addition' // or whatever is appropriate
+            'request_type' => 'addition', // or whatever is appropriate
         ]);
 
         // Add an item to the request
@@ -77,11 +77,11 @@ class MarketingMediaStockRequestTest extends TestCase
             'request_id' => $stockRequest->id,
             'item_id' => $item->id,
             'category_id' => $category->id,
-            'quantity' => 10
+            'quantity' => 10,
         ]);
 
-        echo "✓ MarketingMediaStockRequest created with ID: " . $stockRequest->id . "\n";
-        echo "✓ Request item added with quantity: " . $requestItem->quantity . "\n";
+        echo '✓ MarketingMediaStockRequest created with ID: '.$stockRequest->id."\n";
+        echo '✓ Request item added with quantity: '.$requestItem->quantity."\n";
 
         // Step 3: Check if approval record was automatically created
         echo "Step 3: Checking if approval was created automatically...\n";
@@ -91,9 +91,9 @@ class MarketingMediaStockRequestTest extends TestCase
             ->first();
 
         if ($approval) {
-            echo "✓ Approval record found with ID: " . $approval->id . "\n";
-            echo "✓ Initial status: " . $approval->status . "\n";
-            echo "✓ Current step: " . $approval->current_step . "\n";
+            echo '✓ Approval record found with ID: '.$approval->id."\n";
+            echo '✓ Initial status: '.$approval->status."\n";
+            echo '✓ Current step: '.$approval->current_step."\n";
         } else {
             echo "✗ No approval record found\n";
         }
@@ -110,28 +110,28 @@ class MarketingMediaStockRequestTest extends TestCase
 
         // Step 5: Simulate approval process (this would typically happen via the approval service)
         echo "Step 5: Simulating approval process...\n";
-        
+
         // In a real scenario, this would be done through the approval service
         // For this test, we'll directly call the approval process
         $approvalService = app(\App\Services\ApprovalService::class);
-        
+
         // We would normally approve this through the proper approval flow
         // Let's assume it gets approved completely and triggers stock update
         $approval = $stockRequest->refresh()->approval;
-        
+
         if ($approval) {
-            echo "✓ Current approval status: " . $approval->status . "\n";
-            echo "✓ Current approval step: " . $approval->current_step . "\n";
+            echo '✓ Current approval status: '.$approval->status."\n";
+            echo '✓ Current approval step: '.$approval->current_step."\n";
         } else {
             echo "✗ No approval found to process\n";
         }
 
         // Step 6: After approval completion (simulated), check stock update
         echo "Step 6: Simulating completion of approval and checking stock update...\n";
-        
+
         // Debug: Check the type of stock request
-        echo "Debug: Stock request class is: " . get_class($stockRequest) . "\n";
-        
+        echo 'Debug: Stock request class is: '.get_class($stockRequest)."\n";
+
         // Manually trigger stock update to test our implementation
         $stockRequest->refresh(); // Refresh to get latest state
         $approvalService->handleStockUpdates($stockRequest);
@@ -143,10 +143,10 @@ class MarketingMediaStockRequestTest extends TestCase
 
         $updatedQuantity = $updatedStock ? $updatedStock->current_stock : 0;
         $expectedQuantity = $initialQuantity + $requestItem->quantity;
-        
+
         echo "✓ Updated stock for item {$item->name}: $updatedQuantity\n";
         echo "✓ Expected quantity: $expectedQuantity\n";
-        
+
         if ($updatedQuantity === $expectedQuantity) {
             echo "✓ Stock updated successfully! Stock increased by {$requestItem->quantity}\n";
         } else {
@@ -155,7 +155,7 @@ class MarketingMediaStockRequestTest extends TestCase
 
         // Step 7: Final validation
         echo "Step 7: Final validation...\n";
-        
+
         $totalRequestItems = $stockRequest->marketingMediaStockRequestItems->sum('quantity');
         $stockRecord = MarketingMediaDivisionStock::where('division_id', $division->id)
             ->where('item_id', $item->id)

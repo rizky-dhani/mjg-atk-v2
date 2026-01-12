@@ -3,19 +3,16 @@
 namespace App\Filament\Actions;
 
 use App\Models\Approval;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
+use App\Services\ApprovalHistoryService;
+use App\Services\ApprovalProcessingService;
 use App\Services\ApprovalService;
 use App\Services\ApprovalValidationService;
-use App\Services\ApprovalProcessingService;
-use App\Services\ApprovalHistoryService;
 use App\Services\StockUpdateService;
+use Filament\Actions\Action;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Filament\Actions\EditAction as BaseEditAction;
-use App\Filament\Resources\AtkStockRequests\Schemas\AtkStockRequestForm;
+use Illuminate\Support\Facades\Auth;
 
 class ResubmitAction
 {
@@ -25,35 +22,35 @@ class ResubmitAction
             ->label('Resubmit for Approval')
             ->color('warning')
             ->modalWidth(Width::SevenExtraLarge)
-            ->icon(fn() => Heroicon::ArrowPath)
+            ->icon(fn () => Heroicon::ArrowPath)
             ->visible(function ($record) {
                 // Only show the resubmit action if the record has been rejected and has not been resubmitted since the last rejection and the current user is the requester
-                if (!$record) {
+                if (! $record) {
                     return false;
                 }
-                
+
                 // Get all approval history records for this model, ordered by performed_at (oldest first)
                 $approvalHistory = \App\Models\ApprovalHistory::where('approvable_type', get_class($record))
                     ->where('approvable_id', $record->id)
                     ->orderBy('performed_at', 'asc')
                     ->get();
-                
+
                 $lastRejection = null;
                 $lastSubmissionAfterRejection = null;
-                
+
                 // Iterate through history records from oldest to newest
                 foreach ($approvalHistory as $history) {
                     if ($history->action === 'rejected') {
                         $lastRejection = $history;
                         $lastSubmissionAfterRejection = null; // Reset submission after this rejection
-                    } else if ($history->action === 'submitted' && $lastRejection) {
+                    } elseif ($history->action === 'submitted' && $lastRejection) {
                         // This submission happened after the last rejection
                         $lastSubmissionAfterRejection = $history;
                     }
                 }
-                
+
                 $requester = auth()->user()->id === $record->requester_id;
-                
+
                 // Show resubmit button only if there was a rejection, no submission after that rejection,
                 // and the current user is the requester
                 return ($lastRejection !== null && $lastSubmissionAfterRejection === null) && $requester;
@@ -73,16 +70,16 @@ class ResubmitAction
                 }
 
                 // Resubmit via service
-                $validationService = new ApprovalValidationService();
+                $validationService = new ApprovalValidationService;
                 $processingService = new ApprovalProcessingService(
-                    $validationService, 
-                    new ApprovalHistoryService(), 
+                    $validationService,
+                    new ApprovalHistoryService,
                     app(StockUpdateService::class)
                 );
                 $approvalService = new ApprovalService(
                     $validationService,
                     $processingService,
-                    new ApprovalHistoryService(),
+                    new ApprovalHistoryService,
                     app(StockUpdateService::class)
                 );
                 $approvalService->resubmitApproval($approval, $user);

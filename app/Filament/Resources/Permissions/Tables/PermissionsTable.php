@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Permissions\Tables;
 
-use Filament\Tables\Table;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
+use App\Filament\Actions\GenerateModelPermissionsAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
-use App\Filament\Actions\GenerateModelPermissionsAction;
+use Filament\Tables\Table;
 
 class PermissionsTable
 {

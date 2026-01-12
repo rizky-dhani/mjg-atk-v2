@@ -54,7 +54,7 @@ class ApprovalAtkStockRequest extends ListRecords
         $count = Approval::whereIn('current_step', $matchingStepIds)
             ->where(function ($query) {
                 $query->where('status', 'pending')
-                      ->orWhere('status', 'partially_approved');
+                    ->orWhere('status', 'partially_approved');
             })
             ->where('approvable_type', (new AtkStockRequest)->getMorphClass()) // Ensure it's for ATK Stock Requests
             ->count();
@@ -135,7 +135,7 @@ class ApprovalAtkStockRequest extends ListRecords
 
         foreach (AtkStockRequest::whereHas('approval', function ($q) {
             $q->where('status', 'pending')
-            ->orWhere('status', 'partially_approved');
+                ->orWhere('status', 'partially_approved');
         })->get() as $stockRequest) {
             if ($approvalService->canUserApproveStockRequest($stockRequest, $user)) {
                 $approvableIds[] = $stockRequest->id;

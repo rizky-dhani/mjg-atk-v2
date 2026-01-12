@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\AtkCategory;
-use App\Models\OfficeStationeryCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class AtkCategorySeeder extends Seeder

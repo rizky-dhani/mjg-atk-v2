@@ -2,21 +2,20 @@
 
 namespace App\Filament\Resources\AtkStockUsages\Schemas;
 
-use App\Models\User;
-use App\Models\AtkItem;
-use App\Models\AtkCategory;
 use App\Models\AtkBudgeting;
-use Filament\Actions\Action;
-use Filament\Schemas\Schema;
+use App\Models\AtkCategory;
 use App\Models\AtkDivisionStock;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Grid;
+use App\Models\AtkItem;
+use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\Size;
 
 class AtkStockUsageForm
@@ -27,7 +26,7 @@ class AtkStockUsageForm
             Section::make('Rejection Details')
                 ->visible(function ($get, $record) {
                     // Show this section only when there's a rejection
-                    if (!$record) {
+                    if (! $record) {
                         return false;
                     }
 
@@ -43,7 +42,7 @@ class AtkStockUsageForm
                             ->readOnly()
                             ->dehydrated(false) // Don't include this in form data
                             ->formatStateUsing(function ($record) {
-                                if (!$record) {
+                                if (! $record) {
                                     return null;
                                 }
 
@@ -57,7 +56,7 @@ class AtkStockUsageForm
                             ->readOnly()
                             ->dehydrated(false) // Don't include this in form data
                             ->formatStateUsing(function ($record) {
-                                if (!$record) {
+                                if (! $record) {
                                     return null;
                                 }
 
@@ -120,7 +119,7 @@ class AtkStockUsageForm
                                 ->label('Item')
                                 ->options(function (callable $get) {
                                     $categoryId = $get('category_id');
-                                    if (!$categoryId) {
+                                    if (! $categoryId) {
                                         return AtkItem::all()->pluck('name', 'id');
                                     }
 
@@ -171,7 +170,7 @@ class AtkStockUsageForm
                                 ->minValue(1)
                                 ->helperText(function (callable $get) {
                                     $itemId = $get('item_id');
-                                    if (!$itemId) {
+                                    if (! $itemId) {
                                         return '';
                                     }
 
@@ -186,7 +185,7 @@ class AtkStockUsageForm
                                 ->live()
                                 ->afterStateUpdated(function (callable $get, callable $set, $state) {
                                     $itemId = $get('item_id');
-                                    if (!$itemId || !$state) {
+                                    if (! $itemId || ! $state) {
                                         return;
                                     }
 
@@ -238,7 +237,7 @@ class AtkStockUsageForm
                                             // Get the item_id for this repeater item
                                             $itemId = data_get($livewire, "data.atkStockUsageItems.{$index}.item_id");
 
-                                            if (!$itemId || !$value) {
+                                            if (! $itemId || ! $value) {
                                                 return;
                                             }
 
@@ -302,7 +301,7 @@ class AtkStockUsageForm
                                 $divisionId = auth()->user()->division_id ?? null;
                                 $currentYear = now()->year;
 
-                                if (!$divisionId) {
+                                if (! $divisionId) {
                                     return 'N/A';
                                 }
 
@@ -338,7 +337,7 @@ class AtkStockUsageForm
 
                                 foreach ($items as $item) {
                                     if (isset($item['quantity']) && isset($item['moving_average_cost'])) {
-                                        $potentialCost += (int)$item['quantity'] * (int)$item['moving_average_cost'];
+                                        $potentialCost += (int) $item['quantity'] * (int) $item['moving_average_cost'];
                                     }
                                 }
 
@@ -357,7 +356,7 @@ class AtkStockUsageForm
                                     if ($budget) {
                                         $usedBudget = $budget->used_amount;
                                         $potentialRemaining = $budget->budget_amount - $usedBudget - $potentialCost;
-                                        
+
                                         // Update potential_remaining_budget field
                                         $set('potential_remaining_budget', $potentialRemaining);
                                     }
@@ -365,7 +364,7 @@ class AtkStockUsageForm
                             })
                             ->color('primary'),
                     ])
-                    ->fullWidth(),
+                        ->fullWidth(),
                 ])
                 ->collapsible(),
         ]);

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\UserDivisions\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class UserDivisionForm

@@ -10,11 +10,13 @@ use Illuminate\Support\Facades\Auth;
 class AtkStockRequestStatus extends StatsOverviewWidget
 {
     protected ?string $heading = 'Permintaan ATK';
+
     protected static ?int $sort = 2;
+
     protected function getStats(): array
     {
         $user = Auth::user();
-        
+
         // Initialize counts
         $pendingCount = 0;
         $onProgressCount = 0;
@@ -26,13 +28,13 @@ class AtkStockRequestStatus extends StatsOverviewWidget
 
             // Count pending requests: division's requests where there is no approval history or the latest approval history action is not 'approved' or 'rejected'
             $pendingCount = AtkStockRequest::where('division_id', $divisionId)
-                ->whereDoesntHave('approvalHistory', function($query){
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'rejected');
                 })
-                ->whereDoesntHave('approvalHistory', function($query){
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');
                 })
-                ->whereDoesntHave('approvalHistory', function($query): void{
+                ->whereDoesntHave('approvalHistory', function ($query): void {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
                 })
                 ->count();

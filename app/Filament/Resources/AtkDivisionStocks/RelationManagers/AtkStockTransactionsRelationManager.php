@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\RelationManagers;
 
-use App\Models\AtkStockTransaction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class AtkStockTransactionsRelationManager extends RelationManager
 {

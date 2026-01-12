@@ -12,7 +12,7 @@ class ApprovalStepApproval extends Model
         'user_id',
         'approved_at',
         'status',
-        'notes'
+        'notes',
     ];
 
     public function approval()

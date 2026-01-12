@@ -2,20 +2,19 @@
 
 namespace App\Services;
 
-use App\Models\AtkStockUsage;
-use App\Models\AtkStockRequest;
 use App\Models\AtkDivisionStock;
-use App\Models\AtkStockUsageItem;
-use App\Models\MarketingMediaStockUsage;
-use App\Models\MarketingMediaStockRequest;
+use App\Models\AtkStockRequest;
+use App\Models\AtkStockUsage;
 use App\Models\MarketingMediaDivisionStock;
-use App\Services\StockTransactionService;
+use App\Models\MarketingMediaStockRequest;
+use App\Models\MarketingMediaStockUsage;
 
 class StockUpdateService
 {
     protected BudgetService $budgetService;
+
     protected StockTransactionService $stockTransactionService;
-    
+
     public function __construct(BudgetService $budgetService, StockTransactionService $stockTransactionService)
     {
         $this->budgetService = $budgetService;
@@ -32,7 +31,7 @@ class StockUpdateService
         \Log::info('StockUpdateService: handleStockUpdates called', [
             'model_id' => $model->id,
             'model_type' => get_class($model),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
 
         $modelClass = get_class($model);
@@ -57,7 +56,7 @@ class StockUpdateService
                     $this->updateStockForTransfer($model);
                     break;
 
-                // Add more cases as needed for other models
+                    // Add more cases as needed for other models
                 default:
                     // No stock update needed for this model type
                     break;
@@ -75,7 +74,7 @@ class StockUpdateService
         \Log::info('StockUpdateService: updateStockForAddition called', [
             'model_id' => $stockRequest->id,
             'model_type' => get_class($stockRequest),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
 
         // Load the items to ensure they are available
@@ -90,10 +89,10 @@ class StockUpdateService
 
         // Process each unique item to prevent duplicate processing
         $processedItems = [];
-        
+
         foreach ($stockRequest->items as $requestItem) {
             $itemKey = $requestItem->item_id;
-            
+
             // Skip if this item has already been processed to prevent duplicate processing
             if (in_array($itemKey, $processedItems)) {
                 \Log::warning('StockUpdateService: Duplicate item detected and skipped', [
@@ -101,18 +100,19 @@ class StockUpdateService
                     'item_id' => $requestItem->item_id,
                     'quantity' => $requestItem->quantity,
                 ]);
+
                 continue;
             }
-            
+
             $processedItems[] = $itemKey;
-            
+
             \Log::info('StockUpdateService: Processing stock request item', [
                 'request_id' => $stockRequest->id,
                 'item_id' => $requestItem->item_id,
                 'quantity' => $requestItem->quantity,
-                'item_details' => $requestItem->item->name ?? 'unknown'
+                'item_details' => $requestItem->item->name ?? 'unknown',
             ]);
-            
+
             // For MarketingMedia models, we need to include category_id in defaults
             if ($divisionStockModel === MarketingMediaDivisionStock::class) {
                 $divisionStock = $divisionStockModel::firstOrCreate(
@@ -149,7 +149,7 @@ class StockUpdateService
             if (get_class($stockRequest) === AtkStockRequest::class) {
                 // Get the active price with the latest effective_date
                 $priceModel = $requestItem->item->activePrice()->first();
-                
+
                 \Log::info('StockUpdateService: Price retrieval for item', [
                     'item_id' => $requestItem->item_id,
                     'request_id' => $stockRequest->id,
@@ -158,15 +158,15 @@ class StockUpdateService
                         'id' => $priceModel->id,
                         'unit_price' => $priceModel->unit_price,
                         'is_active' => $priceModel->is_active,
-                        'effective_date' => $priceModel->effective_date
-                    ] : null
+                        'effective_date' => $priceModel->effective_date,
+                    ] : null,
                 ]);
-                
+
                 if ($priceModel && isset($priceModel->unit_price) && $priceModel->unit_price !== null && $priceModel->unit_price > 0) {
                     $incomingUnitCost = $priceModel->unit_price;
                     \Log::info('StockUpdateService: Using active price for MAC calculation', [
                         'item_id' => $requestItem->item_id,
-                        'unit_price_used' => $incomingUnitCost
+                        'unit_price_used' => $incomingUnitCost,
                     ]);
                 } else {
                     // Fallback: try to get the latest price if no active price exists
@@ -178,22 +178,22 @@ class StockUpdateService
                             'id' => $fallbackPriceModel->id,
                             'unit_price' => $fallbackPriceModel->unit_price,
                             'is_active' => $fallbackPriceModel->is_active,
-                            'effective_date' => $fallbackPriceModel->effective_date
-                        ] : null
+                            'effective_date' => $fallbackPriceModel->effective_date,
+                        ] : null,
                     ]);
-                    
+
                     if ($fallbackPriceModel && isset($fallbackPriceModel->unit_price) && $fallbackPriceModel->unit_price !== null && $fallbackPriceModel->unit_price > 0) {
                         $incomingUnitCost = $fallbackPriceModel->unit_price;
                         \Log::info('StockUpdateService: Using fallback price for MAC calculation', [
                             'item_id' => $requestItem->item_id,
-                            'unit_price_used' => $incomingUnitCost
+                            'unit_price_used' => $incomingUnitCost,
                         ]);
                     } else {
                         \Log::warning('No price found for item during stock update', [
                             'item_id' => $requestItem->item_id,
                             'request_id' => $stockRequest->id,
                             'price_model' => $priceModel ? $priceModel->toArray() : null,
-                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null
+                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null,
                         ]);
                         // Use 0 as final fallback - this will result in MAC being 0 if no pricing info is available
                     }
@@ -227,9 +227,9 @@ class StockUpdateService
                 'new_quantity' => $newQuantity,
                 'old_mac' => $oldMac,
                 'new_mac' => (int) round($newMovingAverageCost),
-                'unit_cost_used' => $incomingUnitCost
+                'unit_cost_used' => $incomingUnitCost,
             ]);
-            
+
             // Record the transaction for tracking purposes
             if (get_class($stockRequest) === AtkStockRequest::class) {
                 $this->stockTransactionService->recordTransactionOnly(
@@ -326,9 +326,9 @@ class StockUpdateService
                 'old_stock' => $divisionStock->current_stock + $usageItem->quantity, // original stock before reduction
                 'reduced_quantity' => $usageItem->quantity,
                 'new_quantity' => $newQuantity,
-                'unit_cost_used' => $unitCost
+                'unit_cost_used' => $unitCost,
             ]);
-            
+
             // Record the transaction for tracking purposes
             if (get_class($stockUsage) === AtkStockUsage::class) {
                 $this->stockTransactionService->recordTransactionOnly(
@@ -383,7 +383,7 @@ class StockUpdateService
             'model_id' => $model->id,
             'model_type' => get_class($model),
             'request_type' => $model->request_type ?? 'not_set',
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
 
         // Determine the operation based on request_type
@@ -433,7 +433,7 @@ class StockUpdateService
                 'model_id' => $model->id,
                 'item_id' => $item->item_id,
                 'quantity' => $item->{$quantityField} ?? 0,
-                'item_details' => $item->item->name ?? 'unknown'
+                'item_details' => $item->item->name ?? 'unknown',
             ]);
 
             $quantity = $item->{$quantityField} ?? 0;
@@ -473,7 +473,7 @@ class StockUpdateService
             }
 
             $currentStockBefore = $divisionStock->current_stock;
-            
+
             \Log::info('StockUpdateService: Division stock before update', [
                 'division_id' => $model->division_id,
                 'item_id' => $item->item_id,
@@ -494,7 +494,7 @@ class StockUpdateService
             if (get_class($model) === AtkStockRequest::class && $operation === 'addition') {
                 // Get the active price with the latest effective_date
                 $priceModel = $item->item->activePrice()->first();
-                
+
                 \Log::info('StockUpdateService: Price retrieval for item in updateStockByRequestType', [
                     'item_id' => $item->item_id,
                     'model_id' => $model->id,
@@ -504,15 +504,15 @@ class StockUpdateService
                         'id' => $priceModel->id,
                         'unit_price' => $priceModel->unit_price,
                         'is_active' => $priceModel->is_active,
-                        'effective_date' => $priceModel->effective_date
-                    ] : null
+                        'effective_date' => $priceModel->effective_date,
+                    ] : null,
                 ]);
-                
+
                 if ($priceModel && isset($priceModel->unit_price) && $priceModel->unit_price !== null && $priceModel->unit_price > 0) {
                     $unitCost = $priceModel->unit_price;
                     \Log::info('StockUpdateService: Using active price for MAC calculation in updateStockByRequestType', [
                         'item_id' => $item->item_id,
-                        'unit_price_used' => $unitCost
+                        'unit_price_used' => $unitCost,
                     ]);
                 } else {
                     // Fallback: try to get the latest price if no active price exists
@@ -526,15 +526,15 @@ class StockUpdateService
                             'id' => $fallbackPriceModel->id,
                             'unit_price' => $fallbackPriceModel->unit_price,
                             'is_active' => $fallbackPriceModel->is_active,
-                            'effective_date' => $fallbackPriceModel->effective_date
-                        ] : null
+                            'effective_date' => $fallbackPriceModel->effective_date,
+                        ] : null,
                     ]);
-                    
+
                     if ($fallbackPriceModel && isset($fallbackPriceModel->unit_price) && $fallbackPriceModel->unit_price !== null && $fallbackPriceModel->unit_price > 0) {
                         $unitCost = $fallbackPriceModel->unit_price;
                         \Log::info('StockUpdateService: Using fallback price for MAC calculation in updateStockByRequestType', [
                             'item_id' => $item->item_id,
-                            'unit_price_used' => $unitCost
+                            'unit_price_used' => $unitCost,
                         ]);
                     } else {
                         \Log::warning('No price found for item during stock update by request type', [
@@ -542,7 +542,7 @@ class StockUpdateService
                             'model_id' => $model->id,
                             'model_type' => get_class($model),
                             'price_model' => $priceModel ? $priceModel->toArray() : null,
-                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null
+                            'fallback_model' => $fallbackPriceModel ? $fallbackPriceModel->toArray() : null,
                         ]);
                     }
                 }
@@ -582,9 +582,9 @@ class StockUpdateService
                 'new_quantity' => $newQuantity,
                 'current_stock_after' => $newQuantity,
                 'old_mac' => $divisionStock->moving_average_cost,
-                'new_mac' => (int) round($newMovingAverageCost)
+                'new_mac' => (int) round($newMovingAverageCost),
             ]);
-            
+
             // Record the transaction for tracking purposes
             if (in_array(get_class($model), [AtkStockRequest::class, AtkStockUsage::class])) {
                 $this->stockTransactionService->recordTransactionOnly(
@@ -597,12 +597,12 @@ class StockUpdateService
                 );
             }
         }
-        
+
         // For AtkStockUsage reduction operations, also handle budget deduction
         if (get_class($model) === AtkStockUsage::class && in_array($operation, ['reduction', 'decrease'])) {
             // Get the potential cost from the model
             $totalCost = $model->potential_cost ?? 0;
-            
+
             // Deduct the cost from the division's budget
             $this->budgetService->deductFromBudget(
                 $model->division_id,
@@ -625,7 +625,7 @@ class StockUpdateService
             'transfer_number' => $transferStock->transfer_number,
             'source_division_id' => $transferStock->source_division_id,
             'requesting_division_id' => $transferStock->requesting_division_id,
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ]);
 
         // Load the transfer stock items to ensure they are available
@@ -643,7 +643,7 @@ class StockUpdateService
                 'item_id' => $itemId,
                 'quantity' => $quantity,
                 'source_division_id' => $sourceDivisionId,
-                'requesting_division_id' => $requestingDivisionId
+                'requesting_division_id' => $requestingDivisionId,
             ]);
 
             // Reduce stock from source division
@@ -684,7 +684,7 @@ class StockUpdateService
                     'required_quantity' => $quantity,
                     'available_quantity' => $sourceStockQuantity,
                     'source_division_id' => $sourceDivisionId,
-                    'transfer_number' => $transferStock->transfer_number
+                    'transfer_number' => $transferStock->transfer_number,
                 ]);
 
                 // Continue to the next item instead of stopping the whole process

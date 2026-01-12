@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\AtkItemPriceHistories\Tables;
 
-use App\Models\AtkItem;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class AtkItemPriceHistoriesTable
 {
@@ -19,11 +17,11 @@ class AtkItemPriceHistoriesTable
                 \Filament\Tables\Columns\TextColumn::make('old_price')
                     ->label('Old Price')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'N/A'),
+                    ->formatStateUsing(fn ($state) => $state ? 'Rp '.number_format($state, 0, ',', '.') : 'N/A'),
                 \Filament\Tables\Columns\TextColumn::make('new_price')
                     ->label('New Price')
                     ->sortable()
-                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                    ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                 \Filament\Tables\Columns\TextColumn::make('effective_date')
                     ->label('Effective Date')
                     ->date()

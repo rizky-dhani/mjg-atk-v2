@@ -32,7 +32,7 @@ class AtkStockUsageItem extends Model
     {
         return $this->belongsTo(AtkCategory::class, 'category_id');
     }
-    
+
     /**
      * Update the parent AtkStockUsage potential_cost after saving or deleting
      */
@@ -44,7 +44,7 @@ class AtkStockUsageItem extends Model
                 $usage->updatePotentialCost();
             }
         });
-        
+
         static::deleted(function ($item) {
             $usage = $item->usage;
             if ($usage) {

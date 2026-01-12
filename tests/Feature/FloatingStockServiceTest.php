@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\AtkItem;
 use App\Models\AtkCategory;
-use App\Models\UserDivision;
+use App\Models\AtkItem;
 use App\Models\AtkStockRequest;
+use App\Models\UserDivision;
 use App\Services\FloatingStockService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -18,7 +18,7 @@ beforeEach(function () {
         'unit_of_measure' => 'pcs',
     ]);
     $this->division = UserDivision::create(['name' => 'IT', 'initial' => 'IT']);
-    $this->service = new FloatingStockService();
+    $this->service = new FloatingStockService;
 });
 
 it('stores source_division_id for incoming transactions', function () {
@@ -54,7 +54,7 @@ it('stores destination_division_id for outgoing transactions', function () {
 
 it('infers source_division_id from transactionSource for incoming', function () {
     $staff = \App\Models\User::factory()->create(['division_id' => $this->division->id]);
-    
+
     $request = AtkStockRequest::create([
         'request_number' => 'REQ-001',
         'requester_id' => $staff->id,
@@ -76,7 +76,7 @@ it('infers source_division_id from transactionSource for incoming', function () 
 
 it('infers destination_division_id from transactionSource for outgoing', function () {
     $staff = \App\Models\User::factory()->create(['division_id' => $this->division->id]);
-    
+
     $usage = \App\Models\AtkStockUsage::create([
         'request_number' => 'USG-001',
         'requester_id' => $staff->id,
@@ -95,4 +95,3 @@ it('infers destination_division_id from transactionSource for outgoing', functio
     expect($trx->source_division_id)->toBeNull();
     expect($trx->destination_division_id)->toBe($this->division->id);
 });
-

@@ -50,7 +50,7 @@ class StockUsageService
                 $divisionStock = AtkDivisionStock::where('division_id', $data['division_id'])
                     ->where('item_id', $itemData['item_id'])
                     ->first();
-                
+
                 $movingAverageCost = $divisionStock ? $divisionStock->moving_average_cost : 0;
 
                 $usageItem = new AtkStockUsageItem([

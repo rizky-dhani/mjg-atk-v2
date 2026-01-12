@@ -51,6 +51,4 @@ class AtkBudgeting extends Model
     {
         return $this->remaining_amount >= $amount;
     }
-    
-
 }

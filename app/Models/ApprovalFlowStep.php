@@ -13,7 +13,7 @@ class ApprovalFlowStep extends Model
         'role_id',
         'division_id',
         'description',
-        'allow_resubmission'
+        'allow_resubmission',
     ];
 
     protected $casts = [
@@ -29,7 +29,7 @@ class ApprovalFlowStep extends Model
     {
         return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'role_id');
     }
-    
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_approval_flow_steps', 'step_id', 'user_id');
@@ -48,6 +48,7 @@ class ApprovalFlowStep extends Model
         if (is_null($this->division_id)) {
             return true; // This will be handled at the request level
         }
+
         // Otherwise, check if it matches the specific division
         return $this->division_id == $divisionId;
     }

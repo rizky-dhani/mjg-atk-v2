@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AtkItemPrices\Schemas;
 
-use Filament\Infolists\Components\Component;
 use Filament\Schemas\Schema;
 
 class AtkItemPriceInfolist
@@ -18,7 +17,7 @@ class AtkItemPriceInfolist
                         ->label('Category'),
                     \Filament\Infolists\Components\TextEntry::make('unit_price')
                         ->label('Unit Price')
-                        ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                        ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                     \Filament\Infolists\Components\TextEntry::make('effective_date')
                         ->label('Effective Date')
                         ->date(),

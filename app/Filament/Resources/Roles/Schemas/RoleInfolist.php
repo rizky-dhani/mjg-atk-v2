@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\Roles\Schemas;
 
-use Filament\Schemas\Schema;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
 
 class RoleInfolist
 {
@@ -18,10 +18,10 @@ class RoleInfolist
                         Grid::make(2)
                             ->schema([
                                 TextEntry::make('name'),
-                                TextEntry::make('guard_name')
-                            ])
+                                TextEntry::make('guard_name'),
+                            ]),
                     ])
-                    ->columnSpanFull()
+                    ->columnSpanFull(),
             ]);
     }
 }

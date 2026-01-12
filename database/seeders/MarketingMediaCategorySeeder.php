@@ -17,27 +17,27 @@ class MarketingMediaCategorySeeder extends Seeder
         $categories = [
             [
                 'name' => 'Banner & Signage',
-                'description' => 'Banners, signs, and promotional displays'
+                'description' => 'Banners, signs, and promotional displays',
             ],
             [
                 'name' => 'Print Materials',
-                'description' => 'Brochures, leaflets, business cards, and other printed materials'
+                'description' => 'Brochures, leaflets, business cards, and other printed materials',
             ],
             [
                 'name' => 'Promotional Items',
-                'description' => 'Branded merchandise and giveaways'
+                'description' => 'Branded merchandise and giveaways',
             ],
             [
                 'name' => 'Digital Media',
-                'description' => 'Digital marketing materials and assets'
+                'description' => 'Digital marketing materials and assets',
             ],
             [
                 'name' => 'Display Materials',
-                'description' => 'Point of sale displays and exhibition materials'
+                'description' => 'Point of sale displays and exhibition materials',
             ],
             [
                 'name' => 'Marketing Kits',
-                'description' => 'Complete marketing packages and kits'
+                'description' => 'Complete marketing packages and kits',
             ],
         ];
 

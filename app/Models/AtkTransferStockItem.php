@@ -20,8 +20,6 @@ class AtkTransferStockItem extends Model
         return $this->belongsTo(AtkTransferStock::class, 'transfer_stock_id');
     }
 
-
-
     public function itemCategory(): BelongsTo
     {
         return $this->belongsTo(\App\Models\AtkCategory::class, 'item_category_id');

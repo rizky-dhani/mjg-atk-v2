@@ -2,22 +2,19 @@
 
 namespace Database\Seeders;
 
-use App\Models\AtkCategory;
+use App\Models\AtkBudgeting;
 use App\Models\AtkItem;
-use App\Models\UserDivision;
-use App\Models\AtkDivisionStock;
+use App\Models\AtkItemPrice;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockRequestItem;
+use App\Models\AtkStockTransaction;
 use App\Models\AtkStockUsage;
 use App\Models\AtkStockUsageItem;
-use App\Models\AtkStockTransaction;
-use App\Models\AtkBudgeting;
-use App\Models\AtkItemPrice;
-use App\Services\StockUpdateService;
-use App\Services\StockTransactionService;
+use App\Models\UserDivision;
 use App\Services\BudgetService;
+use App\Services\StockTransactionService;
+use App\Services\StockUpdateService;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class MovingAverageCostDemoSeeder extends Seeder
 {
@@ -25,13 +22,13 @@ class MovingAverageCostDemoSeeder extends Seeder
     {
         // Get Information Technology Division (should already exist from UserDivisionSeeder)
         $division = UserDivision::where('initial', 'ITD')->first();
-        
-        if (!$division) {
+
+        if (! $division) {
             // Fallback: create the division with proper initial if it doesn't exist
             $division = UserDivision::create([
                 'name' => 'Information Technology',
                 'initial' => 'ITD',
-                'description' => 'Information Technology Division'
+                'description' => 'Information Technology Division',
             ]);
         }
 
@@ -57,9 +54,10 @@ class MovingAverageCostDemoSeeder extends Seeder
 
         // Get some sample items from the database
         $items = AtkItem::limit(3)->get();
-        
+
         if ($items->isEmpty()) {
             echo "No ATK items found. Please run AtkItemSeeder first.\n";
+
             return;
         }
 
@@ -73,18 +71,18 @@ class MovingAverageCostDemoSeeder extends Seeder
         $usbPrice = AtkItemPrice::where('item_id', $usbItem->id)->where('is_active', true)->first();
 
         // Use default prices if none found or if price is null
-        $penUnitPrice = $penPrice && !is_null($penPrice->price) ? (int) $penPrice->price : 5000;
-        $notebookUnitPrice = $notebookPrice && !is_null($notebookPrice->price) ? (int) $notebookPrice->price : 15000;
-        $usbUnitPrice = $usbPrice && !is_null($usbPrice->price) ? (int) $usbPrice->price : 75000;
+        $penUnitPrice = $penPrice && ! is_null($penPrice->price) ? (int) $penPrice->price : 5000;
+        $notebookUnitPrice = $notebookPrice && ! is_null($notebookPrice->price) ? (int) $notebookPrice->price : 15000;
+        $usbUnitPrice = $usbPrice && ! is_null($usbPrice->price) ? (int) $usbPrice->price : 75000;
 
         // Scenario 1: Initial stock request (addition) - Pen
-        echo "SCENARIO 1: Initial Stock Request for " . $penItem->name . "\n";
+        echo 'SCENARIO 1: Initial Stock Request for '.$penItem->name."\n";
         echo "------------------------------------------\n";
-        
+
         $stockRequest1 = AtkStockRequest::create([
             'requester_id' => 1,
             'division_id' => $division->id,
-            'notes' => 'Initial stock request for ' . $penItem->name,
+            'notes' => 'Initial stock request for '.$penItem->name,
             'request_type' => 'addition',
         ]);
 
@@ -100,13 +98,13 @@ class MovingAverageCostDemoSeeder extends Seeder
         $currentStock = $divisionStockPen->current_stock;
         $stockSetting = $divisionStockPen->getSetting();
         $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX;
-        
+
         $requestedQuantity = 100;
         $actualQuantity = min($requestedQuantity, $maxLimit - $currentStock);
         if ($actualQuantity < $requestedQuantity) {
             echo "Requested quantity reduced from {$requestedQuantity} to {$actualQuantity} to respect max limit of {$maxLimit}\n";
         }
-        
+
         // Simulate the stock addition with the actual quantity that respects limits
         $stockTransactionService->recordTransaction(
             $division->id,
@@ -120,18 +118,18 @@ class MovingAverageCostDemoSeeder extends Seeder
         // Refresh to get the updated stock and MAC after the transaction
         $divisionStockPen->refresh();
 
-        echo "Added 100 " . $penItem->name . " at Rp. " . number_format($penUnitPrice, 0, ',', '.') . " each\n";
-        echo "New Moving Average Cost: Rp. " . number_format($divisionStockPen->moving_average_cost, 0, ',', '.') . "\n";
-        echo "Current Stock: " . $divisionStockPen->current_stock . "\n\n";
+        echo 'Added 100 '.$penItem->name.' at Rp. '.number_format($penUnitPrice, 0, ',', '.')." each\n";
+        echo 'New Moving Average Cost: Rp. '.number_format($divisionStockPen->moving_average_cost, 0, ',', '.')."\n";
+        echo 'Current Stock: '.$divisionStockPen->current_stock."\n\n";
 
         // Scenario 2: Additional stock request with different price - Pen
-        echo "SCENARIO 2: Additional Stock Request for " . $penItem->name . " at Different Price\n";
+        echo 'SCENARIO 2: Additional Stock Request for '.$penItem->name." at Different Price\n";
         echo "--------------------------------------------------------------\n";
 
         $stockRequest2 = AtkStockRequest::create([
             'requester_id' => 1,
             'division_id' => $division->id,
-            'notes' => 'Additional stock request for ' . $penItem->name . ' at different price',
+            'notes' => 'Additional stock request for '.$penItem->name.' at different price',
             'request_type' => 'addition',
         ]);
 
@@ -148,13 +146,13 @@ class MovingAverageCostDemoSeeder extends Seeder
         $currentStock = $divisionStockPen->current_stock;
         $stockSetting = $divisionStockPen->getSetting();
         $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX;
-        
+
         $requestedQuantity = 50;
         $actualQuantity = min($requestedQuantity, $maxLimit - $currentStock);
         if ($actualQuantity < $requestedQuantity) {
             echo "Requested quantity reduced from {$requestedQuantity} to {$actualQuantity} to respect max limit of {$maxLimit}\n";
         }
-        
+
         // Simulate the stock addition - use a different price (10% discount)
         $discountedPrice = round($penUnitPrice * 0.9);
         $stockTransactionService->recordTransaction(
@@ -168,26 +166,26 @@ class MovingAverageCostDemoSeeder extends Seeder
 
         // Refresh to get latest values after the transaction
         $divisionStockPen->refresh();
-        
+
         // The transaction service has already handled the update with max limit check, just refresh
         $divisionStockPen->refresh();
 
-        echo "Added 50 more " . $penItem->name . " at Rp. " . number_format($discountedPrice, 0, ',', '.') . " each\n";
-        echo "Old MAC: Rp. " . number_format($oldMac, 0, ',', '.') . "\n";
-        echo "New Moving Average Cost: Rp. " . number_format($divisionStockPen->moving_average_cost, 0, ',', '.') . "\n";
-        echo "Current Stock: " . $divisionStockPen->current_stock . "\n\n";
+        echo 'Added 50 more '.$penItem->name.' at Rp. '.number_format($discountedPrice, 0, ',', '.')." each\n";
+        echo 'Old MAC: Rp. '.number_format($oldMac, 0, ',', '.')."\n";
+        echo 'New Moving Average Cost: Rp. '.number_format($divisionStockPen->moving_average_cost, 0, ',', '.')."\n";
+        echo 'Current Stock: '.$divisionStockPen->current_stock."\n\n";
 
         // Show calculation breakdown for the actual quantities processed
         $actualQuantity1 = min(100, $maxLimit - 0); // First transaction (starts from 0 stock)
         $actualQuantity2 = min(50, $maxLimit - $actualQuantity1); // Second transaction
-        
+
         $totalValue = ($actualQuantity1 * $penUnitPrice) + ($actualQuantity2 * $discountedPrice);  // Value from actual processed quantities
         $totalQuantity = $actualQuantity1 + $actualQuantity2;  // Total actual quantity
         $calculatedMac = $totalValue / $totalQuantity;
         echo "Calculation Verification:\n";
-        echo "Total value: ({$actualQuantity1} × " . number_format($penUnitPrice, 0, ',', '.') . ") + ({$actualQuantity2} × " . number_format($discountedPrice, 0, ',', '.') . ") = " . number_format($totalValue, 0, ',', '.') . "\n";
-        echo "Total quantity: {$actualQuantity1} + {$actualQuantity2} = " . $totalQuantity . "\n";
-        echo "MAC = " . number_format($totalValue, 0, ',', '.') . " ÷ " . $totalQuantity . " = " . number_format($calculatedMac, 0, ',', '.') . "\n\n";
+        echo "Total value: ({$actualQuantity1} × ".number_format($penUnitPrice, 0, ',', '.').") + ({$actualQuantity2} × ".number_format($discountedPrice, 0, ',', '.').') = '.number_format($totalValue, 0, ',', '.')."\n";
+        echo "Total quantity: {$actualQuantity1} + {$actualQuantity2} = ".$totalQuantity."\n";
+        echo 'MAC = '.number_format($totalValue, 0, ',', '.').' ÷ '.$totalQuantity.' = '.number_format($calculatedMac, 0, ',', '.')."\n\n";
 
         // Scenario 3: Stock usage (reduction)
         echo "SCENARIO 3: Stock Usage\n";
@@ -196,7 +194,7 @@ class MovingAverageCostDemoSeeder extends Seeder
         $stockUsage1 = AtkStockUsage::create([
             'requester_id' => 1,
             'division_id' => $division->id,
-            'notes' => 'Usage of ' . $penItem->name . ' for internal meeting',
+            'notes' => 'Usage of '.$penItem->name.' for internal meeting',
             'request_type' => 'usage',
         ]);
 
@@ -235,9 +233,9 @@ class MovingAverageCostDemoSeeder extends Seeder
             ]);
         }
 
-        echo "Used 30 " . $penItem->name . " at MAC of Rp. " . number_format($divisionStockPen->moving_average_cost, 0, ',', '.') . " each\n";
-        echo "Cost deducted from budget: Rp. " . number_format($costToDeduct, 0, ',', '.') . "\n";
-        echo "Current Stock after usage: " . $divisionStockPen->current_stock . "\n\n";
+        echo 'Used 30 '.$penItem->name.' at MAC of Rp. '.number_format($divisionStockPen->moving_average_cost, 0, ',', '.')." each\n";
+        echo 'Cost deducted from budget: Rp. '.number_format($costToDeduct, 0, ',', '.')."\n";
+        echo 'Current Stock after usage: '.$divisionStockPen->current_stock."\n\n";
 
         // Scenario 4: Another stock request at higher price
         echo "SCENARIO 4: Another Stock Request at Higher Price\n";
@@ -246,7 +244,7 @@ class MovingAverageCostDemoSeeder extends Seeder
         $stockRequest3 = AtkStockRequest::create([
             'requester_id' => 1,
             'division_id' => $division->id,
-            'notes' => 'Additional stock request for ' . $penItem->name . ' at higher price',
+            'notes' => 'Additional stock request for '.$penItem->name.' at higher price',
             'request_type' => 'addition',
         ]);
 
@@ -262,13 +260,13 @@ class MovingAverageCostDemoSeeder extends Seeder
         $currentStock = $divisionStockPen->current_stock;
         $stockSetting = $divisionStockPen->getSetting();
         $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX;
-        
+
         $requestedQuantity = 80;
         $actualQuantity = min($requestedQuantity, $maxLimit - $currentStock);
         if ($actualQuantity < $requestedQuantity) {
             echo "Requested quantity reduced from {$requestedQuantity} to {$actualQuantity} to respect max limit of {$maxLimit}\n";
         }
-        
+
         // Record the transaction - use a higher price (10% premium)
         $premiumPrice = round($penUnitPrice * 1.1);
         $stockTransactionService->recordTransaction(
@@ -283,20 +281,20 @@ class MovingAverageCostDemoSeeder extends Seeder
         // The transaction service has already handled the update with max limit check, just refresh
         $divisionStockPen->refresh();
 
-        echo "Added 80 more " . $penItem->name . " at Rp. " . number_format($premiumPrice, 0, ',', '.') . " each\n";
-        echo "Old MAC: Rp. " . number_format($oldMac, 0, ',', '.') . "\n";
-        echo "New Moving Average Cost: Rp. " . number_format($divisionStockPen->moving_average_cost, 0, ',', '.') . "\n";
-        echo "Current Stock: " . $divisionStockPen->current_stock . "\n\n";
+        echo 'Added 80 more '.$penItem->name.' at Rp. '.number_format($premiumPrice, 0, ',', '.')." each\n";
+        echo 'Old MAC: Rp. '.number_format($oldMac, 0, ',', '.')."\n";
+        echo 'New Moving Average Cost: Rp. '.number_format($divisionStockPen->moving_average_cost, 0, ',', '.')."\n";
+        echo 'Current Stock: '.$divisionStockPen->current_stock."\n\n";
 
         // Show calculation breakdown with actual values after transaction
         $currentDivStock = $divisionStockPen->refresh();
         $totalValue = ($currentDivStock->current_stock * $currentDivStock->moving_average_cost);
         $totalQuantity = $currentDivStock->current_stock;
-        
+
         // Note: This calculation verifies the current state, not a formula application
         echo "Calculation Verification:\n";
-        echo "Current stock value: " . $currentDivStock->current_stock . " at MAC: Rp. " . number_format($currentDivStock->moving_average_cost, 0, ',', '.') . "\n";
-        echo "Total value: " . $currentDivStock->current_stock . " × Rp. " . number_format($currentDivStock->moving_average_cost, 0, ',', '.') . " = Rp. " . number_format($totalValue, 0, ',', '.') . "\n\n";
+        echo 'Current stock value: '.$currentDivStock->current_stock.' at MAC: Rp. '.number_format($currentDivStock->moving_average_cost, 0, ',', '.')."\n";
+        echo 'Total value: '.$currentDivStock->current_stock.' × Rp. '.number_format($currentDivStock->moving_average_cost, 0, ',', '.').' = Rp. '.number_format($totalValue, 0, ',', '.')."\n\n";
 
         // Scenario 5: Check transaction history
         echo "SCENARIO 5: Transaction History\n";
@@ -307,10 +305,10 @@ class MovingAverageCostDemoSeeder extends Seeder
             ->orderBy('created_at', 'asc')
             ->get();
 
-        echo "Transaction History for " . $penItem->name . ":\n";
+        echo 'Transaction History for '.$penItem->name.":\n";
         foreach ($transactions as $transaction) {
             echo "  - Type: {$transaction->type}, Quantity: {$transaction->quantity}, ";
-            echo "Unit Cost: Rp. " . number_format($transaction->unit_cost, 0, ',', '.') . ", MAC at time: Rp. " . number_format($transaction->mac_snapshot, 0, ',', '.') . ", ";
+            echo 'Unit Cost: Rp. '.number_format($transaction->unit_cost, 0, ',', '.').', MAC at time: Rp. '.number_format($transaction->mac_snapshot, 0, ',', '.').', ';
             echo "Balance after: {$transaction->balance_snapshot}\n";
         }
 

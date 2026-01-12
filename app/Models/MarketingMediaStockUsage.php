@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class MarketingMediaStockUsage extends Model
 {
     use StockUsageModelTrait;
-    
+
     protected $fillable = [
         'request_number',
         'requester_id',

@@ -10,7 +10,9 @@ use Illuminate\Support\Facades\Auth;
 class AtkStockUsageStatus extends StatsOverviewWidget
 {
     protected ?string $heading = 'Pengeluaran ATK';
+
     protected static ?int $sort = 3;
+
     protected function getStats(): array
     {
         $user = Auth::user();
@@ -26,27 +28,27 @@ class AtkStockUsageStatus extends StatsOverviewWidget
 
             // Count records where the latest approval history action is 'approved'
             $pendingCount = AtkStockUsage::where('division_id', $divisionId)
-                ->whereDoesntHave('approvalHistory', function($query){
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'rejected');
                 })
-                ->whereDoesntHave('approvalHistory', function($query){
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');
                 })
-                ->whereDoesntHave('approvalHistory', function($query){
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
                 })
                 ->count();
 
             // Count records where the latest approval history action is 'partially_approved'
             $onProgressCount = AtkStockUsage::where('division_id', $divisionId)
-                ->whereHas('approvalHistory', function($query){
+                ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');
                 })
                 ->count();
 
             // Count records that either have no approval history or the latest approval history action is not 'approved' or 'rejected'
             $approvedCount = AtkStockUsage::where('division_id', $divisionId)
-                ->whereHas('approvalHistory', function($query){
+                ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
                 })
                 ->count();

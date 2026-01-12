@@ -8,9 +8,6 @@ use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkItem;
 use App\Models\UserDivision;
 use Illuminate\Database\Seeder;
-use App\Models\CompanyDivision;
-use App\Models\OfficeStationeryItem;
-use App\Models\OfficeStationeryDivisionInventorySetting;
 
 class AtkDivisionStockSettingSeeder extends Seeder
 {

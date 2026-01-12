@@ -21,8 +21,7 @@ class AtkFloatingStockForm
                     ->searchable()
                     ->reactive()
                     ->disabledOn('edit')
-                    ->afterStateUpdated(fn ($state, callable $set) => 
-                        $set('category_id', AtkItem::find($state)?->category_id)
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('category_id', AtkItem::find($state)?->category_id)
                     ),
                 Select::make('category_id')
                     ->label('Category')

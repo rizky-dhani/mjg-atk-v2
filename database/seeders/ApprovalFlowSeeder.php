@@ -247,7 +247,7 @@ class ApprovalFlowSeeder extends Seeder
                 'allow_resubmission' => true,
             ],
         ]);
-        
+
         // Transfer Stock - Flow ID 5
         ApprovalFlowStep::insert([
             [

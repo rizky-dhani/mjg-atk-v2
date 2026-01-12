@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Schemas;
 
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AtkTransferStockInfolist

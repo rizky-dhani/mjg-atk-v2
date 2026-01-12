@@ -10,6 +10,7 @@ use App\Services\ApprovalService;
 use App\Services\ApprovalValidationService;
 use App\Services\StockUpdateService;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -83,7 +84,7 @@ class ApprovalAction
             ->modalSubmitActionLabel('Setujui')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
             ->schema(fn (Model $record) => [
-                \Filament\Forms\Components\Section::make('Ringkasan Permintaan')
+                Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')
@@ -153,7 +154,7 @@ class ApprovalAction
             ->modalSubmitActionLabel('Tolak')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
             ->schema(fn (Model $record) => [
-                \Filament\Forms\Components\Section::make('Ringkasan Permintaan')
+                Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')

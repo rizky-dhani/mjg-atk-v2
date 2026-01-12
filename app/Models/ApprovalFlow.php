@@ -10,7 +10,7 @@ class ApprovalFlow extends Model
         'name',
         'description',
         'model_type',
-        'is_active'
+        'is_active',
     ];
 
     public function approvalFlowSteps()

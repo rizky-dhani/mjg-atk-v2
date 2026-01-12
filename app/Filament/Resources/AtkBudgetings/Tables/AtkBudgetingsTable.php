@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\AtkBudgetings\Tables;
 
-use Filament\Tables\Table;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
 class AtkBudgetingsTable
@@ -43,7 +43,8 @@ class AtkBudgetingsTable
                             return '0%';
                         }
                         $utilization = ($record->used_amount / $record->budget_amount) * 100;
-                        return number_format($utilization, 2) . '%';
+
+                        return number_format($utilization, 2).'%';
                     })
                     ->sortable(),
             ])

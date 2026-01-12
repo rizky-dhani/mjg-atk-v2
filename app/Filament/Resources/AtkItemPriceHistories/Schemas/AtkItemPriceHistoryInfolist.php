@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\AtkItemPriceHistories\Schemas;
 
-use Filament\Infolists\Components\Component;
 use Filament\Schemas\Schema;
 
 class AtkItemPriceHistoryInfolist
@@ -16,10 +15,10 @@ class AtkItemPriceHistoryInfolist
                         ->label('Item'),
                     \Filament\Infolists\Components\TextEntry::make('old_price')
                         ->label('Old Price')
-                        ->formatStateUsing(fn ($state) => $state ? 'Rp ' . number_format($state, 0, ',', '.') : 'N/A'),
+                        ->formatStateUsing(fn ($state) => $state ? 'Rp '.number_format($state, 0, ',', '.') : 'N/A'),
                     \Filament\Infolists\Components\TextEntry::make('new_price')
                         ->label('New Price')
-                        ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                        ->formatStateUsing(fn ($state) => 'Rp '.number_format($state, 0, ',', '.')),
                     \Filament\Infolists\Components\TextEntry::make('effective_date')
                         ->label('Effective Date')
                         ->date(),

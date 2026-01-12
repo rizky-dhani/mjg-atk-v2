@@ -10,10 +10,12 @@ use Filament\Tables\Table;
 class UsersRelationManager extends RelationManager
 {
     protected static string $relationship = 'users';
-    public function isReadOnly(): bool 
+
+    public function isReadOnly(): bool
     {
         return false;
     }
+
     protected static ?string $relatedResource = UserResource::class;
 
     public function table(Table $table): Table

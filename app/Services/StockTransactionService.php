@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\AtkDivisionStock;
-use App\Models\AtkStockTransaction;
 use App\Models\AtkStockRequest;
+use App\Models\AtkStockTransaction;
 use App\Models\AtkStockUsage;
 use Illuminate\Support\Facades\DB;
 
@@ -13,14 +13,8 @@ class StockTransactionService
     /**
      * Record a stock transaction and update the moving average cost
      *
-     * @param int $divisionId
-     * @param int $itemId
-     * @param string $type
-     * @param int $quantity
-     * @param float $unitCost
-     * @param object $transactionSource
-     * @param string|null $notes
-     * @return AtkStockTransaction
+     * @param  float  $unitCost
+     * @param  object  $transactionSource
      */
     public function recordTransaction(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource, ?string $notes = null): AtkStockTransaction
     {
@@ -44,15 +38,17 @@ class StockTransactionService
                 // Check max limit setting if it exists
                 $stockSetting = $divisionStock->getSetting();
                 $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX; // Use a large number if no limit set
-                
+
                 $newBalance += $quantity;
-                
+
                 // Ensure we don't exceed the max limit
                 if ($newBalance > $maxLimit) {
                     $newBalance = $maxLimit;
                     // Adjust quantity to respect the limit
                     $quantity = $maxLimit - $divisionStock->current_stock;
-                    if ($quantity < 0) $quantity = 0; // Prevent negative quantity
+                    if ($quantity < 0) {
+                        $quantity = 0;
+                    } // Prevent negative quantity
                 }
             } elseif ($type === 'usage') {
                 $newBalance = max(0, $newBalance - $quantity); // Prevent negative stock
@@ -62,15 +58,17 @@ class StockTransactionService
                     // Check max limit setting if it exists
                     $stockSetting = $divisionStock->getSetting();
                     $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX; // Use a large number if no limit set
-                    
+
                     $newBalance += $quantity;
-                    
+
                     // Ensure we don't exceed the max limit
                     if ($newBalance > $maxLimit) {
                         $newBalance = $maxLimit;
                         // Adjust quantity to respect the limit
                         $quantity = $maxLimit - $divisionStock->current_stock;
-                        if ($quantity < 0) $quantity = 0; // Prevent negative quantity
+                        if ($quantity < 0) {
+                            $quantity = 0;
+                        } // Prevent negative quantity
                     }
                 } else {
                     $newBalance = max(0, $newBalance + $quantity); // quantity is negative for reductions
@@ -80,15 +78,17 @@ class StockTransactionService
                 if ($quantity > 0) {
                     $stockSetting = $divisionStock->getSetting();
                     $maxLimit = $stockSetting ? $stockSetting->max_limit : PHP_INT_MAX; // Use a large number if no limit set
-                    
+
                     $newBalance = $newBalance + $quantity;
-                    
+
                     // Ensure we don't exceed the max limit
                     if ($newBalance > $maxLimit) {
                         $newBalance = $maxLimit;
                         // Adjust quantity to respect the limit
                         $quantity = $maxLimit - $divisionStock->current_stock;
-                        if ($quantity < 0) $quantity = 0; // Prevent negative quantity
+                        if ($quantity < 0) {
+                            $quantity = 0;
+                        } // Prevent negative quantity
                     }
                 } else {
                     // For transfer reducing stock
@@ -152,10 +152,8 @@ class StockTransactionService
      * Calculate the new moving average cost using the formula:
      * New MAC = ((Old Stock × Old MAC) + (Incoming Stock × Incoming Unit Cost)) / (Old Stock + Incoming Stock)
      *
-     * @param int $oldStock
-     * @param float $oldMac
-     * @param int $incomingStock
-     * @param float $incomingUnitCost
+     * @param  float  $oldMac
+     * @param  float  $incomingUnitCost
      * @return float
      */
     public function calculateNewMovingAverageCost(int $oldStock, int $oldMac, int $incomingStock, int $incomingUnitCost): int
@@ -166,7 +164,7 @@ class StockTransactionService
 
         $totalValue = ($oldStock * $oldMac) + ($incomingStock * $incomingUnitCost);
         $totalQuantity = $oldStock + $incomingStock;
-        
+
         // Round to integer since we're storing as integer
         return (int) round($totalValue / $totalQuantity);
     }
@@ -174,10 +172,6 @@ class StockTransactionService
     /**
      * Recalculate the moving average cost for all division stocks based on transaction history
      * This method can be used to rebuild MAC if needed
-     * 
-     * @param int $divisionId
-     * @param int $itemId
-     * @return int
      */
     public function recalculateMovingAverageCost(int $divisionId, int $itemId): int
     {
@@ -235,9 +229,6 @@ class StockTransactionService
 
     /**
      * Process a stock request by recording a transaction and updating stock
-     *
-     * @param AtkStockRequest $stockRequest
-     * @return void
      */
     public function processStockRequest(AtkStockRequest $stockRequest): void
     {
@@ -248,7 +239,7 @@ class StockTransactionService
             // This could come from AtkItemPrice or other cost source
             $priceModel = $item->item->latestPrice()->first();
             $unitCost = $priceModel?->price ?? 0;
-            
+
             $this->recordTransaction(
                 $stockRequest->division_id,
                 $item->item_id,
@@ -262,9 +253,6 @@ class StockTransactionService
 
     /**
      * Process a stock usage by recording a transaction and updating stock
-     *
-     * @param AtkStockUsage $stockUsage
-     * @return void
      */
     public function processStockUsage(AtkStockUsage $stockUsage): void
     {
@@ -277,7 +265,7 @@ class StockTransactionService
                 ->first();
 
             $unitCost = $divisionStock ? $divisionStock->moving_average_cost : 0;
-            
+
             $this->recordTransaction(
                 $stockUsage->division_id,
                 $item->item_id,
@@ -293,14 +281,8 @@ class StockTransactionService
      * Record only a transaction without updating the division stock
      * This is used when stock updates are handled separately to avoid duplication
      *
-     * @param int $divisionId
-     * @param int $itemId
-     * @param string $type
-     * @param int $quantity
-     * @param float $unitCost
-     * @param object $transactionSource
-     * @param string|null $notes
-     * @return AtkStockTransaction
+     * @param  float  $unitCost
+     * @param  object  $transactionSource
      */
     public function recordTransactionOnly(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource, ?string $notes = null): AtkStockTransaction
     {
@@ -333,8 +315,6 @@ class StockTransactionService
     /**
      * Get transaction history for a specific division and item
      *
-     * @param int $divisionId
-     * @param int $itemId
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getTransactionHistory(int $divisionId, int $itemId)
@@ -347,9 +327,6 @@ class StockTransactionService
 
     /**
      * Rollback a transaction if needed (e.g., when a request is cancelled or rejected)
-     *
-     * @param AtkStockTransaction $transaction
-     * @return bool
      */
     public function rollbackTransaction(AtkStockTransaction $transaction): bool
     {
@@ -359,7 +336,7 @@ class StockTransactionService
                 ->where('item_id', $transaction->item_id)
                 ->first();
 
-            if (!$divisionStock) {
+            if (! $divisionStock) {
                 return false;
             }
 

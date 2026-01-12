@@ -5,7 +5,6 @@ namespace App\Filament\Resources\MarketingMediaItems\Pages;
 use App\Filament\Resources\MarketingMediaItems\MarketingMediaItemResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Infolists\Infolist;
 
 class ViewMarketingMediaItem extends ViewRecord
 {

@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamp('performed_at')->useCurrent(); // When the action was performed
             $table->json('metadata')->nullable(); // Additional metadata like step number, etc.
             $table->timestamps();
-            
+
             // Indexes for better query performance
             $table->index(['approvable_type']);
             $table->index(['document_id']);

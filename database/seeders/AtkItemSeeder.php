@@ -2,12 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\AtkItem;
 use App\Models\AtkCategory;
+use App\Models\AtkItem;
 use Illuminate\Database\Seeder;
-use App\Models\OfficeStationeryItem;
-use App\Models\OfficeStationeryCategory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class AtkItemSeeder extends Seeder
 {

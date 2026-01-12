@@ -40,6 +40,7 @@ class AtkStockUsagesRelationManager extends RelationManager
                                 $totalCost += $stock->moving_average_cost * $item->quantity;
                             }
                         }
+
                         return $totalCost;
                     })
                     ->money('IDR'),

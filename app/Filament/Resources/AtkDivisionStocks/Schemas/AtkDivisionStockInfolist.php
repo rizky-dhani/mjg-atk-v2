@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\AtkDivisionStocks\Schemas;
 
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AtkDivisionStockInfolist
@@ -35,6 +35,7 @@ class AtkDivisionStockInfolist
                             ->label('Max Stock Limit')
                             ->getStateUsing(function ($record) {
                                 $setting = $record->getSetting();
+
                                 return $setting ? $setting->max_limit : 'N/A';
                             })
                             ->numeric()

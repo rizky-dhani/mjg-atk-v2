@@ -65,10 +65,8 @@ class AtkFloatingStock extends Model
 
     /**
      * Distribute multiple items to a specific division
-     * 
-     * @param array $items Array of ['item_id' => $id, 'quantity' => $qty]
-     * @param int $divisionId
-     * @param string|null $notes
+     *
+     * @param  array  $items  Array of ['item_id' => $id, 'quantity' => $qty]
      */
     public static function distributeBulkToDivision(array $items, int $divisionId, ?string $notes = null): void
     {

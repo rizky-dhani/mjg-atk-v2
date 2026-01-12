@@ -2,22 +2,18 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\RelationManagers;
 
-use Filament\Forms;
-use Filament\Tables;
-use App\Models\AtkItem;
-use Filament\Tables\Table;
 use App\Models\AtkCategory;
-use App\Models\UserDivision;
-use Filament\Schemas\Schema;
-use App\Models\AtkDivisionStock;
-use Filament\Actions\EditAction;
-use Filament\Actions\AttachAction;
+use App\Models\AtkItem;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
-use App\Models\AtkTransferStockItem;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables;
+use Filament\Tables\Table;
 
 class AtkTransferStockItemsRelationManager extends RelationManager
 {

@@ -4,9 +4,9 @@ namespace App\Filament\Actions;
 
 use Filament\Actions\Action as BaseAction;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\File;
 
 class GenerateModelPermissionsAction
 {
@@ -29,8 +29,8 @@ class GenerateModelPermissionsAction
     {
         // Dynamically get all PHP files from the app/Models directory
         $modelPath = app_path('Models');
-        $files = File::glob($modelPath . '/*.php');
-        
+        $files = File::glob($modelPath.'/*.php');
+
         $models = [];
         foreach ($files as $file) {
             $fileName = basename($file, '.php');
@@ -45,15 +45,15 @@ class GenerateModelPermissionsAction
 
         foreach ($models as $model) {
             $modelPermissions = [
-                'viewAny' => 'view-any ' . Str::kebab($model),
-                'view' => 'view ' . Str::kebab($model),
-                'create' => 'create ' . Str::kebab($model),
-                'edit' => 'edit ' . Str::kebab($model),
-                'delete' => 'delete ' . Str::kebab($model),
+                'viewAny' => 'view-any '.Str::kebab($model),
+                'view' => 'view '.Str::kebab($model),
+                'create' => 'create '.Str::kebab($model),
+                'edit' => 'edit '.Str::kebab($model),
+                'delete' => 'delete '.Str::kebab($model),
             ];
 
             foreach ($modelPermissions as $type => $permissionName) {
-                if (!Permission::where('name', $permissionName)->exists()) {
+                if (! Permission::where('name', $permissionName)->exists()) {
                     Permission::create(['name' => $permissionName]);
                     $generatedCount++;
                 } else {

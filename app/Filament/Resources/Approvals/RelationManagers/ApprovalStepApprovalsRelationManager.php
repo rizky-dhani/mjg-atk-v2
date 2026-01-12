@@ -11,8 +11,8 @@ use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -21,10 +21,12 @@ use Filament\Tables\Table;
 class ApprovalStepApprovalsRelationManager extends RelationManager
 {
     protected static string $relationship = 'approvalStepApprovals';
+
     public function isReadOnly(): bool
     {
         return false;
     }
+
     public function form(Schema $schema): Schema
     {
         return $schema

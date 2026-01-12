@@ -22,7 +22,7 @@ class MarketingMediaStockRequestItem extends Model
     {
         return $this->belongsTo(MarketingMediaItem::class, 'item_id');
     }
-    
+
     public function category()
     {
         return $this->belongsTo(MarketingMediaCategory::class, 'category_id');

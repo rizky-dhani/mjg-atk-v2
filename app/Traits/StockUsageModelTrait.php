@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use App\Helpers\StockNumberGenerator;
 use App\Models\Approval;
-use App\Models\ApprovalFlow;
 use App\Models\ApprovalHistory;
 use App\Models\AtkStockUsage;
 use App\Models\MarketingMediaStockUsage;
@@ -19,7 +18,7 @@ trait StockUsageModelTrait
             if (empty($model->request_number)) {
                 // Generate request number using the appropriate helper based on model type
                 $modelClass = get_class($model);
-                
+
                 if ($modelClass === AtkStockUsage::class) {
                     $model->request_number = StockNumberGenerator::generateOfficeStationeryUsageNumber($model->division_id);
                 } elseif ($modelClass === MarketingMediaStockUsage::class) {

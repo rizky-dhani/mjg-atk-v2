@@ -2,12 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\AtkBudgeting;
-use App\Models\UserDivision;
+use App\Models\AtkDivisionStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
-use App\Models\AtkDivisionStock;
-use Illuminate\Support\Facades\DB;
 
 class BudgetValidationService
 {
@@ -25,18 +22,18 @@ class BudgetValidationService
     {
         $divisionId = $request->division_id;
         $fiscalYear = $request->created_at->year ?? now()->year;
-        
+
         // Calculate total cost of the request items using moving_average_cost from AtkDivisionStock
         $totalCost = $this->calculateRequestCost($request);
-        
+
         $hasBudget = $this->budgetService->hasSufficientBudget($divisionId, $totalCost, $fiscalYear);
-        
+
         return [
             'valid' => $hasBudget,
             'total_cost' => $totalCost,
-            'available_budget' => $hasBudget ? 
+            'available_budget' => $hasBudget ?
                 $this->budgetService->getBudgetInfo($divisionId, $fiscalYear)?->remaining_amount : 0,
-            'required_budget' => $totalCost
+            'required_budget' => $totalCost,
         ];
     }
 
@@ -46,13 +43,13 @@ class BudgetValidationService
     private function calculateRequestCost(AtkStockRequest $request): float
     {
         $totalCost = 0;
-        
+
         foreach ($request->items as $item) {
             // Get the moving_average_cost from AtkDivisionStock for the specific item and division
             $stock = AtkDivisionStock::where('division_id', $request->division_id)
                 ->where('atk_item_id', $item->atk_item_id)
                 ->first();
-            
+
             if ($stock) {
                 $itemCost = $stock->moving_average_cost * $item->quantity;
                 $totalCost += $itemCost;
@@ -62,7 +59,7 @@ class BudgetValidationService
                 $totalCost += 0;
             }
         }
-        
+
         return $totalCost;
     }
 
@@ -73,18 +70,18 @@ class BudgetValidationService
     {
         $divisionId = $usage->division_id;
         $fiscalYear = $usage->created_at->year ?? now()->year;
-        
+
         // Calculate total cost of the usage items using moving_average_cost from AtkDivisionStock
         $totalCost = $this->calculateUsageCost($usage);
-        
+
         $hasBudget = $this->budgetService->hasSufficientBudget($divisionId, $totalCost, $fiscalYear);
-        
+
         return [
             'valid' => $hasBudget,
             'total_cost' => $totalCost,
-            'available_budget' => $hasBudget ? 
+            'available_budget' => $hasBudget ?
                 $this->budgetService->getBudgetInfo($divisionId, $fiscalYear)?->remaining_amount : 0,
-            'required_budget' => $totalCost
+            'required_budget' => $totalCost,
         ];
     }
 
@@ -94,13 +91,13 @@ class BudgetValidationService
     private function calculateUsageCost(AtkStockUsage $usage): float
     {
         $totalCost = 0;
-        
+
         foreach ($usage->items as $item) {
             // Get the moving_average_cost from AtkDivisionStock for the specific item and division
             $stock = AtkDivisionStock::where('division_id', $usage->division_id)
                 ->where('atk_item_id', $item->atk_item_id)
                 ->first();
-            
+
             if ($stock) {
                 $itemCost = $stock->moving_average_cost * $item->quantity;
                 $totalCost += $itemCost;
@@ -109,7 +106,7 @@ class BudgetValidationService
                 $totalCost += 0;
             }
         }
-        
+
         return $totalCost;
     }
 
@@ -119,7 +116,8 @@ class BudgetValidationService
     public function requiresOverride(AtkStockRequest $request): bool
     {
         $validation = $this->validateRequestBudget($request);
-        return !$validation['valid'];
+
+        return ! $validation['valid'];
     }
 
     /**
@@ -128,7 +126,8 @@ class BudgetValidationService
     public function requiresOverrideForUsage(AtkStockUsage $usage): bool
     {
         $validation = $this->validateUsageBudget($usage);
-        return !$validation['valid'];
+
+        return ! $validation['valid'];
     }
 
     /**
@@ -137,11 +136,11 @@ class BudgetValidationService
     public function validateAndCheck(AtkStockRequest $request, bool $allowOverride = false): void
     {
         $validation = $this->validateRequestBudget($request);
-        
-        if (!$validation['valid'] && !$allowOverride) {
+
+        if (! $validation['valid'] && ! $allowOverride) {
             throw new \Exception(
-                "Insufficient budget for division ID {$request->division_id}. " . 
-                "Required: {$validation['required_budget']}, " . 
+                "Insufficient budget for division ID {$request->division_id}. ".
+                "Required: {$validation['required_budget']}, ".
                 "Available: {$validation['available_budget']}"
             );
         }
@@ -153,11 +152,11 @@ class BudgetValidationService
     public function validateAndCheckUsage(AtkStockUsage $usage, bool $allowOverride = false): void
     {
         $validation = $this->validateUsageBudget($usage);
-        
-        if (!$validation['valid'] && !$allowOverride) {
+
+        if (! $validation['valid'] && ! $allowOverride) {
             throw new \Exception(
-                "Insufficient budget for division ID {$usage->division_id}. " . 
-                "Required: {$validation['required_budget']}, " . 
+                "Insufficient budget for division ID {$usage->division_id}. ".
+                "Required: {$validation['required_budget']}, ".
                 "Available: {$validation['available_budget']}"
             );
         }

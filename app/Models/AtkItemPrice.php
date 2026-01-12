@@ -46,12 +46,12 @@ class AtkItemPrice extends Model
         static::updating(function ($model) {
             // Get the original state
             $original = $model->getOriginal();
-            
+
             // Check if the unit price has changed
             if ($model->isDirty('unit_price')) {
                 $oldPrice = $original['unit_price'];
                 $newPrice = $model->unit_price;
-                
+
                 // Log the price change in the history table
                 AtkItemPriceHistory::create([
                     'item_id' => $model->item_id,
@@ -61,7 +61,7 @@ class AtkItemPrice extends Model
                     'changed_by' => Auth::id(),
                 ]);
             }
-            
+
             // If is_active is being set to true, deactivate all other prices for the same item
             if ($model->is_active && $model->isDirty('is_active')) {
                 self::where('item_id', $model->item_id)
@@ -79,7 +79,7 @@ class AtkItemPrice extends Model
                 'effective_date' => $model->effective_date,
                 'changed_by' => Auth::id(),
             ]);
-            
+
             // If this new record has is_active = true, deactivate all other prices for the same item
             if ($model->is_active) {
                 self::where('item_id', $model->item_id)

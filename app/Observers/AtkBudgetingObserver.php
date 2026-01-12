@@ -14,7 +14,7 @@ class AtkBudgetingObserver
     public function created(AtkBudgeting $atkBudgeting): void
     {
         $key = $atkBudgeting->getKey();
-        
+
         // Ensure the remaining amount is calculated when the budget is created
         if (! isset(self::$updatingRemainingAmount[$key])) {
             $atkBudgeting->remaining_amount = $atkBudgeting->calculateRemainingAmount();
@@ -30,7 +30,7 @@ class AtkBudgetingObserver
     public function updated(AtkBudgeting $atkBudgeting): void
     {
         $key = $atkBudgeting->getKey();
-        
+
         // If the budget_amount or used_amount changed, update the remaining amount
         if ($atkBudgeting->isDirty(['budget_amount', 'used_amount']) && ! isset(self::$updatingRemainingAmount[$key])) {
             $atkBudgeting->remaining_amount = $atkBudgeting->calculateRemainingAmount();

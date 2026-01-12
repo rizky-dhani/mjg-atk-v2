@@ -11,7 +11,7 @@ class Approval extends Model
         'approvable_id',
         'flow_id',
         'current_step',
-        'status'
+        'status',
     ];
 
     public function approvalFlow()
