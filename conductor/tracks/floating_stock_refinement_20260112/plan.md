@@ -1,6 +1,6 @@
 # Plan: Refine Floating Stock Transaction Types and Add Destination Division
 
-## Phase 1: Database and Model Updates
+## Phase 1: Database and Model Updates [checkpoint: 1ef5079]
 
 - [x] **Task 1: Create Database Migration**
   - Create a migration to add `destination_division_id` to `atk_floating_stock_trx`.
@@ -10,7 +10,7 @@
   - Add `destination_division_id` to `$fillable`.
   - Define `destinationDivision` relationship.
 
-- [~] **Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)**
 
 ## Phase 2: Service and Logic Updates
 
