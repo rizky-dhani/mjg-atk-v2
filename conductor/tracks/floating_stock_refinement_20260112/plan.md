@@ -26,12 +26,12 @@
 
 ## Phase 3: Caller Integration and Refined Status Usage
 
-- [ ] **Task 5: Refine Status Usage in Callers**
+- [x] **Task 5: Refine Status Usage in Callers**
   - Review all callers of `recordTransaction`.
   - Ensure transfers *to* floating stock use `in` with `source_division_id`.
   - Ensure distributions *from* floating stock use `out` with `destination_division_id`.
 
-- [ ] **Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)**
 
 ## Phase 4: UI Updates
 
