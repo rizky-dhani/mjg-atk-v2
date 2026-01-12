@@ -4,7 +4,6 @@ namespace App\Filament\Resources\AtkRequestFromFloatingStocks\Schemas;
 
 use App\Models\AtkFloatingStock;
 use App\Models\AtkItem;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -80,7 +79,7 @@ class AtkRequestFromFloatingStockForm
                             ->schema([
                                 Select::make('item_id')
                                     ->label('Item')
-                                    ->options(AtkFloatingStock::with('item')->get()->pluck('item.name', 'item_id'))
+                                    ->options(fn () => AtkItem::whereHas('atkFloatingStock')->pluck('name', 'id'))
                                     ->searchable()
                                     ->required()
                                     ->reactive()
@@ -102,6 +101,7 @@ class AtkRequestFromFloatingStockForm
                                     ->numeric()
                                     ->minValue(1)
                                     ->maxValue(fn ($get) => $get('available_stock') ?? 1000)
+                                    ->reactive()
                                     ->live()
                                     ->afterStateUpdated(function ($get, $set, $state) {
                                         $available = $get('available_stock') ?? 0;
