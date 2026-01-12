@@ -12,6 +12,8 @@ class AtkFloatingStockTransactionHistory extends Model
 
     protected $fillable = [
         'item_id',
+        'source_division_id',
+        'destination_division_id',
         'type',
         'quantity',
         'unit_cost',
@@ -25,6 +27,16 @@ class AtkFloatingStockTransactionHistory extends Model
     public function item(): BelongsTo
     {
         return $this->belongsTo(AtkItem::class, 'item_id');
+    }
+
+    public function sourceDivision(): BelongsTo
+    {
+        return $this->belongsTo(UserDivision::class, 'source_division_id');
+    }
+
+    public function destinationDivision(): BelongsTo
+    {
+        return $this->belongsTo(UserDivision::class, 'destination_division_id');
     }
 
     public function trx_src(): MorphTo

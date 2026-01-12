@@ -2,16 +2,17 @@
 
 namespace App\Filament\Actions;
 
-use App\Models\Approval;
 use App\Models\User;
-use App\Services\ApprovalService;
-use App\Services\ApprovalValidationService;
-use App\Services\ApprovalProcessingService;
-use App\Services\ApprovalHistoryService;
-use App\Services\StockUpdateService;
+use App\Models\Approval;
 use Filament\Actions\Action;
+use App\Services\ApprovalService;
+use App\Services\StockUpdateService;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\ApprovalHistoryService;
+use Filament\Schemas\Components\Section;
+use App\Services\ApprovalProcessingService;
+use App\Services\ApprovalValidationService;
 
 class ApprovalAction
 {
@@ -82,6 +83,24 @@ class ApprovalAction
             ->modalHeading('Approve Request')
             ->modalDescription('Are you sure you want to approve this request?')
             ->modalSubmitActionLabel('Approve')
+            ->modalSubmitActionLabel('Approve')
+            ->modalWidth(\Filament\Support\Enums\Width::Large)
+            ->schema(fn (Model $record) => [
+                Section::make('Request Summary')
+                    ->compact()
+                    ->schema([
+                        \Filament\Forms\Components\Placeholder::make('requester')
+                            ->label('Requester')
+                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                        \Filament\Forms\Components\Placeholder::make('items')
+                            ->label('Items')
+                            ->content(function () use ($record) {
+                                return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
+                            }),
+                    ]),
+                \Filament\Forms\Components\Placeholder::make('confirmation')
+                    ->content('Are you sure you want to approve this request?'),
+            ])
             ->visible(function (Model $record) {
                 $validationService = new ApprovalValidationService();
                 $user = auth()->user();
@@ -136,7 +155,20 @@ class ApprovalAction
             ->modalHeading('Reject Request')
             ->modalDescription('Are you sure you want to reject this request?')
             ->modalSubmitActionLabel('Reject')
-            ->schema([
+            ->modalWidth(\Filament\Support\Enums\Width::Large)
+            ->schema(fn (Model $record) => [
+                Section::make('Request Summary')
+                    ->compact()
+                    ->schema([
+                        \Filament\Forms\Components\Placeholder::make('requester')
+                            ->label('Requester')
+                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                        \Filament\Forms\Components\Placeholder::make('items')
+                            ->label('Items')
+                            ->content(function () use ($record) {
+                                return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
+                            }),
+                    ]),
                 \Filament\Forms\Components\Textarea::make('rejection_notes')
                     ->label('Rejection Reason')
                     ->placeholder('Provide a reason for rejecting this request...')

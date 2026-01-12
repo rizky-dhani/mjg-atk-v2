@@ -54,10 +54,11 @@ class AtkDivisionStock extends Model
             // 3. Add to Floating Stock
             $floatingService->recordTransaction(
                 $this->item_id,
-                'transfer',
+                'in',
                 $quantity,
                 $unitCost,
-                $this
+                $this,
+                $this->division_id
             );
         });
     }

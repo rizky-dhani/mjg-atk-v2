@@ -36,6 +36,16 @@ class AtkFloatingStockTransactionHistoryTable
                         'transfer' => 'Transfer',
                         default => $state,
                     }),
+                TextColumn::make('sourceDivision.name')
+                    ->label('Asal')
+                    ->placeholder('N/A')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('destinationDivision.name')
+                    ->label('Tujuan')
+                    ->placeholder('N/A')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('quantity')
                     ->label('Jumlah')
                     ->sortable(),

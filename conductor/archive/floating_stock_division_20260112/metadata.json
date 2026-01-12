@@ -1,0 +1,8 @@
+{
+  "track_id": "floating_stock_division_20260112",
+  "type": "feature",
+  "status": "in_progress",
+  "created_at": "2026-01-12T04:30:00Z",
+  "updated_at": "2026-01-12T04:30:00Z",
+  "description": "Add Division Source column to AtkFloatingStockTransactionHistory to show the origin of AtkItems."
+}

@@ -37,6 +37,7 @@ class DashboardPanelProvider extends PanelProvider
             ->id('dashboard')
             ->path('dashboard')
             ->login()
+            ->databaseNotifications()
             ->spa()
             ->databaseTransactions()
             ->brandLogo(fn () => asset('assets/images/LOGO-MEDQUEST-HD.png'))

@@ -2,11 +2,14 @@
 <html>
 <head>
     <title>ATK Stock Usage Update</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
         table {
             width: 100%;
@@ -15,8 +18,9 @@
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 12px;
+            padding: 10px;
             text-align: left;
+            font-size: 14px;
         }
         th {
             background-color: #f8f9fa;
@@ -30,11 +34,28 @@
             border-radius: 6px;
             font-weight: bold;
             margin-top: 20px;
+            text-align: center;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
+        }
+        @media only screen and (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            h2 {
+                font-size: 1.4em;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 13px;
+            }
+            .button {
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
