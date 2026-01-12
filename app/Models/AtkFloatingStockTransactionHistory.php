@@ -22,6 +22,7 @@ class AtkFloatingStockTransactionHistory extends Model
         'balance_snapshot',
         'trx_src_id',
         'trx_src_type',
+        'notes',
     ];
 
     public function item(): BelongsTo

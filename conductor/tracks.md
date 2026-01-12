@@ -4,10 +4,10 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [ ] Track: Transfer Floating Stock to Division
+## [~] Track: Transfer Floating Stock to Division
 *Link: [./conductor/tracks/transfer_floating_stock_20260112/](./conductor/tracks/transfer_floating_stock_20260112/)*
 
 ---
 
-## [~] Track: Translate Notifications to Bahasa Indonesia
+## [x] Track: Translate Notifications to Bahasa Indonesia
 *Link: [./conductor/tracks/translate_notifications_20260112/](./conductor/tracks/translate_notifications_20260112/)*

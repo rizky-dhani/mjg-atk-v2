@@ -20,6 +20,7 @@ class AtkStockTransaction extends Model
         'balance_snapshot',
         'trx_src_type',
         'trx_src_id',
+        'notes',
     ];
 
     protected $casts = [

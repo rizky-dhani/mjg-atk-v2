@@ -26,13 +26,13 @@ class AtkFloatingStock extends Model
     /**
      * Distribute stock from floating to a specific division
      */
-    public function distributeToDivision(int $divisionId, int $quantity): void
+    public function distributeToDivision(int $divisionId, int $quantity, ?string $notes = null): void
     {
         if ($quantity <= 0 || $quantity > $this->current_stock) {
             throw new \InvalidArgumentException('Invalid quantity to distribute.');
         }
 
-        DB::transaction(function () use ($divisionId, $quantity) {
+        DB::transaction(function () use ($divisionId, $quantity, $notes) {
             $floatingService = app(FloatingStockService::class);
             $divisionService = app(StockTransactionService::class);
 
@@ -46,7 +46,8 @@ class AtkFloatingStock extends Model
                 $unitCost,
                 $this,
                 null,
-                $divisionId
+                $divisionId,
+                $notes
             );
 
             // 2. Add to Division Stock
@@ -56,8 +57,26 @@ class AtkFloatingStock extends Model
                 'transfer',
                 $quantity,
                 $unitCost,
-                $this
+                $this,
+                $notes
             );
+        });
+    }
+
+    /**
+     * Distribute multiple items to a specific division
+     * 
+     * @param array $items Array of ['item_id' => $id, 'quantity' => $qty]
+     * @param int $divisionId
+     * @param string|null $notes
+     */
+    public static function distributeBulkToDivision(array $items, int $divisionId, ?string $notes = null): void
+    {
+        DB::transaction(function () use ($items, $divisionId, $notes) {
+            foreach ($items as $itemData) {
+                $floatingStock = self::where('item_id', $itemData['item_id'])->firstOrFail();
+                $floatingStock->distributeToDivision($divisionId, $itemData['quantity'], $notes);
+            }
         });
     }
 

@@ -11,9 +11,9 @@ class FloatingStockService
     /**
      * Record a stock transaction and update the moving average cost
      */
-    public function recordTransaction(int $itemId, string $type, int $quantity, int $unitCost, $transactionSource = null, ?int $sourceDivisionId = null, ?int $destinationDivisionId = null): AtkFloatingStockTransactionHistory
+    public function recordTransaction(int $itemId, string $type, int $quantity, int $unitCost, $transactionSource = null, ?int $sourceDivisionId = null, ?int $destinationDivisionId = null, ?string $notes = null): AtkFloatingStockTransactionHistory
     {
-        return DB::transaction(function () use ($itemId, $type, $quantity, $unitCost, $transactionSource, $sourceDivisionId, $destinationDivisionId) {
+        return DB::transaction(function () use ($itemId, $type, $quantity, $unitCost, $transactionSource, $sourceDivisionId, $destinationDivisionId, $notes) {
             // Get the current floating stock record
             $floatingStock = AtkFloatingStock::firstOrCreate(
                 ['item_id' => $itemId],
@@ -91,6 +91,7 @@ class FloatingStockService
                 'balance_snapshot' => $newBalance,
                 'trx_src_type' => $transactionSource ? get_class($transactionSource) : null,
                 'trx_src_id' => $transactionSource ? $transactionSource->id : null,
+                'notes' => $notes,
             ]);
         });
     }

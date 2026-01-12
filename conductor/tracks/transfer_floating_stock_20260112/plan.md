@@ -2,7 +2,7 @@
 
 ## Phase 1: Logic and Model Updates
 
-- [ ] **Task 1: Update AtkFloatingStock Model Logic**
+- [~] **Task 1: Update AtkFloatingStock Model Logic**
   - Refine `distributeToDivision` to properly handle the new `source_division_id` and `destination_division_id` fields in transaction history.
   - Ensure the method is robust for bulk operations (wrapping multiple calls in a transaction).
 

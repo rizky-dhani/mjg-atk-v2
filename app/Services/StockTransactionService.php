@@ -19,11 +19,12 @@ class StockTransactionService
      * @param int $quantity
      * @param float $unitCost
      * @param object $transactionSource
+     * @param string|null $notes
      * @return AtkStockTransaction
      */
-    public function recordTransaction(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource): AtkStockTransaction
+    public function recordTransaction(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource, ?string $notes = null): AtkStockTransaction
     {
-        return DB::transaction(function () use ($divisionId, $itemId, $type, $quantity, $unitCost, $transactionSource) {
+        return DB::transaction(function () use ($divisionId, $itemId, $type, $quantity, $unitCost, $transactionSource, $notes) {
             // Get the current division stock record
             $divisionStock = AtkDivisionStock::firstOrCreate(
                 [
@@ -112,6 +113,14 @@ class StockTransactionService
                     $quantity, // Using the adjusted quantity that respects the limit
                     $unitCost
                 );
+            } elseif ($type === 'transfer' && $quantity > 0) {
+                // Also calculate MAC for transfers adding stock
+                $newMovingAverageCost = $this->calculateNewMovingAverageCost(
+                    $divisionStock->current_stock,
+                    $divisionStock->moving_average_cost,
+                    $quantity,
+                    $unitCost
+                );
             }
 
             // Update the division stock
@@ -132,6 +141,7 @@ class StockTransactionService
                 'balance_snapshot' => $newBalance,
                 'trx_src_type' => get_class($transactionSource),
                 'trx_src_id' => $transactionSource->id,
+                'notes' => $notes,
             ]);
 
             return $transaction;
@@ -289,9 +299,10 @@ class StockTransactionService
      * @param int $quantity
      * @param float $unitCost
      * @param object $transactionSource
+     * @param string|null $notes
      * @return AtkStockTransaction
      */
-    public function recordTransactionOnly(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource): AtkStockTransaction
+    public function recordTransactionOnly(int $divisionId, int $itemId, string $type, int $quantity, int $unitCost, $transactionSource, ?string $notes = null): AtkStockTransaction
     {
         // Get the current division stock record to get the current MAC and balance for the snapshot
         $divisionStock = AtkDivisionStock::where('division_id', $divisionId)
@@ -313,6 +324,7 @@ class StockTransactionService
             'balance_snapshot' => $currentBalance,
             'trx_src_type' => get_class($transactionSource),
             'trx_src_id' => $transactionSource->id,
+            'notes' => $notes,
         ]);
 
         return $transaction;
