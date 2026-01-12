@@ -17,6 +17,7 @@ class ListAtkRequestFromFloatingStocks extends ListRecords
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['requester_id'] = auth()->id();
                     $data['division_id'] = auth()->user()->division_id;
+
                     return $data;
                 })
                 ->successNotificationTitle('Permintaan stok umum berhasil dibuat'),

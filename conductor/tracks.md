@@ -4,10 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Transfer Floating Stock to Division
-*Link: [./conductor/tracks/transfer_floating_stock_20260112/](./conductor/tracks/transfer_floating_stock_20260112/)*
+## [~] Track: Create AtkRequestFromFloatingStock resource to request from AtkFloatingStock
+*Link: [./conductor/tracks/create_atk_request_from_floating_stock_20260112/](./conductor/tracks/create_atk_request_from_floating_stock_20260112/)*
 
----
-
-## [x] Track: Translate Notifications to Bahasa Indonesia
-*Link: [./conductor/tracks/translate_notifications_20260112/](./conductor/tracks/translate_notifications_20260112/)*

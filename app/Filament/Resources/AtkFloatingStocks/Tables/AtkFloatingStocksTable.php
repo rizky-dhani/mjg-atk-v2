@@ -55,7 +55,7 @@ class AtkFloatingStocksTable
                     ->form([
                         Select::make('division_id')
                             ->label('Target Division')
-                            ->options(fn () => UserDivision::all()->pluck('name_with_initial', 'id'))
+                            ->options(fn () => UserDivision::all()->pluck('name', 'id'))
                             ->required()
                             ->searchable(),
                         TextInput::make('quantity')

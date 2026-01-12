@@ -3,9 +3,8 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ListAtkRequestFromFloatingStocks;
-use App\Models\AtkCategory;
-use App\Models\AtkItem;
 use App\Models\AtkFloatingStock;
+use App\Models\AtkItem;
 use App\Models\User;
 use App\Models\UserDivision;
 use Filament\Facades\Filament;
@@ -27,7 +26,7 @@ beforeEach(function () {
     $this->user = User::factory()->create(['division_id' => $this->division->id]);
 
     $this->item = AtkItem::first();
-    
+
     $this->floatingStock = AtkFloatingStock::create([
         'item_id' => $this->item->id,
         'category_id' => $this->item->category_id,
@@ -52,8 +51,8 @@ it('can create a request', function () {
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 10,
-                ]
-            ]
+                ],
+            ],
         ])
         ->callMountedAction()
         ->assertHasNoActionErrors()
@@ -78,8 +77,8 @@ it('validates quantity exceeds available stock', function () {
                 [
                     'item_id' => $this->item->id,
                     'quantity' => 101, // More than current stock (100)
-                ]
-            ]
+                ],
+            ],
         ])
         ->callMountedAction()
         ->assertHasActionErrors(['atkRequestFromFloatingStockItems.*.quantity']);

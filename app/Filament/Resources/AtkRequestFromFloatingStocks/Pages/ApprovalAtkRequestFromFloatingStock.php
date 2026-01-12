@@ -24,11 +24,11 @@ class ApprovalAtkRequestFromFloatingStock extends ListRecords
                 $eligibleStepIds = \App\Models\ApprovalFlowStep::where(function ($query) use ($user) {
                     $query->whereIn('role_id', $user->roles->pluck('id'));
                 })
-                ->where(function ($query) use ($user) {
-                    $query->whereNull('division_id')
-                        ->orWhere('division_id', $user->division_id);
-                })
-                ->pluck('id');
+                    ->where(function ($query) use ($user) {
+                        $query->whereNull('division_id')
+                            ->orWhere('division_id', $user->division_id);
+                    })
+                    ->pluck('id');
 
                 return $query->whereHas('approval', function ($query) use ($eligibleStepIds) {
                     $query->where('status', 'pending')

@@ -1,11 +1,10 @@
 <?php
 
 use App\Models\AtkCategory;
-use App\Models\AtkItem;
-use App\Models\AtkFloatingStock;
 use App\Models\AtkDivisionStock;
+use App\Models\AtkFloatingStock;
+use App\Models\AtkItem;
 use App\Models\AtkRequestFromFloatingStock;
-use App\Models\AtkRequestFromFloatingStockItem;
 use App\Models\User;
 use App\Models\UserDivision;
 use App\Services\ApprovalService;
@@ -20,11 +19,11 @@ beforeEach(function () {
 
     $this->division = UserDivision::where('initial', 'ITD')->first();
     $this->gaDivision = UserDivision::where('initial', 'GA')->first();
-    
+
     $this->user = User::factory()->create(['division_id' => $this->division->id]);
     $this->gaAdmin = User::factory()->create(['division_id' => $this->gaDivision->id]);
     $this->gaAdmin->assignRole('Admin');
-    
+
     $this->category = AtkCategory::create(['name' => 'Stationery', 'slug' => 'atk']);
     $this->item = AtkItem::create([
         'name' => 'Test Item',
@@ -57,11 +56,11 @@ it('transfers stock from floating to division on final approval', function () {
     $approvalService = app(ApprovalService::class);
 
     // Mock the approval steps. We'll manually set it to approved to trigger handleStockUpdates
-    // In a real flow, we'd go through each step. 
+    // In a real flow, we'd go through each step.
     // For this test, we verify the integration between Approval and StockUpdateService.
-    
+
     $approval->update(['status' => 'approved']);
-    
+
     $approvalService->handleStockUpdates($request);
 
     // Verify stock movement
@@ -71,7 +70,7 @@ it('transfers stock from floating to division on final approval', function () {
     $divisionStock = AtkDivisionStock::where('division_id', $this->division->id)
         ->where('item_id', $this->item->id)
         ->first();
-    
+
     expect($divisionStock)->not->toBeNull();
     expect($divisionStock->current_stock)->toBe(10);
 });

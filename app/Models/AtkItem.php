@@ -25,6 +25,11 @@ class AtkItem extends Model
         return $this->hasMany(AtkDivisionStock::class, 'item_id');
     }
 
+    public function atkFloatingStock()
+    {
+        return $this->hasOne(AtkFloatingStock::class, 'item_id');
+    }
+
     public function atkStockRequestItems()
     {
         return $this->hasMany(AtkStockRequestItem::class, 'item_id');

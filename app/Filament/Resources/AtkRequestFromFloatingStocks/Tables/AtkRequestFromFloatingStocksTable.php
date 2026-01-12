@@ -63,6 +63,7 @@ class AtkRequestFromFloatingStocksTable
                     ->modalWidth(Width::SevenExtraLarge)
                     ->authorize(static function ($record) {
                         $user = auth()->user();
+
                         return $user && $user->id === $record->requester_id && $record->approval_status === 'pending';
                     }),
                 ApprovalAction::makeApprove()->successNotification(

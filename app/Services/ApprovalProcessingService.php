@@ -483,7 +483,7 @@ class ApprovalProcessingService
 
         if ($uniqueRecipients->isNotEmpty()) {
             // Note: URL will be added when resource is created
-            $viewUrl = '#'; 
+            $viewUrl = '#';
 
             foreach ($uniqueRecipients as $recipient) {
                 // Send Filament Notification

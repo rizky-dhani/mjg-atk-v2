@@ -3,7 +3,6 @@
 use App\Models\AtkCategory;
 use App\Models\AtkItem;
 use App\Models\AtkRequestFromFloatingStock;
-use App\Models\AtkRequestFromFloatingStockItem;
 use App\Models\User;
 use App\Models\UserDivision;
 use Illuminate\Foundation\Testing\RefreshDatabase;

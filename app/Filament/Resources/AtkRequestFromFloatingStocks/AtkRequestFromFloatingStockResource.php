@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AtkRequestFromFloatingStocks;
 
+use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ListAtkRequestFromFloatingStocks;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Schemas\AtkRequestFromFloatingStockForm;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Tables\AtkRequestFromFloatingStocksTable;
@@ -67,7 +68,7 @@ class AtkRequestFromFloatingStockResource extends Resource
     {
         return [
             'index' => ListAtkRequestFromFloatingStocks::route('/'),
-            'approval' => \App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock::route('/approval'),
+            'approval' => ApprovalAtkRequestFromFloatingStock::route('/approval'),
         ];
     }
 }

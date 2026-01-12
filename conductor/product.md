@@ -17,6 +17,7 @@ To provide a transparent, efficient, and accountable ecosystem for managing orga
 
 # Key Features
 *   **Dynamic Inventory Tracking:** Real-time visibility into stock levels across all organizational divisions.
+*   **Direct Stock Distribution:** Ability for central administration (GA) to directly transfer or bulk-distribute items from general "Floating Stock" to specific divisions.
 *   **Multi-Step Approval Workflows:** Flexible, configurable logic that adapts to different request types and organizational hierarchies.
 *   **Intelligent Notifications:** Real-time alerts (email/system) to minimize bottlenecks in the approval chain.
 *   **Mobile-First Approval Experience:** Ensuring decision-makers can approve or reject requests seamlessly from any device.

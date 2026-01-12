@@ -6,8 +6,8 @@ use App\Helpers\StockNumberGenerator;
 use App\Models\Approval;
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalHistory;
-use App\Models\AtkStockRequest;
 use App\Models\AtkRequestFromFloatingStock;
+use App\Models\AtkStockRequest;
 use App\Models\MarketingMediaStockRequest;
 
 trait StockRequestModelTrait

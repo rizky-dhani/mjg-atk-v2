@@ -6,8 +6,8 @@ use App\Models\AtkFloatingStock;
 use App\Models\AtkItem;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -21,7 +21,10 @@ class AtkRequestFromFloatingStockForm
             ->components([
                 Section::make('Rejection Details')
                     ->visible(function ($record) {
-                        if (!$record) return false;
+                        if (! $record) {
+                            return false;
+                        }
+
                         return \App\Models\ApprovalHistory::where('approvable_type', get_class($record))
                             ->where('approvable_id', $record->id)
                             ->where('action', 'rejected')
@@ -35,12 +38,15 @@ class AtkRequestFromFloatingStockForm
                                     ->readOnly()
                                     ->dehydrated(false)
                                     ->formatStateUsing(function ($record) {
-                                        if (!$record) return null;
+                                        if (! $record) {
+                                            return null;
+                                        }
                                         $rejection = \App\Models\ApprovalHistory::where('approvable_type', get_class($record))
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
                                             ->first();
+
                                         return $rejection ? $rejection->rejection_reason : null;
                                     }),
                                 TextInput::make('rejector_name')
@@ -48,12 +54,15 @@ class AtkRequestFromFloatingStockForm
                                     ->readOnly()
                                     ->dehydrated(false)
                                     ->formatStateUsing(function ($record) {
-                                        if (!$record) return null;
+                                        if (! $record) {
+                                            return null;
+                                        }
                                         $rejection = \App\Models\ApprovalHistory::where('approvable_type', get_class($record))
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
                                             ->first();
+
                                         return $rejection ? $rejection->user->name : null;
                                     }),
                             ]),
