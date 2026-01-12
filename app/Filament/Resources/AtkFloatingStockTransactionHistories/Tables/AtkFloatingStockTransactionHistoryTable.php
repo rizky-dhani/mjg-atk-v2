@@ -37,7 +37,12 @@ class AtkFloatingStockTransactionHistoryTable
                         default => $state,
                     }),
                 TextColumn::make('sourceDivision.name')
-                    ->label('Divisi Asal/Tujuan')
+                    ->label('Asal')
+                    ->placeholder('N/A')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('destinationDivision.name')
+                    ->label('Tujuan')
                     ->placeholder('N/A')
                     ->searchable()
                     ->sortable(),

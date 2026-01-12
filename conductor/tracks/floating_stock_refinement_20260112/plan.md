@@ -35,8 +35,8 @@
 
 ## Phase 4: UI Updates
 
-- [ ] **Task 6: Update Filament Resource Table**
+- [x] **Task 6: Update Filament Resource Table**
   - Add "Destination Division" column to `AtkFloatingStockTransactionHistoryTable`.
   - Refine column labels for clarity (e.g., "From Division" and "To Division").
 
-- [ ] **Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Phase 4' (Protocol in workflow.md)**
