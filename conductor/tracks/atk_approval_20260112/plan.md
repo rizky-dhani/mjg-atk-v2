@@ -48,8 +48,8 @@
 
 ## Phase 4: Final Verification & Coverage
 
-- [ ] **Task 9: Global Coverage Audit**
+- [x] **Task 9: Global Coverage Audit**
   - Run full test suite with coverage report.
   - Address any gaps to ensure >99% coverage for new modules.
 
-- [ ] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
