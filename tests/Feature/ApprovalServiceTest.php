@@ -10,10 +10,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
+use App\Filament\Resources\AtkStockRequests\Pages\ListAtkStockRequests;
+use Filament\Facades\Filament;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    Filament::setCurrentPanel(Filament::getPanel('dashboard'));
     Mail::fake();
     Notification::fake();
 
@@ -225,6 +229,50 @@ it('dispatches system notification to the next approver', function () {
         return $notification->data['title'] === 'ATK Stock Request Awaiting Your Approval';
     });
 });
+
+it('returns a valid approval action', function () {
+    $action = App\Filament\Actions\ApprovalAction::makeApprove();
+    
+    expect($action)->toBeInstanceOf(\Filament\Actions\Action::class);
+    expect($action->getName())->toBe('approve');
+    expect($action->getColor())->toBe('success');
+    expect($action->getLabel())->toBe('Approve Request');
+});
+
+it('hides approval action from unauthorized users', function () {
+    $action = App\Filament\Actions\ApprovalAction::makeApprove();
+    
+    // Create approval record
+    $this->approvalService->createApproval($this->stockRequest, AtkStockRequest::class);
+
+    // Head should see it
+    $this->actingAs($this->head);
+    expect($action->record($this->stockRequest)->isVisible())->toBeTrue();
+
+    // Finance should not see it (current step is 1)
+    $this->actingAs($this->finance);
+    expect($action->record($this->stockRequest)->isVisible())->toBeFalse();
+});
+
+it('shows approval action to the correct approver at step 2', function () {
+    $action = App\Filament\Actions\ApprovalAction::makeApprove();
+    
+    $approval = $this->approvalService->createApproval($this->stockRequest, AtkStockRequest::class);
+    $this->approvalService->processApprovalStep($approval, $this->head, 'approve');
+    
+    $this->stockRequest->refresh();
+    $this->stockRequest->load('approval');
+
+    // Head should no longer see it
+    $this->actingAs($this->head);
+    expect($action->record($this->stockRequest)->isVisible())->toBeFalse();
+
+    // Finance should now see it
+    $this->actingAs($this->finance);
+    expect($action->record($this->stockRequest)->isVisible())->toBeTrue();
+});
+
+
 
 
 

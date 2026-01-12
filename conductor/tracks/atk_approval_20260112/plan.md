@@ -36,15 +36,13 @@
 
 ## Phase 3: Mobile-Optimized Interface
 
-- [ ] **Task 7: UI Component Testing**
+- [~] **Task 7: UI Component Testing**
   - Write Pest browser tests for the "Approve" and "Reject" Filament actions.
   - Assert that responsive classes are present on modal components.
 
-- [ ] **Task 8: Refine Filament Actions for Mobile**
-  - Update the `AtkStockRequestResource` to use mobile-friendly layouts in action modals.
-  - Implement a condensed "Request Summary" view for small screens.
+- [x] **Task 8: Refine Filament Actions for Mobile**
 
-- [ ] **Task: Conductor - User Manual Verification 'Mobile UI' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Mobile UI' (Protocol in workflow.md)**
 
 ## Phase 4: Final Verification & Coverage
 

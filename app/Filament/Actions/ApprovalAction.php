@@ -80,8 +80,24 @@ class ApprovalAction
             ->icon(fn () => Heroicon::CheckCircle)
             ->requiresConfirmation()
             ->modalHeading('Approve Request')
-            ->modalDescription('Are you sure you want to approve this request?')
             ->modalSubmitActionLabel('Approve')
+            ->modalWidth(\Filament\Support\Enums\Width::Large)
+            ->schema(fn (Model $record) => [
+                \Filament\Forms\Components\Section::make('Request Summary')
+                    ->compact()
+                    ->schema([
+                        \Filament\Forms\Components\Placeholder::make('requester')
+                            ->label('Requester')
+                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                        \Filament\Forms\Components\Placeholder::make('items')
+                            ->label('Items')
+                            ->content(function () use ($record) {
+                                return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
+                            }),
+                    ]),
+                \Filament\Forms\Components\Placeholder::make('confirmation')
+                    ->content('Are you sure you want to approve this request?'),
+            ])
             ->visible(function (Model $record) {
                 $validationService = new ApprovalValidationService();
                 $user = auth()->user();
@@ -134,9 +150,21 @@ class ApprovalAction
             ->icon(fn () => Heroicon::XCircle)
             ->requiresConfirmation()
             ->modalHeading('Reject Request')
-            ->modalDescription('Are you sure you want to reject this request?')
             ->modalSubmitActionLabel('Reject')
-            ->schema([
+            ->modalWidth(\Filament\Support\Enums\Width::Large)
+            ->schema(fn (Model $record) => [
+                \Filament\Forms\Components\Section::make('Request Summary')
+                    ->compact()
+                    ->schema([
+                        \Filament\Forms\Components\Placeholder::make('requester')
+                            ->label('Requester')
+                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                        \Filament\Forms\Components\Placeholder::make('items')
+                            ->label('Items')
+                            ->content(function () use ($record) {
+                                return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
+                            }),
+                    ]),
                 \Filament\Forms\Components\Textarea::make('rejection_notes')
                     ->label('Rejection Reason')
                     ->placeholder('Provide a reason for rejecting this request...')
