@@ -31,7 +31,7 @@
 
 ## Phase 3: UI Implementation - Filament Resource
 
-- [ ] **Task 6: Create AtkRequestFromFloatingStockResource**
+- [x] **Task 6: Create AtkRequestFromFloatingStockResource** 93a7ba5
   - Generate the resource using Artisan.
   - Configure the Form with a repeater for items.
   - Configure the Table with status and requester information.
