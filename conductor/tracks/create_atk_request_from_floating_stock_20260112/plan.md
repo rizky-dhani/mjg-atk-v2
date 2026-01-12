@@ -19,7 +19,7 @@
 
 ## Phase 2: Logic and Approval Integration
 
-- [ ] **Task 4: Integrate with Approval System**
+- [x] **Task 4: Integrate with Approval System** c9f6c45
   - Register the new model in the approval flow configuration.
   - Implement logic to trigger stock transfer upon `final_approved` status.
 
