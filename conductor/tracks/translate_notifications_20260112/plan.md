@@ -34,10 +34,10 @@
 
 - [x] **Task: Conductor - User Manual Verification 'Remaining Notifications' (Protocol in workflow.md)**
 
-## Phase 4: Final Verification
+## Phase 4: Final Verification [checkpoint: 727e298]
 
 - [x] **Task 7: Global Code Audit and Standards**
   - Run all tests to ensure no logic was broken during translation.
   - Run Laravel Pint for formatting.
 
-- [~] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
