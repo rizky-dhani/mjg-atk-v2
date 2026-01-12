@@ -22,7 +22,7 @@
 
 - [x] **Task: Conductor - User Manual Verification 'Core Approval Logic' (Protocol in workflow.md)**
 
-## Phase 2: Real-time Notifications
+## Phase 2: Real-time Notifications [checkpoint: 9147f1e]
 
 - [x] **Task 5: Notification Tests**
   - Write tests to verify email dispatch using `AtkStockRequestMail`.
@@ -32,7 +32,7 @@
   - Integrate `Notification` dispatches within the `ApprovalService` transitions.
   - Refine email templates for mobile readability.
 
-- [~] **Task: Conductor - User Manual Verification 'Notifications' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Notifications' (Protocol in workflow.md)**
 
 ## Phase 3: Mobile-Optimized Interface
 
