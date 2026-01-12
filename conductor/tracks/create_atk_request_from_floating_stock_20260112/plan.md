@@ -36,7 +36,7 @@
   - Configure the Form with a repeater for items.
   - Configure the Table with status and requester information.
 
-- [ ] **Task 7: Write UI Tests for Filament Resource**
+- [x] **Task 7: Write UI Tests for Filament Resource** 21d3463
   - Verify form submission and validation.
   - Verify approval actions are visible and functional.
 
