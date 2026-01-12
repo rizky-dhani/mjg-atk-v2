@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-## [~] Track: Add Division Source to Floating Stock Transactions
-*Link: [./conductor/tracks/floating_stock_division_20260112/](./conductor/tracks/floating_stock_division_20260112/)*
+## [~] Track: Refine Floating Stock Transaction Types and Add Destination Division
+*Link: [./conductor/tracks/floating_stock_refinement_20260112/](./conductor/tracks/floating_stock_refinement_20260112/)*

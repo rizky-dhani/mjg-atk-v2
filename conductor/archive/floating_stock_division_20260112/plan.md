@@ -24,8 +24,6 @@
 
 ## Phase 3: UI Updates
 
-- [ ] **Task 5: Update Filament Resource**
-  - Update `AtkFloatingStockTransactionHistoryResource` table configuration.
-  - Add `sourceDivision.name` column.
+- [x] **Task 5: Update Filament Resource**
 
-- [ ] **Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Phase 3' (Protocol in workflow.md)**
