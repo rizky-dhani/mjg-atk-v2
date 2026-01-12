@@ -6,7 +6,7 @@
   - Create migrations for `atk_requests_from_floating_stock` and `atk_requests_from_floating_stock_items`.
   - Include necessary foreign keys and indexes.
 
-- [ ] **Task 2: Create Models**
+- [x] **Task 2: Create Models** 4800df1
   - Create `AtkRequestFromFloatingStock` and `AtkRequestFromFloatingStockItem` models.
   - Define relationships and fillable fields.
   - Integrate with `StockRequestModelTrait` if applicable or create a specialized trait.
