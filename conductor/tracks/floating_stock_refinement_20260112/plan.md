@@ -14,15 +14,15 @@
 
 ## Phase 2: Service and Logic Updates
 
-- [ ] **Task 3: Update FloatingStockService**
+- [x] **Task 3: Update FloatingStockService**
   - Modify `recordTransaction` to accept and store `destination_division_id`.
   - Implement logic to handle `in` (from division) and `out` (to division) correctly based on source/destination parameters.
 
-- [ ] **Task 4: Update FloatingStockService Tests**
+- [x] **Task 4: Update FloatingStockService Tests**
   - Write failing tests for destination division storage and refined `in`/`out` logic.
   - Implement logic to make tests pass.
 
-- [ ] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
 
 ## Phase 3: Caller Integration and Refined Status Usage
 

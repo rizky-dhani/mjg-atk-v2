@@ -21,7 +21,7 @@ beforeEach(function () {
     $this->service = new FloatingStockService();
 });
 
-it('stores source_division_id explicitly', function () {
+it('stores source_division_id for incoming transactions', function () {
     $trx = $this->service->recordTransaction(
         $this->item->id,
         'in',
@@ -32,9 +32,27 @@ it('stores source_division_id explicitly', function () {
     );
 
     expect($trx->source_division_id)->toBe($this->division->id);
+    expect($trx->destination_division_id)->toBeNull();
+    expect($trx->type)->toBe('in');
 });
 
-it('infers source_division_id from transactionSource', function () {
+it('stores destination_division_id for outgoing transactions', function () {
+    $trx = $this->service->recordTransaction(
+        $this->item->id,
+        'out',
+        5,
+        1000,
+        null,
+        null,
+        $this->division->id
+    );
+
+    expect($trx->source_division_id)->toBeNull();
+    expect($trx->destination_division_id)->toBe($this->division->id);
+    expect($trx->type)->toBe('out');
+});
+
+it('infers source_division_id from transactionSource for incoming', function () {
     $staff = \App\Models\User::factory()->create(['division_id' => $this->division->id]);
     
     $request = AtkStockRequest::create([
@@ -53,4 +71,28 @@ it('infers source_division_id from transactionSource', function () {
     );
 
     expect($trx->source_division_id)->toBe($this->division->id);
+    expect($trx->destination_division_id)->toBeNull();
 });
+
+it('infers destination_division_id from transactionSource for outgoing', function () {
+    $staff = \App\Models\User::factory()->create(['division_id' => $this->division->id]);
+    
+    $usage = \App\Models\AtkStockUsage::create([
+        'request_number' => 'USG-001',
+        'requester_id' => $staff->id,
+        'division_id' => $this->division->id,
+        'request_type' => 'reduction',
+    ]);
+
+    $trx = $this->service->recordTransaction(
+        $this->item->id,
+        'out',
+        5,
+        1000,
+        $usage
+    );
+
+    expect($trx->source_division_id)->toBeNull();
+    expect($trx->destination_division_id)->toBe($this->division->id);
+});
+
