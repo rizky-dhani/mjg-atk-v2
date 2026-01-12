@@ -1,0 +1,8 @@
+{
+  "track_id": "atk_approval_20260112",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-01-12T00:00:00Z",
+  "updated_at": "2026-01-12T00:00:00Z",
+  "description": "Refine the ATK Stock Request Approval Workflow with multi-step logic, notifications, and mobile optimization."
+}
