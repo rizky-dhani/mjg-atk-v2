@@ -12,7 +12,7 @@
 
 - [x] **Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)**
 
-## Phase 2: Service and Logic Updates
+## Phase 2: Service and Logic Updates [checkpoint: a6f16d1]
 
 - [x] **Task 3: Update FloatingStockService**
   - Modify `recordTransaction` to accept and store `destination_division_id`.
@@ -22,7 +22,7 @@
   - Write failing tests for destination division storage and refined `in`/`out` logic.
   - Implement logic to make tests pass.
 
-- [~] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
 
 ## Phase 3: Caller Integration and Refined Status Usage
 
