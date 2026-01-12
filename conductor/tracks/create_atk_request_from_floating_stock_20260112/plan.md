@@ -17,7 +17,7 @@
 
 - [ ] **Task: Conductor - User Manual Verification 'Model Setup' (Protocol in workflow.md)**
 
-## Phase 2: Logic and Approval Integration
+## Phase 2: Logic and Approval Integration [checkpoint: 433ab59]
 
 - [x] **Task 4: Integrate with Approval System** c9f6c45
   - Register the new model in the approval flow configuration.
