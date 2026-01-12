@@ -7,6 +7,7 @@ use App\Models\Approval;
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalHistory;
 use App\Models\AtkStockRequest;
+use App\Models\AtkRequestFromFloatingStock;
 use App\Models\MarketingMediaStockRequest;
 
 trait StockRequestModelTrait
@@ -22,6 +23,8 @@ trait StockRequestModelTrait
 
                 if ($modelClass === AtkStockRequest::class) {
                     $model->request_number = StockNumberGenerator::generateOfficeStationeryRequestNumber($model->division_id);
+                } elseif ($modelClass === AtkRequestFromFloatingStock::class) {
+                    $model->request_number = StockNumberGenerator::generateAtkRequestFromFloatingStockNumber($model->division_id);
                 } elseif ($modelClass === MarketingMediaStockRequest::class) {
                     $model->request_number = StockNumberGenerator::generateMarketingMediaRequestNumber($model->division_id);
                 }

@@ -45,6 +45,35 @@ class StockNumberGenerator
     }
 
     /**
+     * Generate a unique request number for ATK Request from Floating Stock
+     */
+    public static function generateAtkRequestFromFloatingStockNumber(?int $divisionId): string
+    {
+        $division = $divisionId ? UserDivision::find($divisionId) : null;
+        $divisionInitial = $division ? $division->initial : 'DEFAULT';
+
+        return DB::transaction(function () use ($divisionId, $divisionInitial) {
+            $query = \App\Models\AtkRequestFromFloatingStock::whereNotNull('request_number');
+            if ($divisionId) {
+                $query = $query->where('division_id', $divisionId);
+            }
+            $latestRequest = $query->orderByDesc('id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($latestRequest) {
+                $parts = explode('-', $latestRequest->request_number);
+                $latestNumber = intval(end($parts));
+                $nextNumber = $latestNumber + 1;
+            } else {
+                $nextNumber = 1;
+            }
+
+            return 'ATK-FLOAT-'.$divisionInitial.'-REQ-'.str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
+        });
+    }
+
+    /**
      * Generate a unique usage number for Office Stationery Stock Usage
      */
     public static function generateOfficeStationeryUsageNumber(int $divisionId): string
