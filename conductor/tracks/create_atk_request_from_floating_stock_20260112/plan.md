@@ -1,6 +1,6 @@
 # Plan: Create AtkRequestFromFloatingStock Resource
 
-## Phase 1: Model and Migration Setup
+## Phase 1: Model and Migration Setup [checkpoint: 8a16f6b]
 
 - [x] **Task 1: Create Migrations** fa7d2ac
   - Create migrations for `atk_requests_from_floating_stock` and `atk_requests_from_floating_stock_items`.
