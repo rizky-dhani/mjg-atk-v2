@@ -29,7 +29,7 @@
 
 - [ ] **Task: Conductor - User Manual Verification 'Approval Integration' (Protocol in workflow.md)**
 
-## Phase 3: UI Implementation - Filament Resource
+## Phase 3: UI Implementation - Filament Resource [checkpoint: 0bdb4bd]
 
 - [x] **Task 6: Create AtkRequestFromFloatingStockResource** 93a7ba5
   - Generate the resource using Artisan.
