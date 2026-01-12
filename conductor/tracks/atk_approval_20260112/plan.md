@@ -24,15 +24,15 @@
 
 ## Phase 2: Real-time Notifications
 
-- [ ] **Task 5: Notification Tests**
+- [x] **Task 5: Notification Tests**
   - Write tests to verify email dispatch using `AtkStockRequestMail`.
   - Write tests for system notification triggering.
 
-- [ ] **Task 6: Implement Email & System Notifications**
+- [x] **Task 6: Implement Email & System Notifications**
   - Integrate `Notification` dispatches within the `ApprovalService` transitions.
   - Refine email templates for mobile readability.
 
-- [ ] **Task: Conductor - User Manual Verification 'Notifications' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Notifications' (Protocol in workflow.md)**
 
 ## Phase 3: Mobile-Optimized Interface
 

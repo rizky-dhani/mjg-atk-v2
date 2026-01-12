@@ -9,6 +9,7 @@ use App\Models\ApprovalHistory;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
 use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -208,8 +209,15 @@ class ApprovalProcessingService
 
             // Set the relation on the model so history logging can find it
             $model->setRelation('approval', $approval);
+        }
 
-            // Log initial submission to history
+        // Log initial submission to history if it hasn't been logged yet
+        $hasHistory = \App\Models\ApprovalHistory::where('approvable_type', get_class($model))
+            ->where('approvable_id', $model->id)
+            ->where('action', 'submitted')
+            ->exists();
+
+        if (!$hasHistory) {
             /** @var User $currentUser */
             $currentUser = Auth::user();
             $this->historyService->logNewApproval($model, $currentUser);
@@ -221,6 +229,8 @@ class ApprovalProcessingService
                 $this->notifyStockUsage($model, 'submitted', $currentUser);
             }
         }
+
+        return $approval;
 
         return $approval;
     }
@@ -375,6 +385,7 @@ class ApprovalProcessingService
             $viewUrl = \App\Filament\Resources\AtkStockRequests\AtkStockRequestResource::getUrl('view', ['record' => $stockRequest]);
 
             foreach ($uniqueRecipients as $recipient) {
+                // Send Email
                 $mailable = new AtkStockRequestMail(
                     $stockRequest,
                     $actionStatus,
@@ -402,6 +413,38 @@ class ApprovalProcessingService
                 }
 
                 Mail::to($recipient['email'])->send($mailable);
+
+                // Send Filament Notification
+                $user = User::where('email', $recipient['email'])->first();
+                if ($user) {
+                    $notification = FilamentNotification::make();
+                    
+                    $title = match ($actionStatus) {
+                        'submitted' => 'New ATK Stock Request',
+                        'approved' => 'ATK Stock Request Approved',
+                        'rejected' => 'ATK Stock Request Rejected',
+                        'partially_approved' => 'ATK Stock Request Awaiting Your Approval',
+                        default => 'ATK Stock Request Update',
+                    };
+
+                    $notification->title($title)
+                        ->body("Request: {$stockRequest->request_number}")
+                        ->actions([
+                            \Filament\Actions\Action::make('view')
+                                ->url($viewUrl)
+                                ->button(),
+                        ]);
+
+                    if ($actionStatus === 'rejected') {
+                        $notification->danger();
+                    } elseif ($actionStatus === 'approved') {
+                        $notification->success();
+                    } else {
+                        $notification->info();
+                    }
+
+                    $notification->sendToDatabase($user);
+                }
             }
         }
     }
@@ -443,6 +486,7 @@ class ApprovalProcessingService
             $viewUrl = \App\Filament\Resources\AtkStockUsages\AtkStockUsageResource::getUrl('view', ['record' => $stockUsage]);
 
             foreach ($uniqueRecipients as $recipient) {
+                // Send Email
                 $mailable = new AtkStockUsageMail(
                     $stockUsage,
                     $actionStatus,
@@ -470,6 +514,38 @@ class ApprovalProcessingService
                 }
 
                 Mail::to($recipient['email'])->send($mailable);
+
+                // Send Filament Notification
+                $user = User::where('email', $recipient['email'])->first();
+                if ($user) {
+                    $notification = FilamentNotification::make();
+                    
+                    $title = match ($actionStatus) {
+                        'submitted' => 'New ATK Stock Usage',
+                        'approved' => 'ATK Stock Usage Approved',
+                        'rejected' => 'ATK Stock Usage Rejected',
+                        'partially_approved' => 'ATK Stock Usage Awaiting Your Approval',
+                        default => 'ATK Stock Usage Update',
+                    };
+
+                    $notification->title($title)
+                        ->body("Usage: {$stockUsage->request_number}")
+                        ->actions([
+                            \Filament\Actions\Action::make('view')
+                                ->url($viewUrl)
+                                ->button(),
+                        ]);
+
+                    if ($actionStatus === 'rejected') {
+                        $notification->danger();
+                    } elseif ($actionStatus === 'approved') {
+                        $notification->success();
+                    } else {
+                        $notification->info();
+                    }
+
+                    $notification->sendToDatabase($user);
+                }
             }
         }
     }

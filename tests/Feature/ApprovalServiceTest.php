@@ -9,11 +9,13 @@ use App\Services\ApprovalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Mail::fake();
+    Notification::fake();
 
     $this->division = UserDivision::create([
         'name' => 'IT Division',
@@ -191,5 +193,38 @@ it('does not adjust stock until final approval', function () {
     $divisionStock->refresh();
     expect($divisionStock->current_stock)->toBe(10); // Stock SHOULD be updated now
 });
+
+it('dispatches email to the next approver', function () {
+    // Initial creation dispatches email to initial approver (Head)
+    $approval = $this->approvalService->createApproval($this->stockRequest, AtkStockRequest::class);
+    
+    Mail::assertSent(\App\Mail\AtkStockRequestMail::class, function ($mail) {
+        return $mail->hasTo($this->head->email) && $mail->actionStatus === 'submitted';
+    });
+
+    // Step 1: Head Approval should notify Finance (Step 2)
+    $this->approvalService->processApprovalStep($approval, $this->head, 'approve');
+    
+    Mail::assertSent(\App\Mail\AtkStockRequestMail::class, function ($mail) {
+        return $mail->hasTo($this->finance->email) && $mail->actionStatus === 'partially_approved';
+    });
+});
+
+it('dispatches system notification to the next approver', function () {
+    // Initial creation should notify initial approver (Head)
+    $approval = $this->approvalService->createApproval($this->stockRequest, AtkStockRequest::class);
+    
+    Notification::assertSentTo($this->head, \Filament\Notifications\DatabaseNotification::class, function ($notification) {
+        return $notification->data['title'] === 'New ATK Stock Request';
+    });
+
+    // Step 1: Head Approval should notify Finance (Step 2)
+    $this->approvalService->processApprovalStep($approval, $this->head, 'approve');
+    
+    Notification::assertSentTo($this->finance, \Filament\Notifications\DatabaseNotification::class, function ($notification) {
+        return $notification->data['title'] === 'ATK Stock Request Awaiting Your Approval';
+    });
+});
+
 
 
