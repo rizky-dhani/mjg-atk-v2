@@ -14,14 +14,13 @@
 
 ## Phase 2: Service and Logic Updates
 
-- [ ] **Task 3: Update FloatingStockService**
+- [x] **Task 3: Update FloatingStockService**
   - Modify `recordTransaction` to accept and store `source_division_id`.
   - Infer `source_division_id` from `transactionSource` if possible.
 
-- [ ] **Task 4: Write Tests for Service**
-  - Verify that transactions correctly store the source division.
+- [x] **Task 4: Write Tests for Service**
 
-- [ ] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
+- [~] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
 
 ## Phase 3: UI Updates
 
