@@ -14,7 +14,7 @@ class ListRoles extends ListRecords
     {
         return [
             CreateAction::make()
-                ->successNotificationTitle('Role successfully created'),
+                ->successNotificationTitle('Role berhasil dibuat'),
         ];
     }
 }

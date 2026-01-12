@@ -76,8 +76,8 @@ class ApprovalProcessingService
                 $user,
                 $status, // 'approved' or 'rejected'
                 null, // document_id will be auto-generated
-                $action === 'reject' ? ($notes ?? 'No reason provided') : null, // rejection_reason
-                $notes ?? ($action === 'approve' ? 'Request approved at step '.$step->step_number.': '.$step->step_name : 'Request rejected'),
+                $action === 'reject' ? ($notes ?? 'Alasan tidak diberikan') : null, // rejection_reason
+                $notes ?? ($action === 'approve' ? 'Permintaan disetujui pada langkah '.$step->step_number.': '.$step->step_name : 'Permintaan ditolak'),
                 $step->id
             );
 
@@ -127,7 +127,7 @@ class ApprovalProcessingService
                             'submitted', // Final submission/approval
                             null, // document_id will be auto-generated
                             null, // rejection_reason
-                            'Request fully approved',
+                            'Permintaan disetujui sepenuhnya',
                             null // No specific step for final approval
                         );
 
@@ -161,7 +161,7 @@ class ApprovalProcessingService
                         'pending', // Still pending further approvals
                         null, // document_id will be auto-generated
                         null, // rejection_reason
-                        'Request awaiting next approval step: '.($nextStep?->step_number ?? 'unknown'),
+                        'Permintaan menunggu langkah persetujuan selanjutnya: '.($nextStep?->step_number ?? 'tidak diketahui'),
                         $nextStep?->id
                     );
 
@@ -217,7 +217,7 @@ class ApprovalProcessingService
             ->where('action', 'submitted')
             ->exists();
 
-        if (!$hasHistory) {
+        if (! $hasHistory) {
             /** @var User $currentUser */
             $currentUser = Auth::user();
             $this->historyService->logNewApproval($model, $currentUser);
@@ -229,8 +229,6 @@ class ApprovalProcessingService
                 $this->notifyStockUsage($model, 'submitted', $currentUser);
             }
         }
-
-        return $approval;
 
         return $approval;
     }
@@ -254,7 +252,7 @@ class ApprovalProcessingService
             'cancelled',
             null, // document_id will be auto-generated
             null, // rejection_reason
-            'Request cancelled by user',
+            'Permintaan dibatalkan oleh pengguna',
             null // No specific step for cancellation
         );
 
@@ -286,7 +284,7 @@ class ApprovalProcessingService
             'submitted', // Action type for resubmission
             null, // document_id will be auto-generated
             null, // rejection_reason
-            'Request resubmitted for approval',
+            'Permintaan dikirim ulang untuk persetujuan',
             null // No specific step for resubmission
         );
 
@@ -418,19 +416,20 @@ class ApprovalProcessingService
                 $user = User::where('email', $recipient['email'])->first();
                 if ($user) {
                     $notification = FilamentNotification::make();
-                    
+
                     $title = match ($actionStatus) {
-                        'submitted' => 'New ATK Stock Request',
-                        'approved' => 'ATK Stock Request Approved',
-                        'rejected' => 'ATK Stock Request Rejected',
-                        'partially_approved' => 'ATK Stock Request Awaiting Your Approval',
-                        default => 'ATK Stock Request Update',
+                        'submitted' => 'Permintaan Stok ATK Baru',
+                        'approved' => 'Permintaan Stok ATK Disetujui',
+                        'rejected' => 'Permintaan Stok ATK Ditolak',
+                        'partially_approved' => 'Permintaan Stok ATK Menunggu Persetujuan Anda',
+                        default => 'Pembaruan Permintaan Stok ATK',
                     };
 
                     $notification->title($title)
-                        ->body("Request: {$stockRequest->request_number}")
+                        ->body("Permintaan: {$stockRequest->request_number}")
                         ->actions([
                             \Filament\Actions\Action::make('view')
+                                ->label('Lihat')
                                 ->url($viewUrl)
                                 ->button(),
                         ]);
@@ -519,19 +518,20 @@ class ApprovalProcessingService
                 $user = User::where('email', $recipient['email'])->first();
                 if ($user) {
                     $notification = FilamentNotification::make();
-                    
+
                     $title = match ($actionStatus) {
-                        'submitted' => 'New ATK Stock Usage',
-                        'approved' => 'ATK Stock Usage Approved',
-                        'rejected' => 'ATK Stock Usage Rejected',
-                        'partially_approved' => 'ATK Stock Usage Awaiting Your Approval',
-                        default => 'ATK Stock Usage Update',
+                        'submitted' => 'Pengeluaran Stok ATK Baru',
+                        'approved' => 'Pengeluaran Stok ATK Disetujui',
+                        'rejected' => 'Pengeluaran Stok ATK Ditolak',
+                        'partially_approved' => 'Pengeluaran Stok ATK Menunggu Persetujuan Anda',
+                        default => 'Pembaruan Pengeluaran Stok ATK',
                     };
 
                     $notification->title($title)
-                        ->body("Usage: {$stockUsage->request_number}")
+                        ->body("Pengeluaran: {$stockUsage->request_number}")
                         ->actions([
                             \Filament\Actions\Action::make('view')
+                                ->label('Lihat')
                                 ->url($viewUrl)
                                 ->button(),
                         ]);

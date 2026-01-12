@@ -4,10 +4,10 @@ namespace App\Filament\Actions;
 
 use App\Models\Approval;
 use App\Models\User;
+use App\Services\ApprovalHistoryService;
+use App\Services\ApprovalProcessingService;
 use App\Services\ApprovalService;
 use App\Services\ApprovalValidationService;
-use App\Services\ApprovalProcessingService;
-use App\Services\ApprovalHistoryService;
 use App\Services\StockUpdateService;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
@@ -18,26 +18,26 @@ class ApprovalAction
     public static function make(): Action
     {
         return Action::make('approve')
-            ->label('Approve Request')
+            ->label('Setujui Permintaan')
             ->color('success')
             ->requiresConfirmation()
-            ->modalHeading('Approve Request')
-            ->modalDescription('Are you sure you want to approve this request?')
-            ->modalSubmitActionLabel('Approve')
+            ->modalHeading('Setujui Permintaan')
+            ->modalDescription('Apakah Anda yakin ingin menyetujui permintaan ini?')
+            ->modalSubmitActionLabel('Setujui')
             ->visible(function (Model $record) {
-                $validationService = new ApprovalValidationService();
+                $validationService = new ApprovalValidationService;
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
                 return $validationService->canUserApprove($record, $user);
             })
             ->action(function (Model $record) {
-                $validationService = new ApprovalValidationService();
-                $historyService = new ApprovalHistoryService();
+                $validationService = new ApprovalValidationService;
+                $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
-                
+
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -63,55 +63,55 @@ class ApprovalAction
                 }
 
                 // Process the approval step using the service method
-                $approvalService->processApprovalStep($approval, $user, 'approve', 'Request approved');
+                $approvalService->processApprovalStep($approval, $user, 'approve', 'Permintaan disetujui');
 
                 // Synchronize approval status
                 $approvalService->syncApprovalStatus($record);
 
-                return 'Request approved successfully.';
+                return 'Permintaan berhasil disetujui.';
             });
     }
 
     public static function makeApprove(): Action
     {
         return Action::make('approve')
-            ->label('Approve Request')
+            ->label('Setujui Permintaan')
             ->color('success')
             ->icon(fn () => Heroicon::CheckCircle)
             ->requiresConfirmation()
-            ->modalHeading('Approve Request')
-            ->modalSubmitActionLabel('Approve')
+            ->modalHeading('Setujui Permintaan')
+            ->modalSubmitActionLabel('Setujui')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
             ->schema(fn (Model $record) => [
-                \Filament\Forms\Components\Section::make('Request Summary')
+                \Filament\Forms\Components\Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')
-                            ->label('Requester')
-                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                            ->label('Pemohon')
+                            ->content($record->requester->name.' ('.$record->division->name.')'),
                         \Filament\Forms\Components\Placeholder::make('items')
-                            ->label('Items')
+                            ->label('Barang')
                             ->content(function () use ($record) {
                                 return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
                             }),
                     ]),
                 \Filament\Forms\Components\Placeholder::make('confirmation')
-                    ->content('Are you sure you want to approve this request?'),
+                    ->content('Apakah Anda yakin ingin menyetujui permintaan ini?'),
             ])
             ->visible(function (Model $record) {
-                $validationService = new ApprovalValidationService();
+                $validationService = new ApprovalValidationService;
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
                 return $validationService->canUserApprove($record, $user);
             })
             ->action(function (Model $record) {
-                $validationService = new ApprovalValidationService();
-                $historyService = new ApprovalHistoryService();
+                $validationService = new ApprovalValidationService;
+                $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
-                
+
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -133,57 +133,57 @@ class ApprovalAction
                     ]);
                 }
 
-                $approvalService->processApprovalStep($approval, $user, 'approve', 'Request approved');
+                $approvalService->processApprovalStep($approval, $user, 'approve', 'Permintaan disetujui');
 
                 // Synchronize approval status
                 $approvalService->syncApprovalStatus($record);
 
-                return 'Request approved successfully.';
+                return 'Permintaan berhasil disetujui.';
             });
     }
 
     public static function makeReject(): Action
     {
         return Action::make('reject')
-            ->label('Reject Request')
+            ->label('Tolak Permintaan')
             ->color('danger')
             ->icon(fn () => Heroicon::XCircle)
             ->requiresConfirmation()
-            ->modalHeading('Reject Request')
-            ->modalSubmitActionLabel('Reject')
+            ->modalHeading('Tolak Permintaan')
+            ->modalSubmitActionLabel('Tolak')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
             ->schema(fn (Model $record) => [
-                \Filament\Forms\Components\Section::make('Request Summary')
+                \Filament\Forms\Components\Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')
-                            ->label('Requester')
-                            ->content($record->requester->name . ' (' . $record->division->name . ')'),
+                            ->label('Pemohon')
+                            ->content($record->requester->name.' ('.$record->division->name.')'),
                         \Filament\Forms\Components\Placeholder::make('items')
-                            ->label('Items')
+                            ->label('Barang')
                             ->content(function () use ($record) {
                                 return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
                             }),
                     ]),
                 \Filament\Forms\Components\Textarea::make('rejection_notes')
-                    ->label('Rejection Reason')
-                    ->placeholder('Provide a reason for rejecting this request...')
+                    ->label('Alasan Penolakan')
+                    ->placeholder('Berikan alasan penolakan permintaan ini...')
                     ->required(),
             ])
             ->visible(function (Model $record) {
-                $validationService = new ApprovalValidationService();
+                $validationService = new ApprovalValidationService;
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record (same check for rejection)
                 return $validationService->canUserApprove($record, $user);
             })
             ->action(function (array $data, Model $record) {
-                $validationService = new ApprovalValidationService();
-                $historyService = new ApprovalHistoryService();
+                $validationService = new ApprovalValidationService;
+                $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
-                
+
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -207,7 +207,7 @@ class ApprovalAction
 
                 $approvalService->processApprovalStep($approval, $user, 'reject', $data['rejection_notes'] ?? null);
 
-                return 'Request rejected successfully.';
+                return 'Permintaan berhasil ditolak.';
             });
     }
 
@@ -215,10 +215,10 @@ class ApprovalAction
     public static function makeWithRejection(): Action
     {
         return Action::make('approve_with_rejection')
-            ->label('Approve/Reject Request')
+            ->label('Setujui/Tolak Permintaan')
             ->color('success')
             ->visible(function (Model $record) {
-                $validationService = new ApprovalValidationService();
+                $validationService = new ApprovalValidationService;
                 $user = auth()->user();
 
                 // Check if the user can approve this specific record
@@ -226,23 +226,24 @@ class ApprovalAction
             })
             ->form([
                 \Filament\Forms\Components\Select::make('action')
+                    ->label('Tindakan')
                     ->options([
-                        'approve' => 'Approve',
-                        'reject' => 'Reject',
+                        'approve' => 'Setujui',
+                        'reject' => 'Tolak',
                     ])
                     ->required()
                     ->default('approve'),
                 \Filament\Forms\Components\Textarea::make('notes')
-                    ->label('Notes (Optional)')
-                    ->placeholder('Add any notes regarding your decision...'),
+                    ->label('Catatan (Opsional)')
+                    ->placeholder('Tambahkan catatan terkait keputusan Anda...'),
             ])
             ->action(function (array $data, Model $record) {
-                $validationService = new ApprovalValidationService();
-                $historyService = new ApprovalHistoryService();
+                $validationService = new ApprovalValidationService;
+                $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
                 $processingService = new ApprovalProcessingService($validationService, $historyService, $stockUpdateService);
                 $approvalService = new ApprovalService($validationService, $processingService, $historyService, $stockUpdateService);
-                
+
                 $user = auth()->user();
 
                 // Find the active approval flow for this model type
@@ -268,7 +269,7 @@ class ApprovalAction
                 $notes = $data['notes'] ?? null;
 
                 if ($action === 'approve') {
-                    $approvalService->processApprovalStep($approval, $user, 'approve', $notes ?: 'Request approved');
+                    $approvalService->processApprovalStep($approval, $user, 'approve', $notes ?: 'Permintaan disetujui');
                 } else {
                     $approvalService->processApprovalStep($approval, $user, 'reject', $notes);
                 }
@@ -276,7 +277,7 @@ class ApprovalAction
                 // Synchronize approval status
                 $approvalService->syncApprovalStatus($record);
 
-                $message = $action === 'approve' ? 'Request approved successfully.' : 'Request rejected.';
+                $message = $action === 'approve' ? 'Permintaan berhasil disetujui.' : 'Permintaan berhasil ditolak.';
 
                 return $message;
             });

@@ -4,11 +4,11 @@ namespace App\Filament\Resources\AtkTransferStocks\Pages;
 
 use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Services\TransferStockApprovalService;
-use Filament\Resources\Pages\ViewRecord;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Auth;
-use Filament\Notifications\Notification;
 
 class ViewAtkTransferStock extends ViewRecord
 {
@@ -18,8 +18,8 @@ class ViewAtkTransferStock extends ViewRecord
     {
         // Add approval buttons if the user has permission
         $record = $this->getRecord();
-        $approvalService = new TransferStockApprovalService();
-        
+        $approvalService = new TransferStockApprovalService;
+
         // Check if user is authorized to edit (requester, users with GA initial, or Admin role)
         $user = Auth::user();
         $isRequester = $user->id == $record->requester_id;
@@ -40,7 +40,7 @@ class ViewAtkTransferStock extends ViewRecord
                 ->successNotificationTitle('ATK Stock Transfer updated')
                 ->modalWidth(Width::SevenExtraLarge);
         }
-        
+
         if ($approvalService->canApprove($record)) {
             // Add approve action
             $actions[] = Action::make('approve')
@@ -53,7 +53,7 @@ class ViewAtkTransferStock extends ViewRecord
                     if ($approvalService->approve($record)) {
                         Notification::make()
                             ->title('Success')
-                            ->body('Transfer stock request has been approved successfully.')
+                            ->body('Permintaan transfer stok berhasil disetujui.')
                             ->success()
                             ->send();
                     } else {
@@ -83,7 +83,7 @@ class ViewAtkTransferStock extends ViewRecord
                     if ($approvalService->reject($record, $data['rejection_reason'])) {
                         Notification::make()
                             ->title('Success')
-                            ->body('Transfer stock request has been rejected successfully.')
+                            ->body('Permintaan transfer stok berhasil ditolak.')
                             ->success()
                             ->send();
                     } else {

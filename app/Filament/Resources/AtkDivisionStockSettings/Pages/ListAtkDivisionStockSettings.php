@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\AtkDivisionStockSettings\Pages;
 
+use App\Filament\Resources\AtkDivisionStockSettings\AtkDivisionStockSettingResource;
 use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkItem;
 use App\Models\UserDivision;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\AtkDivisionStockSettings\AtkDivisionStockSettingResource;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
 
 class ListAtkDivisionStockSettings extends ListRecords
 {
@@ -33,7 +33,7 @@ class ListAtkDivisionStockSettings extends ListRecords
                                 ->first();
 
                             // If no setting exists, create one with default max_limit
-                            if (!$existingSetting) {
+                            if (! $existingSetting) {
                                 AtkDivisionStockSetting::create([
                                     'division_id' => $division->id,
                                     'item_id' => $item->id,
@@ -45,8 +45,8 @@ class ListAtkDivisionStockSettings extends ListRecords
                     }
 
                     Notification::make()
-                        ->title('Item list generated successfully')
-                        ->body(count($divisions) . ' divisions and ' . count($items) . ' items processed')
+                        ->title('Daftar item berhasil dibuat')
+                        ->body(count($divisions).' divisions and '.count($items).' items processed')
                         ->success()
                         ->send();
                 })

@@ -2,29 +2,29 @@
 
 namespace App\Filament\Resources\MarketingMediaDivisionStockSettings\Tables;
 
-use Filament\Tables\Table;
+use App\Models\MarketingMediaDivisionStockSetting;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\MarketingMediaDivisionStockSetting;
 
 class MarketingMediaDivisionStockSettingsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(function(Builder $query){
-                if(auth()->user()->hasRole('Super Admin')){
+            ->modifyQueryUsing(function (Builder $query) {
+                if (auth()->user()->hasRole('Super Admin')) {
                     MarketingMediaDivisionStockSetting::all();
-                }else{
+                } else {
                     $query->where('division_id', auth()->user()->division_id);
                 }
             })
@@ -67,9 +67,9 @@ class MarketingMediaDivisionStockSettingsTable
                             foreach ($records as $record) {
                                 $record->update(['max_limit' => $data['max_limit']]);
                             }
-                            
+
                             Notification::make()
-                                ->title('Maximum limit updated successfully for selected items')
+                                ->title('Batas maksimal berhasil diperbarui untuk item terpilih')
                                 ->success()
                                 ->send();
                         }),
@@ -90,9 +90,9 @@ class MarketingMediaDivisionStockSettingsTable
                         // Update all stock settings for the current division
                         MarketingMediaDivisionStockSetting::where('division_id', auth()->user()->division_id)
                             ->update(['max_limit' => $data['max_limit']]);
-                        
+
                         Notification::make()
-                            ->title('Global maximum limit updated successfully')
+                            ->title('Batas maksimal global berhasil diperbarui')
                             ->success()
                             ->send();
                     }),

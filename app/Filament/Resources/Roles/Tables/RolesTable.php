@@ -19,7 +19,7 @@ class RolesTable
                 TextColumn::make('name')
                     ->label('Role Name'),
                 TextColumn::make('guard_name')
-                    ->label('Guard Name')
+                    ->label('Guard Name'),
             ])
             ->filters([
                 //
@@ -27,14 +27,14 @@ class RolesTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('Role successfully updated'),
+                    ->successNotificationTitle('Role berhasil diperbarui'),
                 DeleteAction::make()
-                    ->successNotificationTitle('Role successfully deleted')
+                    ->successNotificationTitle('Role berhasil dihapus'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('Roles successfully deleted'),
+                        ->successNotificationTitle('Beberapa Role berhasil dihapus'),
                 ]),
             ]);
     }

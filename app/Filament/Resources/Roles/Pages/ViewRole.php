@@ -14,7 +14,7 @@ class ViewRole extends ViewRecord
     {
         return [
             EditAction::make()
-                ->successNotificationTitle('Role successfully updated'),
+                ->successNotificationTitle('Role berhasil diperbarui'),
         ];
     }
 }

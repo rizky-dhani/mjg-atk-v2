@@ -17,7 +17,7 @@ class ListAtkItems extends ListRecords
     {
         return [
             CreateAction::make()
-                ->successNotificationTitle('ATK Item created')
+                ->successNotificationTitle('Item ATK berhasil dibuat')
                 ->using(function (array $data) {
                     $selectedDivisions = $data['division_id'] ?? [];
                     unset($data['division_id']);

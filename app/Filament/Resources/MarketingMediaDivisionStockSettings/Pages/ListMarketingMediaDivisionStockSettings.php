@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\MarketingMediaDivisionStockSettings\Pages;
 
+use App\Filament\Resources\MarketingMediaDivisionStockSettings\MarketingMediaDivisionStockSettingResource;
 use App\Models\MarketingMediaDivisionStockSetting;
 use App\Models\MarketingMediaItem;
 use App\Models\UserDivision;
 use Filament\Actions\Action;
-use Filament\Resources\Pages\ListRecords;
-use App\Filament\Resources\MarketingMediaDivisionStockSettings\MarketingMediaDivisionStockSettingResource;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
 
 class ListMarketingMediaDivisionStockSettings extends ListRecords
 {
@@ -33,7 +33,7 @@ class ListMarketingMediaDivisionStockSettings extends ListRecords
                                 ->first();
 
                             // If no setting exists, create one with default max_limit
-                            if (!$existingSetting) {
+                            if (! $existingSetting) {
                                 MarketingMediaDivisionStockSetting::create([
                                     'division_id' => $division->id,
                                     'item_id' => $item->id,
@@ -45,8 +45,8 @@ class ListMarketingMediaDivisionStockSettings extends ListRecords
                     }
 
                     Notification::make()
-                        ->title('Item list generated successfully')
-                        ->body(count($divisions) . ' divisions and ' . count($items) . ' items processed')
+                        ->title('Daftar item berhasil dibuat')
+                        ->body(count($divisions).' divisions and '.count($items).' items processed')
                         ->success()
                         ->send();
                 })

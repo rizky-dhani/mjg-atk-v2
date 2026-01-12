@@ -108,7 +108,7 @@ class AtkDivisionStocksTable
                             $record->moveToFloating((int) $data['quantity']);
 
                             Notification::make()
-                                ->title('Stock moved to floating successfully')
+                                ->title('Stok berhasil dipindahkan ke stok umum')
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {

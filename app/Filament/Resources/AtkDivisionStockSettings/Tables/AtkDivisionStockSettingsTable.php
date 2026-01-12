@@ -2,9 +2,7 @@
 
 namespace App\Filament\Resources\AtkDivisionStockSettings\Tables;
 
-use App\Models\AtkCategory;
 use App\Models\AtkDivisionStockSetting;
-use App\Models\UserDivision;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -27,7 +25,7 @@ class AtkDivisionStockSettingsTable
             ->modifyQueryUsing(function (Builder $query) {
                 $query->with(['division', 'item', 'item.category']);
                 $user = auth()->user();
-                
+
                 if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
                     // Super Admin, Admin, or GA division users can see all records
                 } else {
@@ -91,7 +89,7 @@ class AtkDivisionStockSettingsTable
                             }
 
                             Notification::make()
-                                ->title('Maximum limit updated successfully for selected items')
+                                ->title('Batas maksimal berhasil diperbarui untuk item terpilih')
                                 ->success()
                                 ->send();
                         }),
@@ -110,7 +108,7 @@ class AtkDivisionStockSettingsTable
                     ])
                     ->action(function (array $data) {
                         $user = auth()->user();
-                        
+
                         // Update all stock settings for the current division
                         // If user is Super Admin, Admin, or from GA division, update all records
                         if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
@@ -121,7 +119,7 @@ class AtkDivisionStockSettingsTable
                         }
 
                         Notification::make()
-                            ->title('Global maximum limit updated successfully')
+                            ->title('Batas maksimal global berhasil diperbarui')
                             ->success()
                             ->send();
                     }),

@@ -3,9 +3,6 @@
 namespace App\Services;
 
 use App\Models\ApprovalHistory;
-use App\Models\AtkStockRequest;
-use App\Models\AtkStockUsage;
-use App\Models\MarketingMediaStockRequest;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -102,7 +99,7 @@ class ApprovalHistoryService
             'submitted', // Initial submission
             $documentId,
             null, // No rejection reason
-            'Request submitted for approval',
+            'Permintaan diajukan untuk persetujuan',
             null // No specific step for initial submission
         );
     }
