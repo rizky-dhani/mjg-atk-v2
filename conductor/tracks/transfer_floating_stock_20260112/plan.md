@@ -2,14 +2,8 @@
 
 ## Phase 1: Logic and Model Updates
 
-- [~] **Task 1: Update AtkFloatingStock Model Logic**
-  - Refine `distributeToDivision` to properly handle the new `source_division_id` and `destination_division_id` fields in transaction history.
-  - Ensure the method is robust for bulk operations (wrapping multiple calls in a transaction).
-
-- [ ] **Task 2: Write Unit Tests for Transfer Logic**
-  - Create tests to verify stock decreases in `AtkFloatingStock` and increases in `AtkDivisionStock`.
-  - Verify that transaction history records are correctly created for both models.
-  - Verify validation (e.g., insufficient stock).
+- [x] **Task 1: Update AtkFloatingStock Model Logic** e1da280
+- [x] **Task 2: Write Unit Tests for Transfer Logic** e1da280
 
 - [ ] **Task: Conductor - User Manual Verification 'Logic and Model Updates' (Protocol in workflow.md)**
 
