@@ -1,6 +1,6 @@
 # Plan: ATK Stock Request Approval Workflow Refinement
 
-## Phase 1: Core Approval Logic & Step Transitions
+## Phase 1: Core Approval Logic & Step Transitions [checkpoint: 07e02ed]
 
 - [x] **Task 1: Define Approval Logic Tests**
   - Write Pest tests for dynamic step transitions in `ApprovalService`.
@@ -17,8 +17,10 @@
   - Write tests to verify stock *is* adjusted correctly after final approval.
 
 - [x] **Task 4: Implement Final Approval Stock Update**
+  - Connect `StockUpdateService` to the final step of the `ApprovalService`.
+  - Ensure database transactions wrap the approval and stock update.
 
-- [~] **Task: Conductor - User Manual Verification 'Core Approval Logic' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Core Approval Logic' (Protocol in workflow.md)**
 
 ## Phase 2: Real-time Notifications
 
