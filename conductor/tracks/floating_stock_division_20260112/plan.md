@@ -12,7 +12,7 @@
 
 - [x] **Task: Conductor - User Manual Verification 'Phase 1' (Protocol in workflow.md)**
 
-## Phase 2: Service and Logic Updates
+## Phase 2: Service and Logic Updates [checkpoint: 8710bc0]
 
 - [x] **Task 3: Update FloatingStockService**
   - Modify `recordTransaction` to accept and store `source_division_id`.
@@ -20,7 +20,7 @@
 
 - [x] **Task 4: Write Tests for Service**
 
-- [~] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Phase 2' (Protocol in workflow.md)**
 
 ## Phase 3: UI Updates
 
