@@ -449,6 +449,74 @@ class ApprovalProcessingService
     }
 
     /**
+     * Notify relevant parties about ATK Request from Floating Stock updates
+     */
+    protected function notifyFloatingStockRequest(AtkRequestFromFloatingStock $request, string $actionStatus, ?User $actor = null, ?string $notes = null, ?Approval $approval = null): void
+    {
+        $recipients = collect();
+
+        // Submitter
+        if ($request->requester) {
+            $recipients->push([
+                'email' => $request->requester->email,
+                'name' => $request->requester->name,
+                'is_approver' => false,
+            ]);
+        }
+
+        // Next approvers
+        if (in_array($actionStatus, ['submitted', 'partially_approved'])) {
+            $approval = $approval ?? $request->approval()->first();
+            if ($approval) {
+                $nextApprovers = $this->getNextApprovers($approval);
+                foreach ($nextApprovers as $approver) {
+                    $recipients->push([
+                        'email' => $approver->email,
+                        'name' => $approver->name,
+                        'is_approver' => true,
+                    ]);
+                }
+            }
+        }
+
+        $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
+
+        if ($uniqueRecipients->isNotEmpty()) {
+            // Note: URL will be added when resource is created
+            $viewUrl = '#'; 
+
+            foreach ($uniqueRecipients as $recipient) {
+                // Send Filament Notification
+                $user = User::where('email', $recipient['email'])->first();
+                if ($user) {
+                    $notification = FilamentNotification::make();
+
+                    $title = match ($actionStatus) {
+                        'submitted' => 'Permintaan Stok Umum ATK Baru',
+                        'approved' => 'Permintaan Stok Umum ATK Disetujui',
+                        'rejected' => 'Permintaan Stok Umum ATK Ditolak',
+                        'partially_approved' => 'Permintaan Stok Umum ATK Menunggu Persetujuan Anda',
+                        default => 'Pembaruan Permintaan Stok Umum ATK',
+                    };
+
+                    $notification->title($title)
+                        ->body("Permintaan: {$request->request_number}");
+
+                    if ($actionStatus === 'rejected') {
+                        $notification->danger();
+                    } elseif ($actionStatus === 'approved') {
+                        $notification->success();
+                    } else {
+                        $notification->info();
+                    }
+
+                    $notification->sendToDatabase($user);
+                }
+            }
+        }
+    }
+
+    /**
      * Notify relevant parties about ATK Stock Usage updates
      */
     protected function notifyStockUsage(AtkStockUsage $stockUsage, string $actionStatus, ?User $actor = null, ?string $notes = null, ?Approval $approval = null): void

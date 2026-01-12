@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\AtkDivisionStock;
+use App\Models\AtkFloatingStock;
+use App\Models\AtkRequestFromFloatingStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
 use App\Models\MarketingMediaDivisionStock;
@@ -48,6 +50,10 @@ class StockUpdateService
                     $this->updateStockForAddition($model);
                     break;
 
+                case AtkRequestFromFloatingStock::class:
+                    $this->updateStockForFloatingRequest($model);
+                    break;
+
                 case AtkStockUsage::class:
                     $this->updateStockForReduction($model);
                     break;
@@ -62,6 +68,34 @@ class StockUpdateService
                     break;
             }
         }
+    }
+
+    /**
+     * Update stock for ATK Request from Floating Stock
+     *
+     * @param  AtkRequestFromFloatingStock  $request  The approved request
+     */
+    private function updateStockForFloatingRequest(AtkRequestFromFloatingStock $request): void
+    {
+        \Log::info('StockUpdateService: updateStockForFloatingRequest called', [
+            'request_id' => $request->id,
+            'request_number' => $request->request_number,
+        ]);
+
+        $request->load('items');
+
+        $items = $request->items->map(fn ($item) => [
+            'item_id' => $item->item_id,
+            'quantity' => $item->quantity,
+        ])->toArray();
+
+        // Use the existing bulk distribution method
+        // Note: distributeBulkToDivision internally records transactions for both sides
+        AtkFloatingStock::distributeBulkToDivision(
+            $items,
+            $request->division_id,
+            "Approved Request: {$request->request_number}"
+        );
     }
 
     /**
