@@ -7,37 +7,22 @@
 
 - [ ] **Task: Conductor - User Manual Verification 'Logic and Model Updates' (Protocol in workflow.md)**
 
-## Phase 2: UI Implementation - Table Action
+## Phase 2: UI Implementation - Table Action [checkpoint: 2341e89]
 
-- [ ] **Task 3: Implement Individual Table Action**
-  - Add "Transfer to.." action to `AtkFloatingStocksTable.php`.
-  - Configure the modal form with Target Division, Quantity, and Notes.
-  - Implement the action logic using `AtkFloatingStock` model methods.
+- [x] **Task 3: Implement Individual Table Action** 2341e89
+- [x] **Task 4: Write UI Tests for Table Action** 2341e89
 
-- [ ] **Task 4: Write UI Tests for Table Action**
-  - Verify the action is visible to authorized users.
-  - Verify the modal form fields and validation.
-  - Verify successful submission triggers the stock transfer.
+- [x] **Task: Conductor - User Manual Verification 'Table Action' (Protocol in workflow.md)**
 
-- [ ] **Task: Conductor - User Manual Verification 'Table Action' (Protocol in workflow.md)**
+## Phase 3: UI Implementation - Bulk Action [checkpoint: 2341e89]
 
-## Phase 3: UI Implementation - Bulk Action
+- [x] **Task 5: Implement Bulk Transfer Action** 2341e89
+- [x] **Task 6: Write UI Tests for Bulk Action** 2341e89
 
-- [ ] **Task 5: Implement Bulk Transfer Action**
-  - Add "Transfer Selected to.." bulk action to `AtkFloatingStocksTable.php`.
-  - Configure the modal form (Target Division and Notes apply to all selected; Quantity might need per-item handling or a simplified bulk distribution).
-  - Implement the bulk action logic.
+- [x] **Task: Conductor - User Manual Verification 'Bulk Action' (Protocol in workflow.md)**
 
-- [ ] **Task 6: Write UI Tests for Bulk Action**
-  - Verify the bulk action appears when items are selected.
-  - Verify the bulk transfer correctly updates all selected items.
+## Phase 4: Final Verification and Standards [checkpoint: 2341e89]
 
-- [ ] **Task: Conductor - User Manual Verification 'Bulk Action' (Protocol in workflow.md)**
+- [x] **Task 7: Global Code Quality and Coverage Audit** 2341e89
 
-## Phase 4: Final Verification and Standards
-
-- [ ] **Task 7: Global Code Quality and Coverage Audit**
-  - Run all tests and ensure >99% coverage for new code.
-  - Run Laravel Pint for formatting.
-
-- [ ] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
