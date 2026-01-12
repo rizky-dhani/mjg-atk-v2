@@ -11,7 +11,7 @@
   - Define relationships and fillable fields.
   - Integrate with `StockRequestModelTrait` if applicable or create a specialized trait.
 
-- [ ] **Task 3: Write Unit Tests for Request Logic**
+- [x] **Task 3: Write Unit Tests for Request Logic** 0c934ad
   - Verify model creation and relationships.
   - Verify validation logic (e.g., quantity check against floating stock).
 
