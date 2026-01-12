@@ -75,6 +75,12 @@ class DashboardPanelProvider extends PanelProvider
                     ->group('Approval Permintaan')
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
+                NavigationItem::make('Persetujuan Permintaan Stok Umum ATK')
+                    ->icon(fn () => Heroicon::ArrowTopRightOnSquare)
+                    ->url(fn () => \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
+                    ->group('Approval Permintaan')
+                    ->isActiveWhen(fn () => request()->url() === \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
+                    ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
