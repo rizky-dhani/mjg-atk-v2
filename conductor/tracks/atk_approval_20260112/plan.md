@@ -46,10 +46,10 @@
 
 - [x] **Task: Conductor - User Manual Verification 'Mobile UI' (Protocol in workflow.md)**
 
-## Phase 4: Final Verification & Coverage
+## Phase 4: Final Verification & Coverage [checkpoint: 64edb94]
 
 - [x] **Task 9: Global Coverage Audit**
   - Run full test suite with coverage report.
   - Address any gaps to ensure >99% coverage for new modules.
 
-- [~] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
+- [x] **Task: Conductor - User Manual Verification 'Final Integration' (Protocol in workflow.md)**
