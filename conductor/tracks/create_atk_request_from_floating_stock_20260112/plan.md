@@ -23,7 +23,7 @@
   - Register the new model in the approval flow configuration.
   - Implement logic to trigger stock transfer upon `final_approved` status.
 
-- [ ] **Task 5: Write Tests for Approval and Stock Movement**
+- [x] **Task 5: Write Tests for Approval and Stock Movement** 11dba9c
   - Verify that final approval triggers `AtkFloatingStock::distributeBulkToDivision`.
   - Verify transaction histories are recorded correctly.
 
