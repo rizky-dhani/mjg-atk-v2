@@ -1,17 +1,14 @@
 <?php
 
+use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock;
 use App\Models\Approval;
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalFlowStep;
-use App\Models\AtkItem;
 use App\Models\AtkRequestFromFloatingStock;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserDivision;
-use App\Services\ApprovalProcessingService;
-use App\Services\ApprovalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock;
 use Livewire\Livewire;
 
 uses(RefreshDatabase::class);
@@ -27,7 +24,7 @@ beforeEach(function () {
 
     // Create users
     $this->requester = User::factory()->create(['division_id' => $this->marketing->id]);
-    
+
     $this->divHead = User::factory()->create(['division_id' => $this->marketing->id]);
     $this->divHead->assignRole($this->divHeadRole);
 
@@ -77,6 +74,8 @@ test('GA Admin (Step 2) cannot see a request at Step 1', function () {
         'status' => 'pending',
     ]);
 
+    $request->refresh();
+
     // Acting as GA Admin
     $this->actingAs($this->gaAdmin);
 
@@ -102,6 +101,8 @@ test('Division Head (Step 1) CAN see a request at Step 1', function () {
         'status' => 'pending',
     ]);
 
+    $request->refresh();
+
     // Acting as Division Head
     $this->actingAs($this->divHead);
 
@@ -118,14 +119,12 @@ test('GA Admin (Step 2) CAN see a request once it reaches Step 2', function () {
         'division_id' => $this->marketing->id,
     ]);
 
-    // Create approval record at Step 2
-    $approval = Approval::create([
-        'approvable_type' => AtkRequestFromFloatingStock::class,
-        'approvable_id' => $request->id,
-        'flow_id' => $this->flow->id,
+    // Update auto-created approval record to Step 2
+    $request->approval->update([
         'current_step' => 2,
-        'status' => 'pending',
     ]);
+
+    $request->refresh();
 
     // Acting as GA Admin
     $this->actingAs($this->gaAdmin);
@@ -143,14 +142,12 @@ test('Division Head (Step 1) no longer sees the request after it moves to Step 2
         'division_id' => $this->marketing->id,
     ]);
 
-    // Create approval record at Step 2
-    $approval = Approval::create([
-        'approvable_type' => AtkRequestFromFloatingStock::class,
-        'approvable_id' => $request->id,
-        'flow_id' => $this->flow->id,
+    // Update auto-created approval record to Step 2
+    $request->approval->update([
         'current_step' => 2,
-        'status' => 'pending',
     ]);
+
+    $request->refresh();
 
     // Acting as Division Head
     $this->actingAs($this->divHead);
