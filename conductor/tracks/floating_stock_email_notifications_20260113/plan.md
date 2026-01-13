@@ -12,9 +12,9 @@ Preparation of the email templates and Mailable class.
 ## Phase 2: Email Dispatch Integration
 Integrating the email triggers into the approval and submission process.
 
-- [ ] Task: Identify and hook into the submission process for `AtkRequestFromFloatingStock`.
-- [ ] Task: Update `ApprovalProcessingService` or relevant service to dispatch floating stock emails on submission and final decision.
-- [ ] Task: Ensure emails are sent to the correct recipients (Requester and Approvers).
+- [x] Task: Identify and hook into the submission process for `AtkRequestFromFloatingStock`. 146d9d2
+- [x] Task: Update `ApprovalProcessingService` or relevant service to dispatch floating stock emails on submission and final decision. 146d9d2
+- [x] Task: Ensure emails are sent to the correct recipients (Requester and Approvers). 146d9d2
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Email Dispatch Integration' (Protocol in workflow.md)
 
 ## Phase 3: Testing and Refinement
