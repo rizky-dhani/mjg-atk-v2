@@ -6,6 +6,7 @@ use App\Mail\AtkStockRequestMail;
 use App\Mail\AtkStockUsageMail;
 use App\Models\Approval;
 use App\Models\ApprovalHistory;
+use App\Models\AtkRequestFromFloatingStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
 use App\Models\User;
@@ -96,6 +97,8 @@ class ApprovalProcessingService
                     $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
                 } elseif ($approvable instanceof AtkStockUsage) {
                     $this->notifyStockUsage($approvable, 'rejected', $user, $notes, $approval);
+                } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                    $this->notifyFloatingStockRequest($approvable, 'rejected', $user, $notes, $approval);
                 }
 
                 return false; // Approval is not completed due to rejection
@@ -143,6 +146,8 @@ class ApprovalProcessingService
                         $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
                     } elseif ($approvable instanceof AtkStockUsage) {
                         $this->notifyStockUsage($approvable, 'approved', $user, $notes, $approval);
+                    } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                        $this->notifyFloatingStockRequest($approvable, 'approved', $user, $notes, $approval);
                     }
 
                     return true; // Approval is completed
@@ -173,6 +178,8 @@ class ApprovalProcessingService
                         $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
                     } elseif ($approvable instanceof AtkStockUsage) {
                         $this->notifyStockUsage($approvable, 'partially_approved', $user, $notes, $approval);
+                    } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                        $this->notifyFloatingStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
                     }
 
                     return false; // Approval is not yet completed
@@ -227,6 +234,8 @@ class ApprovalProcessingService
                 $this->notifyStockRequest($model, 'submitted', $currentUser);
             } elseif ($model instanceof AtkStockUsage) {
                 $this->notifyStockUsage($model, 'submitted', $currentUser);
+            } elseif ($model instanceof \App\Models\AtkRequestFromFloatingStock) {
+                $this->notifyFloatingStockRequest($model, 'submitted', $currentUser);
             }
         }
 
@@ -293,6 +302,8 @@ class ApprovalProcessingService
             $this->notifyStockRequest($approval->approvable, 'submitted', $user);
         } elseif ($approval->approvable instanceof AtkStockUsage) {
             $this->notifyStockUsage($approval->approvable, 'submitted', $user);
+        } elseif ($approval->approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+            $this->notifyFloatingStockRequest($approval->approvable, 'submitted', $user);
         }
     }
 
@@ -482,10 +493,38 @@ class ApprovalProcessingService
         $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
 
         if ($uniqueRecipients->isNotEmpty()) {
-            // Note: URL will be added when resource is created
-            $viewUrl = '#';
+            $viewUrl = \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('index');
 
             foreach ($uniqueRecipients as $recipient) {
+                // Send Email
+                $mailable = new \App\Mail\AtkRequestFromFloatingStockMail(
+                    $request,
+                    $actionStatus,
+                    $actor,
+                    $notes,
+                    $recipient['name'],
+                    $viewUrl,
+                    $recipient['is_approver']
+                );
+
+                // Monitoring headers
+                if (in_array($actionStatus, ['approved', 'rejected', 'partially_approved']) && $actor) {
+                    $type = match ($actionStatus) {
+                        'approved', 'partially_approved' => 'Approve',
+                        'rejected' => 'Reject',
+                        default => null,
+                    };
+
+                    if ($type) {
+                        $mailable->withSymfonyMessage(function ($message) use ($type, $actor) {
+                            $message->getHeaders()->addTextHeader('X-Action-Type', $type);
+                            $message->getHeaders()->addTextHeader('X-Action-By-Id', $actor->id);
+                        });
+                    }
+                }
+
+                Mail::to($recipient['email'])->send($mailable);
+
                 // Send Filament Notification
                 $user = User::where('email', $recipient['email'])->first();
                 if ($user) {
@@ -500,7 +539,13 @@ class ApprovalProcessingService
                     };
 
                     $notification->title($title)
-                        ->body("Permintaan: {$request->request_number}");
+                        ->body("Permintaan: {$request->request_number}")
+                        ->actions([
+                            \Filament\Actions\Action::make('view')
+                                ->label('Lihat')
+                                ->url($viewUrl)
+                                ->button(),
+                        ]);
 
                     if ($actionStatus === 'rejected') {
                         $notification->danger();
