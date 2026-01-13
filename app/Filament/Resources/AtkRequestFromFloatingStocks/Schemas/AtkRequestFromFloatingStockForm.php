@@ -66,7 +66,8 @@ class AtkRequestFromFloatingStockForm
                                         return $rejection ? $rejection->user->name : null;
                                     }),
                             ]),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
                 Section::make('Request Information')
                     ->schema([
                         Grid::make(2)
@@ -80,7 +81,8 @@ class AtkRequestFromFloatingStockForm
                                     ->label('Notes')
                                     ->columnSpanFull(),
                             ]),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
                 Section::make('Requested Items')
                     ->schema([
                         Repeater::make('atkRequestFromFloatingStockItems')
@@ -127,7 +129,8 @@ class AtkRequestFromFloatingStockForm
                             ->columns(3)
                             ->minItems(1)
                             ->addActionLabel('Add Item'),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 }

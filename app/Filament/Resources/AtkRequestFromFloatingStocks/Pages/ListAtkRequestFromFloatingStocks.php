@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AtkRequestFromFloatingStocks\Pages;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\Width;
 
 class ListAtkRequestFromFloatingStocks extends ListRecords
 {
@@ -14,6 +15,7 @@ class ListAtkRequestFromFloatingStocks extends ListRecords
     {
         return [
             CreateAction::make()
+                ->modalWidth(Width::SevenExtraLarge)
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['requester_id'] = auth()->id();
                     $data['division_id'] = auth()->user()->division_id;
