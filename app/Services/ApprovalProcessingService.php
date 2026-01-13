@@ -127,7 +127,7 @@ class ApprovalProcessingService
                         $this->historyService->logApprovalAction(
                             $approvable,
                             $user,
-                            'submitted', // Final submission/approval
+                            'approved', // Final submission/approval
                             null, // document_id will be auto-generated
                             null, // rejection_reason
                             'Permintaan disetujui sepenuhnya',

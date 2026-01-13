@@ -12,10 +12,10 @@ Establish a failing test case to confirm the issue.
 ## Phase 2: Core Logic Fix
 Identify and fix the root cause in the service or model.
 
-- [ ] Task: Audit `ApprovalProcessingService::processApprovalStep` for `AtkRequestFromFloatingStock` handling.
-- [ ] Task: Ensure `syncApprovalStatus` correctly updates the model if it has its own status column (or ensures the `Approval` record is correct).
-- [ ] Task: Refine `AtkRequestFromFloatingStock::getApprovalStatusAttribute()` if needed to properly map "approved" state.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Core Logic Fix' (Protocol in workflow.md)
+- [x] Task: Audit `ApprovalProcessingService::processApprovalStep` for `AtkRequestFromFloatingStock` handling. ea9b2d6
+- [x] Task: Ensure `syncApprovalStatus` correctly updates the model if it has its own status column (or ensures the `Approval` record is correct). ea9b2d6
+- [x] Task: Refine `AtkRequestFromFloatingStock::getApprovalStatusAttribute()` if needed to properly map "approved" state. ea9b2d6
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Core Logic Fix' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification and Standards
 Ensure the fix is robust and adheres to project quality standards.
