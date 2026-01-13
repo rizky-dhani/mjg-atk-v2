@@ -6,9 +6,9 @@ use App\Models\AtkRequestFromFloatingStock;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserDivision;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class AtkRequestFromFloatingStockEmailIntegrationTest extends TestCase
 {
@@ -24,11 +24,11 @@ class AtkRequestFromFloatingStockEmailIntegrationTest extends TestCase
     {
         $division = UserDivision::create(['name' => 'Marketing', 'initial' => 'MKT']);
         $role = Role::create(['name' => 'Manager', 'guard_name' => 'web']);
-        
+
         $requester = User::factory()->create(['division_id' => $division->id]);
         $approver = User::factory()->create(['division_id' => $division->id]);
         $approver->assignRole($role);
-        
+
         // Setup Approval Flow
         $flow = ApprovalFlow::create([
             'name' => 'Floating Stock Flow',
@@ -61,6 +61,56 @@ class AtkRequestFromFloatingStockEmailIntegrationTest extends TestCase
         // We expect an email to be sent to the approver
         Mail::assertSent(AtkRequestFromFloatingStockMail::class, function ($mail) use ($approver) {
             return $mail->hasTo($approver->email) && $mail->actionStatus === 'submitted' && $mail->isApprover === true;
+        });
+    }
+
+    public function test_approving_floating_stock_request_triggers_email(): void
+    {
+        $division = UserDivision::create(['name' => 'Marketing', 'initial' => 'MKT']);
+        $role = Role::create(['name' => 'Manager', 'guard_name' => 'web']);
+        $requester = User::factory()->create(['division_id' => $division->id]);
+        $approver = User::factory()->create(['division_id' => $division->id]);
+        $approver->assignRole($role);
+
+        $flow = ApprovalFlow::create(['name' => 'Flow', 'model_type' => AtkRequestFromFloatingStock::class, 'is_active' => true]);
+        $flow->approvalFlowSteps()->create(['step_name' => 'S1', 'step_number' => 1, 'division_id' => $division->id, 'role_id' => $role->id]);
+
+        $request = AtkRequestFromFloatingStock::create(['requester_id' => $requester->id, 'division_id' => $division->id, 'request_number' => 'ATK-FS-1']);
+
+        $this->actingAs($requester);
+        $approval = app(\App\Services\ApprovalProcessingService::class)->createApproval($request, AtkRequestFromFloatingStock::class);
+
+        Mail::fake(); // Clear submission emails
+
+        app(\App\Services\ApprovalProcessingService::class)->processApprovalStep($approval, $approver, 'approve');
+
+        Mail::assertSent(AtkRequestFromFloatingStockMail::class, function ($mail) use ($requester) {
+            return $mail->hasTo($requester->email) && $mail->actionStatus === 'approved';
+        });
+    }
+
+    public function test_rejecting_floating_stock_request_triggers_email(): void
+    {
+        $division = UserDivision::create(['name' => 'Marketing', 'initial' => 'MKT']);
+        $role = Role::create(['name' => 'Manager', 'guard_name' => 'web']);
+        $requester = User::factory()->create(['division_id' => $division->id]);
+        $approver = User::factory()->create(['division_id' => $division->id]);
+        $approver->assignRole($role);
+
+        $flow = ApprovalFlow::create(['name' => 'Flow', 'model_type' => AtkRequestFromFloatingStock::class, 'is_active' => true]);
+        $flow->approvalFlowSteps()->create(['step_name' => 'S1', 'step_number' => 1, 'division_id' => $division->id, 'role_id' => $role->id]);
+
+        $request = AtkRequestFromFloatingStock::create(['requester_id' => $requester->id, 'division_id' => $division->id, 'request_number' => 'ATK-FS-1']);
+
+        $this->actingAs($requester);
+        $approval = app(\App\Services\ApprovalProcessingService::class)->createApproval($request, AtkRequestFromFloatingStock::class);
+
+        Mail::fake(); // Clear submission emails
+
+        app(\App\Services\ApprovalProcessingService::class)->processApprovalStep($approval, $approver, 'reject', 'Not needed');
+
+        Mail::assertSent(AtkRequestFromFloatingStockMail::class, function ($mail) use ($requester) {
+            return $mail->hasTo($requester->email) && $mail->actionStatus === 'rejected' && $mail->notes === 'Not needed';
         });
     }
 }
