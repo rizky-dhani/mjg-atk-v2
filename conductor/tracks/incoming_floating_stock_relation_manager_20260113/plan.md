@@ -13,11 +13,11 @@ Prepare the Eloquent model to support the new relationship.
 ## Phase 2: Relation Manager Implementation
 Create the Filament component to display the transactions.
 
-- [ ] Task: Generate `FloatingStockRequestsRelationManager` using Filament artisan command.
-- [ ] Task: Configure the relation manager table columns (Request Number, Quantity, Status, Date).
-- [ ] Task: Implement the "View" action to link to the original request.
-- [ ] Task: Register the relation manager in `AtkDivisionStockResource`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Relation Manager Implementation' (Protocol in workflow.md)
+- [x] Task: Generate `FloatingStockRequestsRelationManager` using Filament artisan command. ff0c62d
+- [x] Task: Configure the relation manager table columns (Request Number, Quantity, Status, Date). ff0c62d
+- [x] Task: Implement the "View" action to link to the original request. ff0c62d
+- [x] Task: Register the relation manager in `AtkDivisionStockResource`. ff0c62d
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Relation Manager Implementation' (Protocol in workflow.md)
 
 ## Phase 3: Final Refinement and Standards
 Ensure quality and consistency.

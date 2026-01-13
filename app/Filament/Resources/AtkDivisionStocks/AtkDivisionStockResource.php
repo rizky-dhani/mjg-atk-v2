@@ -51,6 +51,7 @@ class AtkDivisionStockResource extends Resource
     {
         return [
             AtkStockTransactionsRelationManager::class,
+            RelationManagers\IncomingFloatingStockRequestsRelationManager::class,
         ];
     }
 
