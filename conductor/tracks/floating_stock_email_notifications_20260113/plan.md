@@ -20,8 +20,8 @@ Integrating the email triggers into the approval and submission process.
 ## Phase 3: Testing and Refinement
 Ensuring high quality and correct behavior through automated tests.
 
-- [ ] Task: Write feature tests for email submission notification.
-- [ ] Task: Write feature tests for final status (Approved/Rejected) notifications.
-- [ ] Task: Verify 100% test coverage for new notification logic.
-- [ ] Task: Run `vendor/bin/pint` to ensure code style compliance.
+- [x] Task: Write feature tests for email submission notification. 146d9d2
+- [x] Task: Write feature tests for final status (Approved/Rejected) notifications. 3eb10b1
+- [x] Task: Verify 100% test coverage for new notification logic. 3eb10b1
+- [x] Task: Run `vendor/bin/pint` to ensure code style compliance. 3eb10b1
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Testing and Refinement' (Protocol in workflow.md)
