@@ -15,10 +15,10 @@ Establish a baseline by creating tests that fail under the current implementatio
 ## Phase 2: Query Refactoring
 Update the approval page logic to strictly filter by the current active step.
 
-- [ ] Task: Refactor the query in `ApprovalAtkRequestFromFloatingStock.php`.
+- [x] Task: Refactor the query in `ApprovalAtkRequestFromFloatingStock.php`.
     - Sub-task: Align logic with `ApprovalAtkStockRequest` by using the `current_step` from the `approvals` table.
     - Sub-task: Ensure the join/relationship logic correctly matches the user's role and division to the active step.
-- [ ] Task: Implement a navigation badge for the Floating Stock approval menu to match `AtkStockRequest`.
+- [x] Task: Implement a navigation badge for the Floating Stock approval menu to match `AtkStockRequest`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Query Refactoring' (Protocol in workflow.md)
 
 ## Phase 3: Final Verification and Standards
