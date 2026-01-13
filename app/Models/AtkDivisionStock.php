@@ -63,6 +63,17 @@ class AtkDivisionStock extends Model
         });
     }
 
+    /**
+     * Relationship to get floating stock requests that match this division and item
+     */
+    public function incomingFloatingStockRequests()
+    {
+        return $this->hasMany(AtkRequestFromFloatingStockItem::class, 'item_id', 'item_id')
+            ->whereHas('request', function ($query) {
+                $query->where('division_id', $this->division_id);
+            });
+    }
+
     public function division(): BelongsTo
     {
         return $this->belongsTo(UserDivision::class, 'division_id');
