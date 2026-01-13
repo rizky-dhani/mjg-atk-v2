@@ -27,6 +27,10 @@ class TransactionsRelationManager extends RelationManager
                         'adjustment' => 'warning',
                         'transfer' => 'info',
                     }),
+                TextColumn::make('sourceDivision.name')
+                    ->label('From'),
+                TextColumn::make('destinationDivision.name')
+                    ->label('To'),
                 TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
