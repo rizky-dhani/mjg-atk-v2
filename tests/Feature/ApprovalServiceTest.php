@@ -143,7 +143,7 @@ it('stops the flow if a request is rejected', function () {
     expect($this->approvalService->canUserApprove($this->stockRequest, $this->finance))->toBeFalse();
 });
 
-it('does not adjust stock until final approval', function () {
+it('does not adjust stock automatically after final approval (manual fulfillment required)', function () {
     // Setup item and initial stock
     $category = \App\Models\AtkCategory::create(['name' => 'Stationery', 'slug' => 'atk']);
     $item = \App\Models\AtkItem::create([
@@ -193,7 +193,7 @@ it('does not adjust stock until final approval', function () {
     $this->approvalService->processApprovalStep($approval, $this->finance, 'approve');
 
     $divisionStock->refresh();
-    expect($divisionStock->current_stock)->toBe(10); // Stock SHOULD be updated now
+    expect($divisionStock->current_stock)->toBe(0); // Stock should STILL NOT be updated now (manual fulfillment required)
 });
 
 it('dispatches email to the next approver', function () {
@@ -232,7 +232,7 @@ it('returns a valid approval action', function () {
     $action = App\Filament\Actions\ApprovalAction::makeApprove();
 
     expect($action)->toBeInstanceOf(\Filament\Actions\Action::class);
-    expect($action->getName())->toBe('approve');
+    expect($action->getName())->toBe('approve_request');
     expect($action->getColor())->toBe('success');
     expect($action->getLabel())->toBe('Setujui Permintaan');
 });

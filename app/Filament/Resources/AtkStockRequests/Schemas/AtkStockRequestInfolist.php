@@ -21,7 +21,54 @@ class AtkStockRequestInfolist
                 ])
                 ->columns(3)
                 ->columnSpanFull(),
-            // 2. Stock Request Approval section
+            // 2. Approval Progress section
+            Section::make('Approval Progress')
+                ->schema([
+                    RepeatableEntry::make('approvalProgress')
+                        ->label('Expected Approvers & Progress')
+                        ->columns(4)
+                        ->schema([
+                            TextEntry::make('step_name')
+                                ->label('Step Name')
+                                ->formatStateUsing(fn ($state, $record) => "Step {$record['step_number']}: {$state}"),
+                            TextEntry::make('role')
+                                ->label('Required Role'),
+                            TextEntry::make('potential_approvers')
+                                ->label('Approver(s)')
+                                ->formatStateUsing(function ($state, $record) {
+                                    if ($record['status'] === 'approved' || $record['status'] === 'rejected') {
+                                        return $record['approver_name'] ?? 'Unknown';
+                                    }
+
+                                    if ($state->isEmpty()) {
+                                        return 'No approvers found matching role/division';
+                                    }
+
+                                    return $state->map(function ($user) {
+                                        $divisionInitial = $user->division?->initial ? "[{$user->division->initial}] " : '';
+
+                                        return "{$divisionInitial}{$user->name}";
+                                    })->implode(', ');
+                                }),
+                            TextEntry::make('status')
+                                ->label('Status')
+                                ->badge()
+                                ->formatStateUsing(fn ($state) => ucfirst($state))
+                                ->color(fn ($state) => match ($state) {
+                                    'approved' => 'success',
+                                    'rejected' => 'danger',
+                                    'pending' => 'warning',
+                                    'blocked' => 'gray',
+                                    default => 'gray',
+                                }),
+                        ])
+                        ->state(function ($record) {
+                            return $record->approval?->getApprovalProgress() ?? collect();
+                        })
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull(),
+            // 3. Stock Request Approval section
             Section::make('Stock Request Approval')
                 ->schema([
                     RepeatableEntry::make('approvalHistory')

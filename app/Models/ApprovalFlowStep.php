@@ -57,4 +57,33 @@ class ApprovalFlowStep extends Model
     {
         return $this->hasMany(ApprovalStepApproval::class, 'step_id');
     }
+
+    /**
+     * Get the potential approvers for this step given an approvable model.
+     */
+    public function getPotentialApprovers($approvable): \Illuminate\Support\Collection
+    {
+        $query = User::query();
+
+        // 1. Filter by Division
+        if ($this->division_id) {
+            $query->where('division_id', $this->division_id);
+        } else {
+            // Logic for relative division
+            if (isset($approvable->division_id) && $approvable->division_id !== null) {
+                $query->where('division_id', $approvable->division_id);
+            } elseif (method_exists($approvable, 'requestingDivision') && $approvable->requestingDivision()) {
+                $query->where('division_id', $approvable->requesting_division_id);
+            }
+        }
+
+        // 2. Filter by Role
+        if ($this->role_id) {
+            $query->whereHas('roles', function ($q) {
+                $q->where('roles.id', $this->role_id);
+            });
+        }
+
+        return $query->with('division')->get();
+    }
 }
