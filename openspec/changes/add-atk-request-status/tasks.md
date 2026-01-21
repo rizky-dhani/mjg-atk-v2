@@ -15,7 +15,8 @@ This document outlines the tasks required to implement the "Add Status Column to
     *   **List Page:**
         *   Add "Publish" action for `draft` requests, visible only to division administrators, changing the status to `published`.
         *   Add "Unpublish" action for `published` requests, visible only to division administrators, changing the status to `draft`.
-        *   Implement filtering for `draft` and `published` requests on the list page.
+        Implement filtering for `draft` and `published` requests on the list page.
+        *   Display the `status` column on the ATK Stock Request list page.
     *   Implement logic to ensure the approval flow only displays and processes `AtkStockRequest`s with `published` status.
 3.  **Testing:**
     *   Add unit/feature tests for the database migration.

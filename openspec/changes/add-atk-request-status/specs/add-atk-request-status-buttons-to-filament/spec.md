@@ -62,3 +62,9 @@ Then the `AtkStockRequest` MUST NOT be visible or accessible to the approval flo
 Given an `AtkStockRequest` exists with a `status` of `'published'`,
 When an approval flow attempts to view or process this request,
 Then the `AtkStockRequest` MUST be visible and accessible to the approval flow for approval or rejection.
+
+#### Scenario: ATK Stock Request list page displays status column
+
+Given a user is on the ATK Stock Request list page,
+When the list of requests is displayed,
+Then each `AtkStockRequest` record MUST display its `status` (draft or published) in a dedicated column.

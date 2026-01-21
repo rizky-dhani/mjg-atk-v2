@@ -41,6 +41,7 @@ These buttons will replace the standard Filament form submission buttons and wil
 ### List Page
 
 The list page for `AtkStockRequests` will include:
+*   **Status Column**: A dedicated column to display the current `status` (draft or published) of each request.
 *   **Filtering**: A filter to easily view `draft` or `published` requests.
 *   **Actions**:
     *   A "Publish" action for individual `draft` requests, changing their status to `published`.
