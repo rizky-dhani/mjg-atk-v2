@@ -22,6 +22,8 @@ class AtkStockRequestStatus extends StatsOverviewWidget
         $pendingCount = 0;
         $onProgressCount = 0;
         $approvedCount = 0;
+        $fulfilledCount = 0;
+        $pendingFulfillmentCount = 0;
 
         if ($user && $user->division_id) {
             // Get the user's division ID for filtering
@@ -53,26 +55,48 @@ class AtkStockRequestStatus extends StatsOverviewWidget
                     $query->orderBy('performed_at', 'desc')->limit(1)->where('action', 'partially_approved');
                 })
                 ->count();
+
+            // Count fulfilled requests (fully received)
+            $fulfilledCount = AtkStockRequest::where('division_id', $divisionId)
+                ->where('status', \App\Enums\AtkStockRequestStatus::Published)
+                ->whereHas('approval', fn ($q) => $q->where('status', 'approved'))
+                ->get()
+                ->filter(fn ($r) => $r->fulfillment_status === \App\Enums\FulfillmentStatus::Fulfilled)
+                ->count();
+
+            // Count pending fulfillment (approved but not yet fully received)
+            $pendingFulfillmentCount = AtkStockRequest::where('division_id', $divisionId)
+                ->where('status', \App\Enums\AtkStockRequestStatus::Published)
+                ->whereHas('approval', fn ($q) => $q->where('status', 'approved'))
+                ->get()
+                ->filter(fn ($r) => $r->fulfillment_status !== \App\Enums\FulfillmentStatus::Fulfilled)
+                ->count();
         }
 
         return [
-            Stat::make('Pending Requests', $pendingCount)
+            Stat::make('Approval: Pending', $pendingCount)
                 ->description('Waiting for approval')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+                ->descriptionIcon('heroicon-m-clock')
                 ->color('warning')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'pending'])),
 
-            Stat::make('On Progress', $onProgressCount)
-                ->description('Partially approved')
-                ->descriptionIcon('heroicon-m-arrow-trending-up')
+            Stat::make('Approval: In Progress', $onProgressCount)
+                ->description('Under review')
+                ->descriptionIcon('heroicon-m-arrow-path')
                 ->color('info')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'partially_approved'])),
 
-            Stat::make('Approved', $approvedCount)
-                ->description('Successfully approved')
+            Stat::make('Fulfillment: Pending', $pendingFulfillmentCount)
+                ->description('Approved but not fully received')
+                ->descriptionIcon('heroicon-m-archive-box')
+                ->color('primary')
+                ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved', 'tableFilters[fulfillment_status][value]' => 'pending'])),
+
+            Stat::make('Fulfillment: Completed', $fulfilledCount)
+                ->description('Fully received')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success')
-                ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved'])),
+                ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved', 'tableFilters[fulfillment_status][value]' => 'fulfilled'])),
         ];
     }
 }

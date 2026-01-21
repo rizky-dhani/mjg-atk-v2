@@ -106,7 +106,7 @@ class AtkTransferStocksTable
                         return $query->when(
                             $data['value'],
                             function (Builder $query, $value): Builder {
-                                return $query->whereHas('approvalHistories', function ($q) use ($value) {
+                                return $query->whereHas('approvalHistory', function ($q) use ($value) {
                                     $q->where('id', function ($sub) {
                                         $sub->select('id')
                                             ->from('approval_histories')

@@ -98,4 +98,28 @@ class AtkStockRequest extends Model
 
         return $latestApproval->user;
     }
+
+    /**
+     * Get the overall fulfillment status of the request
+     */
+    public function getFulfillmentStatusAttribute(): \App\Enums\FulfillmentStatus
+    {
+        $items = $this->atkStockRequestItems;
+
+        if ($items->isEmpty()) {
+            return \App\Enums\FulfillmentStatus::Pending;
+        }
+
+        $allFullyReceived = $items->every(fn ($item) => $item->isFullyReceived());
+        if ($allFullyReceived) {
+            return \App\Enums\FulfillmentStatus::Fulfilled;
+        }
+
+        $anyReceived = $items->contains(fn ($item) => $item->received_quantity > 0);
+        if ($anyReceived) {
+            return \App\Enums\FulfillmentStatus::PartiallyFulfilled;
+        }
+
+        return \App\Enums\FulfillmentStatus::Pending;
+    }
 }

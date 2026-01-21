@@ -31,10 +31,13 @@ class AtkStockRequestExport implements FromQuery, WithHeadings, WithMapping, Sho
             'Request Number',
             'Requester',
             'Division',
-            'Status',
+            'Approval Status',
+            'Fulfillment Status',
             'Item Name',
             'Item Category',
-            'Quantity',
+            'Requested Quantity',
+            'Received Quantity',
+            'Item Status',
         ];
     }
 
@@ -45,9 +48,12 @@ class AtkStockRequestExport implements FromQuery, WithHeadings, WithMapping, Sho
             $item->request->requester?->name,
             $item->request->division?->name,
             ucfirst($item->request->approval_status),
+            $item->request->fulfillment_status->getLabel(),
             $item->item?->name,
             $item->category?->name,
             $item->quantity,
+            $item->received_quantity,
+            $item->status->getLabel(),
         ];
     }
 }

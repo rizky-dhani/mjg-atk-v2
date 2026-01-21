@@ -1,0 +1,13 @@
+{
+    "Pending": "Menunggu",
+    "Approved": "Disetujui",
+    "Rejected": "Ditolak",
+    "Draft": "Draft",
+    "Published": "Dipublikasikan",
+    "Fulfillment Status": "Status Pemenuhan",
+    "Received": "Diterima",
+    "Remaining": "Sisa",
+    "Requested": "Diminta",
+    "Store Stock": "Simpan Stok",
+    "Bulk Store Stock": "Simpan Stok Terpilih"
+}

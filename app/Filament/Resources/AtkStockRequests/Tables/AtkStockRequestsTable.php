@@ -62,6 +62,12 @@ class AtkStockRequestsTable
                             default => 'warning',
                         },
                     ),
+                TextColumn::make('fulfillment_status')
+                    ->label('Status Pemenuhan')
+                    ->badge()
+                    ->formatStateUsing(fn (\App\Enums\FulfillmentStatus $state): string => $state->getLabel())
+                    ->color(fn (\App\Enums\FulfillmentStatus $state): string => $state->getColor())
+                    ->visible(fn () => auth()->user()->can('view atk-stock-request')),
                 TextColumn::make('approved_by.name')
                     ->label('Approved By')
                     ->getStateUsing(fn ($record) => $record->approved_by?->name)
@@ -92,6 +98,37 @@ class AtkStockRequestsTable
                                             ->limit(1);
                                     })->where('action', $value);
                                 });
+                            }
+                        );
+                    }),
+                SelectFilter::make('fulfillment_status')
+                    ->label('Fulfillment Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'partially_fulfilled' => 'Partially Fulfilled',
+                        'fulfilled' => 'Fulfilled',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            function (Builder $query, $value): Builder {
+                                if ($value === 'fulfilled') {
+                                    return $query->whereDoesntHave('atkStockRequestItems', function ($q) {
+                                        $q->whereRaw('received_quantity < quantity');
+                                    });
+                                } elseif ($value === 'partially_fulfilled') {
+                                    return $query->whereHas('atkStockRequestItems', function ($q) {
+                                        $q->where('received_quantity', '>', 0);
+                                    })->whereHas('atkStockRequestItems', function ($q) {
+                                        $q->whereRaw('received_quantity < quantity');
+                                    });
+                                } elseif ($value === 'pending') {
+                                    return $query->whereDoesntHave('atkStockRequestItems', function ($q) {
+                                        $q->where('received_quantity', '>', 0);
+                                    });
+                                }
+
+                                return $query;
                             }
                         );
                     }),

@@ -105,6 +105,19 @@ class StockUpdateService
      */
     private function updateStockForAddition($stockRequest): void
     {
+        // Skip automatic updates for these models as they now use manual partial fulfillment
+        if (in_array(get_class($stockRequest), [
+            AtkStockRequest::class,
+            MarketingMediaStockRequest::class,
+        ])) {
+            \Log::info('StockUpdateService: Skipping automatic stock update for manual fulfillment model', [
+                'model_id' => $stockRequest->id,
+                'model_type' => get_class($stockRequest),
+            ]);
+
+            return;
+        }
+
         \Log::info('StockUpdateService: updateStockForAddition called', [
             'model_id' => $stockRequest->id,
             'model_type' => get_class($stockRequest),
@@ -413,6 +426,19 @@ class StockUpdateService
      */
     private function updateStockByRequestType($model): void
     {
+        // Skip automatic updates for these models as they now use manual partial fulfillment
+        if (in_array(get_class($model), [
+            AtkStockRequest::class,
+            MarketingMediaStockRequest::class,
+        ])) {
+            \Log::info('StockUpdateService: Skipping automatic stock update by request type for manual fulfillment model', [
+                'model_id' => $model->id,
+                'model_type' => get_class($model),
+            ]);
+
+            return;
+        }
+
         \Log::info('StockUpdateService: updateStockByRequestType called', [
             'model_id' => $model->id,
             'model_type' => get_class($model),
