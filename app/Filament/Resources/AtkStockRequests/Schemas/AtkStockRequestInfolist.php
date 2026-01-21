@@ -40,15 +40,30 @@ class AtkStockRequestInfolist
                                         return $record['approver_name'] ?? 'Unknown';
                                     }
 
-                                    if ($state->isEmpty()) {
+                                    // Check if $state is a collection or array before calling isEmpty()
+                                    $isEmpty = is_array($state) ? empty($state) : (method_exists($state, 'isEmpty') ? $state->isEmpty() : !$state);
+
+                                    if ($isEmpty) {
                                         return 'No approvers found matching role/division';
                                     }
 
-                                    return $state->map(function ($user) {
-                                        $divisionInitial = $user->division?->initial ? "[{$user->division->initial}] " : '';
+                                    // If it's a collection, map it
+                                    if (method_exists($state, 'map')) {
+                                        return $state->map(function ($user) {
+                                            $divisionInitial = $user->division?->initial ? "[{$user->division->initial}] " : '';
 
-                                        return "{$divisionInitial}{$user->name}";
-                                    })->implode(', ');
+                                            return "{$divisionInitial}{$user->name}";
+                                        })->implode(', ');
+                                    }
+
+                                    // If it's a single User object (Filament sometimes iterates)
+                                    if ($state instanceof \App\Models\User) {
+                                        $divisionInitial = $state->division?->initial ? "[{$state->division->initial}] " : '';
+
+                                        return "{$divisionInitial}{$state->name}";
+                                    }
+
+                                    return $state;
                                 }),
                             TextEntry::make('status')
                                 ->label('Status')
