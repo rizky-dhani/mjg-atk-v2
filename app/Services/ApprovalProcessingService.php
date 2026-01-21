@@ -442,7 +442,8 @@ class ApprovalProcessingService
                             \Filament\Actions\Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
-                                ->button(),
+                                ->button()
+                                ->markAsRead(),
                         ]);
 
                     if ($actionStatus === 'rejected') {
@@ -544,7 +545,8 @@ class ApprovalProcessingService
                             \Filament\Actions\Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
-                                ->button(),
+                                ->button()
+                                ->markAsRead(),
                         ]);
 
                     if ($actionStatus === 'rejected') {
@@ -646,7 +648,8 @@ class ApprovalProcessingService
                             \Filament\Actions\Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
-                                ->button(),
+                                ->button()
+                                ->markAsRead(),
                         ]);
 
                     if ($actionStatus === 'rejected') {

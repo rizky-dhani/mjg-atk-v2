@@ -2,20 +2,25 @@
 
 namespace App\Filament\Resources\AtkStockRequests\Tables;
 
+use App\Exports\AtkStockRequestExport;
 use App\Filament\Actions\ApprovalAction;
 use App\Filament\Actions\ResubmitAction;
 use App\Filament\Resources\AtkStockRequests\Schemas\AtkStockRequestForm;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Form;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AtkStockRequestsTable
 {
@@ -68,6 +73,14 @@ class AtkStockRequestsTable
                         return $user && $user->id === $record->requester_id;
                     })
                     ->successNotificationTitle('Permintaan stok ATK berhasil diperbarui'),
+                Action::make('export')
+                    ->label('Export')
+                    ->icon(Heroicon::ArrowDownTray)
+                    ->color('success')
+                    ->action(fn ($record) => Excel::download(
+                        new AtkStockRequestExport($record->id),
+                        'atk_stock_request_'.$record->request_number.'.xlsx'
+                    )),
                 ApprovalAction::makeApprove()->successNotification(
                     Notification::make()
                         ->title('Permintaan stok ATK berhasil disetujui')
@@ -96,6 +109,14 @@ class AtkStockRequestsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->successNotificationTitle('Permintaan stok ATK berhasil dihapus'),
+                    BulkAction::make('export')
+                        ->label('Export Selected')
+                        ->icon(Heroicon::ArrowDownTray)
+                        ->color('success')
+                        ->action(fn (Collection $records) => Excel::download(
+                            new AtkStockRequestExport($records->pluck('id')->toArray()),
+                            'atk_stock_requests_'.now()->format('Y-m-d_H-i-s').'.xlsx'
+                        )),
                 ]),
             ]);
     }
