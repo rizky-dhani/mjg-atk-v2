@@ -74,26 +74,26 @@ class AtkStockRequestStatus extends StatsOverviewWidget
         }
 
         return [
-            Stat::make('Approval: Pending', $pendingCount)
-                ->description('Waiting for approval')
+            Stat::make(__('Approval: Pending'), $pendingCount)
+                ->description(__('Waiting for approval'))
                 ->descriptionIcon('heroicon-m-clock')
                 ->color('warning')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'pending'])),
 
-            Stat::make('Approval: In Progress', $onProgressCount)
-                ->description('Under review')
+            Stat::make(__('Approval: In Progress'), $onProgressCount)
+                ->description(__('Under review'))
                 ->descriptionIcon('heroicon-m-arrow-path')
                 ->color('info')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'partially_approved'])),
 
-            Stat::make('Fulfillment: Pending', $pendingFulfillmentCount)
-                ->description('Approved but not fully received')
+            Stat::make(__('Fulfillment: Pending'), $pendingFulfillmentCount)
+                ->description(__('Approved but not fully received'))
                 ->descriptionIcon('heroicon-m-archive-box')
                 ->color('primary')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved', 'tableFilters[fulfillment_status][value]' => 'pending'])),
 
-            Stat::make('Fulfillment: Completed', $fulfilledCount)
-                ->description('Fully received')
+            Stat::make(__('Fulfillment: Completed'), $fulfilledCount)
+                ->description(__('Fully received'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success')
                 ->url(AtkStockRequestResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved', 'tableFilters[fulfillment_status][value]' => 'fulfilled'])),

@@ -68,20 +68,20 @@ class AtkTransferStockStatus extends StatsOverviewWidget
         }
 
         return [
-            Stat::make('Pending Transfers', $pendingCount)
-                ->description('Waiting for approval')
+            Stat::make(__('Pending Transfers'), $pendingCount)
+                ->description(__('Waiting for approval'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning')
                 ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'pending'])),
 
-            Stat::make('On Progress', $onProgressCount)
-                ->description('Partially approved')
+            Stat::make(__('On Progress'), $onProgressCount)
+                ->description(__('Partially approved'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('info')
                 ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'partially_approved'])),
 
-            Stat::make('Approved', $approvedCount)
-                ->description('Successfully approved')
+            Stat::make(__('Approved'), $approvedCount)
+                ->description(__('Successfully approved'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success')
                 ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'approved'])),

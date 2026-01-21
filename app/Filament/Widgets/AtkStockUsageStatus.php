@@ -56,20 +56,20 @@ class AtkStockUsageStatus extends StatsOverviewWidget
         }
 
         return [
-            Stat::make('Pending Requests', $pendingCount)
-                ->description('Waiting for approval')
+            Stat::make(__('Pending Requests'), $pendingCount)
+                ->description(__('Waiting for approval'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning')
                 ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'pending'])),
 
-            Stat::make('On Progress', $onProgressCount)
-                ->description('Partially approved')
+            Stat::make(__('On Progress'), $onProgressCount)
+                ->description(__('Partially approved'))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('info')
                 ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'partially_approved'])),
 
-            Stat::make('Approved', $approvedCount)
-                ->description('Successfully approved')
+            Stat::make(__('Approved'), $approvedCount)
+                ->description(__('Successfully approved'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success')
                 ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved'])),

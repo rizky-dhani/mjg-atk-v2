@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Budgeting extends StatsOverviewWidget
 {
-    protected ?string $heading = 'Budgetings';
+    protected ?string $heading = 'Anggaran';
 
     protected static ?int $sort = 1;
 
@@ -19,8 +19,8 @@ class Budgeting extends StatsOverviewWidget
 
         if (! $user || ! $user->division_id) {
             return [
-                Stat::make('No Access', 'Please log in to view budget information')
-                    ->description('Budget data is only available for authenticated users')
+                Stat::make(__('No Access'), __('Please log in to view budget information'))
+                    ->description(__('Budget data is only available for authenticated users'))
                     ->color('warning'),
             ];
         }
@@ -34,8 +34,8 @@ class Budgeting extends StatsOverviewWidget
 
         if (! $budgeting) {
             return [
-                Stat::make('Budget Information', 'No budget set for your division')
-                    ->description('Contact administrator to set budget for '.$currentYear)
+                Stat::make(__('Budget Information'), __('No budget set for your division'))
+                    ->description(__('Contact administrator to set budget for :year', ['year' => $currentYear]))
                     ->color('warning'),
             ];
         }
@@ -51,18 +51,18 @@ class Budgeting extends StatsOverviewWidget
             : '0%';
 
         return [
-            Stat::make('Total Budget', $budgetAmount)
+            Stat::make(__('Total Budget'), $budgetAmount)
                 ->description($user->division->name.' - '.$currentYear)
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('primary'),
 
-            Stat::make('Used Amount', $usedAmount)
-                ->description($utilizationPercentage.' Utilized')
+            Stat::make(__('Used Amount'), $usedAmount)
+                ->description(__(':percentage Utilized', ['percentage' => $utilizationPercentage]))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning'),
 
-            Stat::make('Remaining Budget', $remainingAmount)
-                ->description('Available for use')
+            Stat::make(__('Remaining Budget'), $remainingAmount)
+                ->description(__('Available for use'))
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
         ];
