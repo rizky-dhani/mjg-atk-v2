@@ -1,0 +1,40 @@
+# Tasks
+
+This document outlines the tasks required to implement the "Implement Partial Fulfillment for ATK Stock Request Items" feature.
+
+1.  **Database Modifications:**
+    *   Create a migration to add a `received_quantity` (integer) column to the `atk_stock_request_items` table, defaulting to 0.
+    *   Consider adding a `status` column to `atk_stock_request_items` (e.g., `pending`, `partially_received`, `fully_received`) or updating the logic of an existing one.
+
+2.  **Model Modifications:**
+    *   Update the `AtkStockRequestItem` model to handle the new `received_quantity` and potentially `status` attributes.
+    *   Update `AtkStockRequest` model logic to derive its overall status (e.g., `pending`, `partially_fulfilled`, `fulfilled`) based on the status/quantities of its `AtkStockRequestItem`s.
+
+3.  **Filament UI Modifications (`AtkStockRequest` Detail Page):**
+    *   For each `AtkStockRequestItem` in the `AtkStockRequest` detail view, add a "Store Stock" button/action.
+    *   This button should ideally trigger a modal or a form allowing the user to input the `quantity` of stock being received for that specific item.
+    *   Display the `requested_quantity` and `received_quantity` for each item, and visually indicate the remaining quantity to be received.
+    *   Adjust the overall `AtkStockRequest` status display to reflect partial fulfillment.
+
+4.  **Backend Logic for Stock Storage:**
+    *   Implement a service or action that processes the received quantity for an `AtkStockRequestItem`.
+    *   This logic MUST:
+        *   Update the `received_quantity` on the `AtkStockRequestItem`.
+        *   Update the actual inventory/stock levels for the corresponding `AtkItem`.
+        *   Record a stock transaction (e.g., `AtkStockTransaction`) for the received quantity.
+        *   Update the `AtkStockRequestItem`'s status based on `received_quantity` vs `requested_quantity`.
+        *   Update the parent `AtkStockRequest`'s status based on its items' statuses.
+
+5.  **Adapt Current Codebase:**
+    *   Review and modify existing codebase (e.g., reporting, stock level checks, fulfillment processes) that currently assumes full `AtkStockRequest` fulfillment to correctly account for partial receipts. This includes any associated services, policies, or listeners.
+
+6.  **Testing:**
+    *   Add unit/feature tests for database modifications.
+    *   Add feature tests for the "Store Stock" button/action, verifying quantity updates, inventory changes, and status transitions.
+    *   Add tests for the adapted codebase to ensure it correctly handles partial fulfillment.
+
+7.  **Refactor/Optimize (if necessary):**
+    *   Review the new and modified code for performance, scalability, and maintainability.
+
+8.  **Documentation:**
+    *   Update relevant documentation (if any) for the new partial fulfillment workflow.
