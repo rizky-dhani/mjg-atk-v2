@@ -39,6 +39,16 @@ For each `AtkStockRequestItem` listed on the `AtkStockRequest` detail page, a "S
 *   **Input**: The modal/form will allow the user to input the quantity of stock currently being received for that specific item. It will default to the remaining quantity to be received.
 *   **Validation**: Input will be validated to ensure the received quantity does not exceed the remaining requested quantity.
 
+### Bulk Fulfillment for `AtkStockRequestItem`s
+
+To facilitate efficiency for multiple items, a bulk fulfillment option will be added:
+
+*   **Selection Mechanism**: Checkboxes or a similar selection mechanism will be available next to each `AtkStockRequestItem` in the detail view.
+*   **"Bulk Store Stock" Button**: A button will appear (e.g., at the top of the items list or as a bulk action) when one or more `AtkStockRequestItem`s are selected.
+*   **Trigger**: Clicking this button will open a modal or a dedicated bulk fulfillment page.
+*   **Input**: The modal/page will allow the user to input quantities for all selected items. It should clearly indicate remaining quantities for each selected item.
+*   **Validation**: Validation will ensure that the received quantity for any item does not exceed its remaining requested quantity.
+
 ### Display of Quantities and Status
 
 *   **`AtkStockRequestItem` Display**: Each item entry will show:

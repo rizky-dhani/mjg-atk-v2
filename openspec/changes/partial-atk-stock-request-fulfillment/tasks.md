@@ -14,6 +14,8 @@ This document outlines the tasks required to implement the "Implement Partial Fu
     *   For each `AtkStockRequestItem` in the `AtkStockRequest` detail view, add a "Store Stock" button/action.
     *   This button should ideally trigger a modal or a form allowing the user to input the `quantity` of stock being received for that specific item.
     *   Display the `requested_quantity` and `received_quantity` for each item, and visually indicate the remaining quantity to be received.
+    *   Implement a selection mechanism (e.g., checkboxes) for `AtkStockRequestItem`s.
+    *   Add a "Bulk Store Stock" button/action that appears when items are selected, triggering a bulk fulfillment modal/form.
     *   Adjust the overall `AtkStockRequest` status display to reflect partial fulfillment.
 
 4.  **Backend Logic for Stock Storage:**
@@ -31,6 +33,7 @@ This document outlines the tasks required to implement the "Implement Partial Fu
 6.  **Testing:**
     *   Add unit/feature tests for database modifications.
     *   Add feature tests for the "Store Stock" button/action, verifying quantity updates, inventory changes, and status transitions.
+    *   Add feature tests for the "Bulk Store Stock" button/action, verifying quantity updates, inventory changes, and status transitions for multiple selected items.
     *   Add tests for the adapted codebase to ensure it correctly handles partial fulfillment.
 
 7.  **Refactor/Optimize (if necessary):**
