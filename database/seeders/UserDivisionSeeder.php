@@ -15,6 +15,7 @@ class UserDivisionSeeder extends Seeder
         UserDivision::insert([
             ['name' => 'Accounting', 'initial' => 'ACC'],
             ['name' => 'Business Development', 'initial' => 'BDV'],
+            ['name' => 'Calibration', 'initial' => 'CAL'],
             ['name' => 'Finance', 'initial' => 'FIN'],
             ['name' => 'Human Capital', 'initial' => 'HC'],
             ['name' => 'General Affairs', 'initial' => 'GA'],
@@ -31,6 +32,8 @@ class UserDivisionSeeder extends Seeder
             ['name' => 'Regulatory Affairs', 'initial' => 'RA'],
             ['name' => 'Quality Assurance', 'initial' => 'QA'],
             ['name' => 'Revenue Funnel', 'initial' => 'REV'],
+            ['name' => 'Supply Chain Management', 'initial' => 'SCM'],
+            ['name' => 'Technical Support Services', 'initial' => 'TSS'],
         ]);
     }
 }

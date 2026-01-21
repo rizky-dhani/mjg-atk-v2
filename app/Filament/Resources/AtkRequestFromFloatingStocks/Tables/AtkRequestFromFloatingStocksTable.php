@@ -24,7 +24,7 @@ class AtkRequestFromFloatingStocksTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division', 'approval', 'approvalHistory'])
-                    ->where('division_id', auth()->user()->division_id)
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('division_id', auth()->user()->division_id))
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -61,6 +61,11 @@ class AtkRequestFromFloatingStocksTable
                 ViewAction::make(),
                 EditAction::make()
                     ->modalWidth(Width::SevenExtraLarge)
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+
+                        return $data;
+                    })
                     ->authorize(static function ($record) {
                         $user = auth()->user();
 

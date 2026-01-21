@@ -19,6 +19,26 @@ class AtkRequestFromFloatingStockForm
     {
         return $schema
             ->components([
+                Section::make('General Information')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('division_id')
+                                    ->label('Divisi')
+                                    ->relationship('division', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->hidden(fn () => ! auth()->user()->isSuperAdmin())
+                                    ->default(fn () => auth()->user()->division_id)
+                                    ->dehydrated(),
+                                TextInput::make('request_number')
+                                    ->label('Request Number')
+                                    ->disabled()
+                                    ->dehydrated(false)
+                                    ->placeholder('Auto-generated'),
+                            ]),
+                    ]),
                 Section::make('Rejection Details')
                     ->visible(function ($record) {
                         if (! $record) {
@@ -70,17 +90,9 @@ class AtkRequestFromFloatingStockForm
                     ->columnSpanFull(),
                 Section::make('Request Information')
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextInput::make('request_number')
-                                    ->label('Request Number')
-                                    ->disabled()
-                                    ->dehydrated(false)
-                                    ->placeholder('Auto-generated'),
-                                Textarea::make('notes')
-                                    ->label('Notes')
-                                    ->columnSpanFull(),
-                            ]),
+                        Textarea::make('notes')
+                            ->label('Notes')
+                            ->columnSpanFull(),
                     ])
                     ->columnSpanFull(),
                 Section::make('Requested Items')
@@ -112,6 +124,7 @@ class AtkRequestFromFloatingStockForm
                                     ->numeric()
                                     ->minValue(1)
                                     ->maxValue(fn ($get) => $get('available_stock') ?? 1000)
+                                    ->suffix(fn (callable $get) => AtkItem::find($get('item_id'))?->unit_of_measure)
                                     ->reactive()
                                     ->live()
                                     ->afterStateUpdated(function ($get, $set, $state) {

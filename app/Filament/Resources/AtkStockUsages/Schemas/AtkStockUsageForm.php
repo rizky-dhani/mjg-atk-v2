@@ -23,6 +23,27 @@ class AtkStockUsageForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
+            Section::make('General Information')
+                ->schema([
+                    Grid::make(2)
+                        ->schema([
+                            Select::make('division_id')
+                                ->label('Divisi')
+                                ->relationship('division', 'name')
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->hidden(fn () => ! auth()->user()->isSuperAdmin())
+                                ->default(fn () => auth()->user()->division_id)
+                                ->dehydrated(),
+                            TextInput::make('request_number')
+                                ->label('Nomor Penggunaan')
+                                ->placeholder('Auto-generated')
+                                ->disabled()
+                                ->dehydrated(false),
+                        ]),
+                ])
+                ->visible(fn () => auth()->user()->isSuperAdmin()),
             Section::make('Rejection Details')
                 ->visible(function ($get, $record) {
                     // Show this section only when there's a rejection
@@ -168,6 +189,7 @@ class AtkStockUsageForm
                                 ->required()
                                 ->numeric()
                                 ->minValue(1)
+                                ->suffix(fn (callable $get) => AtkItem::find($get('item_id'))?->unit_of_measure)
                                 ->helperText(function (callable $get) {
                                     $itemId = $get('item_id');
                                     if (! $itemId) {
@@ -180,7 +202,9 @@ class AtkStockUsageForm
 
                                     $currentStock = $stock ? $stock->current_stock : 0;
 
-                                    return "Current Stock: {$currentStock}";
+                                    return new \Illuminate\Support\HtmlString(
+                                        "<div class='bg-blue-50 px-2 py-0.5 rounded border border-blue-100 text-xs w-fit'>\n                                            <span class='text-blue-600 font-medium'>Current Stock:</span> <span class='font-bold text-blue-700'>{$currentStock}</span>\n                                        </div>"
+                                    );
                                 })
                                 ->live()
                                 ->afterStateUpdated(function (callable $get, callable $set, $state) {
@@ -227,7 +251,7 @@ class AtkStockUsageForm
                                         return function (string $attribute, $value, \Closure $fail, $livewire) {
                                             // Extract the repeater index from the attribute name
                                             // e.g., "data.items.0.quantity" -> index 0
-                                            preg_match('/atkStockUsageItems\\.(\d+)\\.quantity/', $attribute, $matches);
+                                            preg_match('/atkStockUsageItems\\.(\\d+)\\./quantity/', $attribute, $matches);
                                             $index = $matches[1] ?? null;
 
                                             if ($index === null) {

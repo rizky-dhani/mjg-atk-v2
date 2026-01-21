@@ -57,6 +57,22 @@ class AtkTransferStock extends Model
         return $this->belongsTo(User::class, 'requester_id');
     }
 
+    /**
+     * Generic division relationship for unified approval system
+     */
+    public function division(): BelongsTo
+    {
+        return $this->requestingDivision();
+    }
+
+    /**
+     * Generic items relationship for unified approval system
+     */
+    public function items(): HasMany
+    {
+        return $this->transferStockItems();
+    }
+
     // Accessor to get count of source divisions
     public function getSourceDivisionsCountAttribute()
     {
@@ -111,7 +127,7 @@ class AtkTransferStock extends Model
     }
 
     // Relationship with approval history
-    public function approvalHistories()
+    public function approvalHistory()
     {
         return $this->morphMany(ApprovalHistory::class, 'approvable');
     }

@@ -58,6 +58,7 @@ class UserSeeder extends Seeder
                 'view-any atk-stock-usage',
                 'view-any marketing-media-stock-request',
                 'view-any marketing-media-stock-usage',
+                'view-any atk-transfer-stock',
             ];
             foreach ($permissions as $permissionName) {
                 $headPermission = Permission::where('name', $permissionName)->first();
@@ -90,6 +91,11 @@ class UserSeeder extends Seeder
                 'create marketing-media-stock-usage',
                 'edit marketing-media-stock-usage',
                 'delete marketing-media-stock-usage',
+                'view-any atk-transfer-stock',
+                'view atk-transfer-stock',
+                'create atk-transfer-stock',
+                'edit atk-transfer-stock',
+                'delete atk-transfer-stock',
             ];
 
             foreach ($permissions as $permissionName) {

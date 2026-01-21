@@ -318,10 +318,19 @@ class ApprovalProcessingService
         }
 
         // Get the latest approval history record for this model
-        $latestHistory = ApprovalHistory::where('approvable_type', get_class($model))
+        $latestHistory = ApprovalHistory::where('approvable_type', $model->getMorphClass())
             ->where('approvable_id', $model->id)
-            ->orderBy('performed_at', 'desc')
+            ->latest('id')
             ->first();
+
+        // If the latest action was a rejection, the status should be rejected
+        if ($latestHistory && $latestHistory->action === 'rejected') {
+            $approval->update([
+                'status' => 'rejected',
+            ]);
+
+            return;
+        }
 
         // Check if approval flow is complete
         $approvalFlow = $approval->approvalFlow;

@@ -37,7 +37,11 @@ class AtkStockRequestPolicy
      */
     public function update(User $user, AtkStockRequest $atkStockRequest): bool
     {
-        // Users can update their own pending requests
+        // Users can update their own draft or pending requests
+        if ($atkStockRequest->status === \App\Enums\AtkStockRequestStatus::Draft) {
+            return $user->id === $atkStockRequest->requester_id;
+        }
+
         return $user->id === $atkStockRequest->requester_id &&
             $atkStockRequest->approval &&
             $atkStockRequest->approval->status === 'pending';
@@ -48,7 +52,11 @@ class AtkStockRequestPolicy
      */
     public function delete(User $user, AtkStockRequest $atkStockRequest): bool
     {
-        // Users can delete their own pending requests
+        // Users can delete their own draft or pending requests
+        if ($atkStockRequest->status === \App\Enums\AtkStockRequestStatus::Draft) {
+            return $user->id === $atkStockRequest->requester_id;
+        }
+
         return $user->id === $atkStockRequest->requester_id &&
             $atkStockRequest->approval &&
             $atkStockRequest->approval->status === 'pending';

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AtkStockRequests\Tables;
 
+use App\Enums\AtkStockRequestStatus;
 use App\Exports\AtkStockRequestExport;
 use App\Filament\Actions\ApprovalAction;
 use App\Filament\Actions\ResubmitAction;
@@ -17,6 +18,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -30,7 +32,7 @@ class AtkStockRequestsTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division', 'approval', 'approvalHistory'])
-                    ->where('division_id', auth()->user()->division_id)
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('division_id', auth()->user()->division_id))
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -43,8 +45,13 @@ class AtkStockRequestsTable
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable(),
+                TextColumn::make('status')
+                    ->label('Status Request')
+                    ->badge()
+                    ->formatStateUsing(fn (AtkStockRequestStatus $state): string => $state->getLabel())
+                    ->color(fn (AtkStockRequestStatus $state): string => $state->getColor()),
                 TextColumn::make('approval_status')
-                    ->label('Status')
+                    ->label('Status Approval')
                     ->badge()
                     ->getStateUsing(fn ($record) => $record->approval_status)
                     ->formatStateUsing(fn ($state) => ucfirst($state))
@@ -61,7 +68,33 @@ class AtkStockRequestsTable
                     ->searchable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options(AtkStockRequestStatus::class),
+                SelectFilter::make('approval_status')
+                    ->label('Approval Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'partially_approved' => 'On Progress',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            function (Builder $query, $value): Builder {
+                                return $query->whereHas('approvalHistory', function ($q) use ($value) {
+                                    $q->where('id', function ($sub) {
+                                        $sub->select('id')
+                                            ->from('approval_histories')
+                                            ->whereColumn('approvable_id', 'atk_stock_requests.id')
+                                            ->where('approvable_type', AtkStockRequest::class)
+                                            ->orderByDesc('performed_at')
+                                            ->limit(1);
+                                    })->where('action', $value);
+                                });
+                            }
+                        );
+                    }),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -72,7 +105,59 @@ class AtkStockRequestsTable
 
                         return $user && $user->id === $record->requester_id;
                     })
+                    ->modalSubmitActionLabel(fn ($record) => $record->status === AtkStockRequestStatus::Draft ? 'Publish' : 'Save Changes')
+                    ->mutateFormDataUsing(function (array $data, $record) {
+                        $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                        if ($record->status === AtkStockRequestStatus::Draft) {
+                            $data['status'] = AtkStockRequestStatus::Published;
+                        }
+
+                        return $data;
+                    })
+                    ->after(function (AtkStockRequest $record) {
+                        if ($record->status === AtkStockRequestStatus::Published && ! $record->approval) {
+                            app(ApprovalProcessingService::class)->createApproval($record, AtkStockRequest::class);
+                        }
+                    })
+                    ->extraModalFooterActions([
+                        Action::make('save_as_draft')
+                            ->label('Save as Draft')
+                            ->color('gray')
+                            ->visible(fn ($record) => $record->status === AtkStockRequestStatus::Draft)
+                            ->action(function (EditAction $action, AtkStockRequest $record) {
+                                $action->mutateFormDataUsing(function (array $data) {
+                                    $data['status'] = AtkStockRequestStatus::Draft;
+
+                                    return $data;
+                                });
+                                $action->call('save');
+                            }),
+                    ])
                     ->successNotificationTitle('Permintaan stok ATK berhasil diperbarui'),
+                Action::make('publish')
+                    ->label('Publish')
+                    ->icon(Heroicon::ArrowUpTray)
+                    ->color('success')
+                    ->visible(fn ($record) => $record->status === AtkStockRequestStatus::Draft)
+                    ->action(function ($record) {
+                        $record->update(['status' => AtkStockRequestStatus::Published]);
+                        Notification::make()
+                            ->title('Permintaan berhasil dipublikasikan')
+                            ->success()
+                            ->send();
+                    }),
+                Action::make('unpublish')
+                    ->label('Unpublish')
+                    ->icon(Heroicon::ArrowDownTray)
+                    ->color('gray')
+                    ->visible(fn ($record) => $record->status === AtkStockRequestStatus::Published && $record->approval_status === 'pending')
+                    ->action(function ($record) {
+                        $record->update(['status' => AtkStockRequestStatus::Draft]);
+                        Notification::make()
+                            ->title('Permintaan berhasil ditarik menjadi draft')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('export')
                     ->label('Export')
                     ->icon(Heroicon::ArrowDownTray)

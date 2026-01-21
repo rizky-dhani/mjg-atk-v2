@@ -21,6 +21,27 @@ class AtkStockRequestForm
     {
         return $schema
             ->components([
+                Section::make('General Information')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('division_id')
+                                    ->label('Divisi')
+                                    ->relationship('division', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->hidden(fn () => ! auth()->user()->isSuperAdmin())
+                                    ->default(fn () => auth()->user()->division_id)
+                                    ->dehydrated(),
+                                TextInput::make('request_number')
+                                    ->label('Nomor Permintaan')
+                                    ->placeholder('Auto-generated')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ])
+                    ->visible(fn () => auth()->user()->isSuperAdmin()),
                 Section::make('Rejection Details')
                     ->visible(function ($get, $record) {
                         // Show this section only when there's a rejection
@@ -217,6 +238,7 @@ class AtkStockRequestForm
                                     ->required()
                                     ->numeric()
                                     ->minValue(1)
+                                    ->suffix(fn (callable $get) => AtkItem::find($get('item_id'))?->unit_of_measure)
                                     ->helperText(function (callable $get) {
                                         $itemId = $get('item_id');
                                         if (! $itemId) {
@@ -227,19 +249,21 @@ class AtkStockRequestForm
                                             ->where('item_id', $itemId)
                                             ->first();
 
-                                        if (! $setting) {
-                                            return 'No inventory limit set for this item';
-                                        }
-
                                         $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
                                             ->where('item_id', $itemId)
                                             ->first();
 
                                         $currentStock = $stock ? $stock->current_stock : 0;
-                                        $maxLimit = $setting->max_limit;
-                                        $availableSpace = $maxLimit - $currentStock;
+                                        $maxLimit = $setting ? $setting->max_limit : 'No limit';
+                                        $availableSpace = $setting ? ($maxLimit - $currentStock) : 'Unlimited';
 
-                                        return "Current: {$currentStock} | Max: {$maxLimit} | Available: {$availableSpace}";
+                                        return new \Illuminate\Support\HtmlString("
+                                            <div class='flex flex-wrap gap-x-4 gap-y-1 text-xs'>
+                                                <div class='bg-gray-100 px-2 py-0.5 rounded'><span class='text-gray-500'>Current:</span> <span class='font-medium'>{$currentStock}</span></div>
+                                                <div class='bg-gray-100 px-2 py-0.5 rounded'><span class='text-gray-500'>Max:</span> <span class='font-medium'>{$maxLimit}</span></div>
+                                                <div class='bg-green-50 px-2 py-0.5 rounded border border-green-100'><span class='text-green-600'>Available:</span> <span class='font-bold text-green-700'>{$availableSpace}</span></div>
+                                            </div>
+                                        ");
                                     })
                                     ->live()
                                     ->afterStateUpdated(function (callable $get, callable $set, $state) {
@@ -405,6 +429,8 @@ class AtkStockRequestForm
                             ->reorderableWithButtons()
                             ->collapsible(),
                     ]),
+                \Filament\Forms\Components\Hidden::make('status')
+                    ->default(\App\Enums\AtkStockRequestStatus::Draft),
             ]);
     }
 }

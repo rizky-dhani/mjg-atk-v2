@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\AtkTransferStocks\Tables;
 
+use App\Filament\Actions\ApprovalAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -93,12 +95,30 @@ class AtkTransferStocksTable
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label('Status Approval')
                     ->options([
-                        'pending' => 'Menunggu',
-                        'approved' => 'Disetujui',
-                        'rejected' => 'Ditolak',
-                        'completed' => 'Selesai',
-                    ]),
+                        'pending' => 'Pending',
+                        'partially_approved' => 'On Progress',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            function (Builder $query, $value): Builder {
+                                return $query->whereHas('approvalHistories', function ($q) use ($value) {
+                                    $q->where('id', function ($sub) {
+                                        $sub->select('id')
+                                            ->from('approval_histories')
+                                            ->whereColumn('approvable_id', 'atk_transfer_stocks.id')
+                                            ->where('approvable_type', \App\Models\AtkTransferStock::class)
+                                            ->orderByDesc('performed_at')
+                                            ->limit(1);
+                                    })->where('action', $value);
+                                });
+                            }
+                        );
+                    }),
                 SelectFilter::make('requesting_division_id')
                     ->label('Divisi Pemohon')
                     ->relationship('requestingDivision', 'name'),
@@ -140,86 +160,16 @@ class AtkTransferStocksTable
 
                         return $canEdit;
                     }),
-                \Filament\Actions\Action::make('approve')
-                    ->label('Approve')
-                    ->color('success')
-                    ->icon('heroicon-o-check-circle')
-                    ->requiresConfirmation()
-                    ->modalHeading('Setujui Transfer Stok')
-                    ->modalDescription('Apakah Anda yakin ingin menyetujui permintaan transfer stok ini?')
-                    ->action(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService;
-
-                        if ($approvalService->canApprove($record)) {
-                            if ($approvalService->approve($record)) {
-                                \Filament\Notifications\Notification::make()
-                                    ->title('Berhasil')
-                                    ->body('Permintaan transfer stok berhasil disetujui.')
-                                    ->success()
-                                    ->send();
-                            } else {
-                                \Filament\Notifications\Notification::make()
-                                    ->title('Kesalahan')
-                                    ->body('Gagal menyetujui permintaan transfer stok.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        } else {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Akses Ditolak')
-                                ->body('Anda tidak memiliki hak untuk menyetujui langkah ini.')
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->visible(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService;
-
-                        return $approvalService->canApprove($record);
-                    }),
-                \Filament\Actions\Action::make('reject')
-                    ->label('Reject')
-                    ->color('danger')
-                    ->icon('heroicon-o-x-circle')
-                    ->requiresConfirmation()
-                    ->modalHeading('Tolak Transfer Stok')
-                    ->modalDescription('Apakah Anda yakin ingin menolak permintaan transfer stok ini?')
-                    ->form([
-                        \Filament\Forms\Components\Textarea::make('rejection_reason')
-                            ->label('Alasan Penolakan')
-                            ->required()
-                            ->maxLength(65535),
-                    ])
-                    ->action(function ($record, array $data) {
-                        $approvalService = new \App\Services\TransferStockApprovalService;
-
-                        if ($approvalService->canApprove($record)) {
-                            if ($approvalService->reject($record, $data['rejection_reason'])) {
-                                \Filament\Notifications\Notification::make()
-                                    ->title('Berhasil')
-                                    ->body('Permintaan transfer stok berhasil ditolak.')
-                                    ->success()
-                                    ->send();
-                            } else {
-                                \Filament\Notifications\Notification::make()
-                                    ->title('Kesalahan')
-                                    ->body('Gagal menolak permintaan transfer stok.')
-                                    ->danger()
-                                    ->send();
-                            }
-                        } else {
-                            \Filament\Notifications\Notification::make()
-                                ->title('Akses Ditolak')
-                                ->body('Anda tidak memiliki hak untuk menolak langkah ini.')
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->visible(function ($record) {
-                        $approvalService = new \App\Services\TransferStockApprovalService;
-
-                        return $approvalService->canApprove($record);
-                    }),
+                ApprovalAction::makeApprove()->successNotification(
+                    Notification::make()
+                        ->title('Permintaan transfer stok berhasil disetujui')
+                        ->success(),
+                ),
+                ApprovalAction::makeReject()->successNotification(
+                    Notification::make()
+                        ->title('Permintaan transfer stok berhasil ditolak')
+                        ->success(),
+                ),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

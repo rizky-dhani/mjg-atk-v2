@@ -32,7 +32,7 @@ class ApprovalAction
                 // Check if the user can approve this specific record
                 return $validationService->canUserApprove($record, $user);
             })
-            ->action(function (Model $record) {
+            ->action(function (array $data, Model $record) {
                 $validationService = new ApprovalValidationService;
                 $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
@@ -59,6 +59,9 @@ class ApprovalAction
                         'status' => 'pending',
                     ]);
 
+                    $record->load('approval');
+                    $approval = $record->approval;
+
                     // Log initial submission to history
                     $approvalService->logNewApproval($record, $user);
                 }
@@ -75,7 +78,7 @@ class ApprovalAction
 
     public static function makeApprove(): Action
     {
-        return Action::make('approve')
+        return Action::make('approve_request')
             ->label('Setujui Permintaan')
             ->color('success')
             ->icon(fn () => Heroicon::CheckCircle)
@@ -83,16 +86,16 @@ class ApprovalAction
             ->modalHeading('Setujui Permintaan')
             ->modalSubmitActionLabel('Setujui')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
-            ->schema(fn (Model $record) => [
+            ->form([
                 Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')
                             ->label('Pemohon')
-                            ->content($record->requester->name.' ('.$record->division->name.')'),
+                            ->content(fn (Model $record) => $record->requester->name.' ('.$record->division->name.')'),
                         \Filament\Forms\Components\Placeholder::make('items')
                             ->label('Barang')
-                            ->content(function () use ($record) {
+                            ->content(function (Model $record) {
                                 return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
                             }),
                     ]),
@@ -106,7 +109,7 @@ class ApprovalAction
                 // Check if the user can approve this specific record
                 return $validationService->canUserApprove($record, $user);
             })
-            ->action(function (Model $record) {
+            ->action(function (array $data, Model $record) {
                 $validationService = new ApprovalValidationService;
                 $historyService = new ApprovalHistoryService;
                 $stockUpdateService = app(StockUpdateService::class);
@@ -132,6 +135,9 @@ class ApprovalAction
                         'current_step' => 1,
                         'status' => 'pending',
                     ]);
+
+                    $record->load('approval');
+                    $approval = $record->approval;
                 }
 
                 $approvalService->processApprovalStep($approval, $user, 'approve', 'Permintaan disetujui');
@@ -145,7 +151,7 @@ class ApprovalAction
 
     public static function makeReject(): Action
     {
-        return Action::make('reject')
+        return Action::make('reject_request')
             ->label('Tolak Permintaan')
             ->color('danger')
             ->icon(fn () => Heroicon::XCircle)
@@ -153,23 +159,22 @@ class ApprovalAction
             ->modalHeading('Tolak Permintaan')
             ->modalSubmitActionLabel('Tolak')
             ->modalWidth(\Filament\Support\Enums\Width::Large)
-            ->schema(fn (Model $record) => [
+            ->form([
                 Section::make('Ringkasan Permintaan')
                     ->compact()
                     ->schema([
                         \Filament\Forms\Components\Placeholder::make('requester')
                             ->label('Pemohon')
-                            ->content($record->requester->name.' ('.$record->division->name.')'),
+                            ->content(fn (Model $record) => $record->requester->name.' ('.$record->division->name.')'),
                         \Filament\Forms\Components\Placeholder::make('items')
                             ->label('Barang')
-                            ->content(function () use ($record) {
+                            ->content(function (Model $record) {
                                 return $record->items->map(fn ($item) => "{$item->item->name} ({$item->quantity})")->implode(', ');
                             }),
                     ]),
                 \Filament\Forms\Components\Textarea::make('rejection_notes')
                     ->label('Alasan Penolakan')
-                    ->placeholder('Berikan alasan penolakan permintaan ini...')
-                    ->required(),
+                    ->placeholder('Berikan alasan penolakan permintaan ini...'),
             ])
             ->visible(function (Model $record) {
                 $validationService = new ApprovalValidationService;
@@ -204,9 +209,15 @@ class ApprovalAction
                         'current_step' => 1,
                         'status' => 'pending',
                     ]);
+
+                    $record->load('approval');
+                    $approval = $record->approval;
                 }
 
                 $approvalService->processApprovalStep($approval, $user, 'reject', $data['rejection_notes'] ?? null);
+
+                // Synchronize approval status
+                $approvalService->syncApprovalStatus($record);
 
                 return 'Permintaan berhasil ditolak.';
             });

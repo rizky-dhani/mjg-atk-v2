@@ -5,6 +5,7 @@ namespace App\Filament\Resources\AtkStockUsages\Tables;
 use App\Filament\Actions\ApprovalAction;
 use App\Filament\Actions\ResubmitAction;
 use App\Filament\Resources\AtkStockUsages\Schemas\AtkStockUsageForm;
+use App\Models\AtkStockUsage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -12,6 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -23,7 +25,7 @@ class AtkStockUsagesTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division', 'approval', 'approvalHistory'])
-                    ->where('division_id', auth()->user()->division_id)
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('division_id', auth()->user()->division_id))
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -54,12 +56,41 @@ class AtkStockUsagesTable
                     ->searchable(),
             ])
             ->filters([
-                //
+                SelectFilter::make('approval_status')
+                    ->label('Approval Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'partially_approved' => 'On Progress',
+                        'approved' => 'Approved',
+                        'rejected' => 'Rejected',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            function (Builder $query, $value): Builder {
+                                return $query->whereHas('approvalHistory', function ($q) use ($value) {
+                                    $q->where('id', function ($sub) {
+                                        $sub->select('id')
+                                            ->from('approval_histories')
+                                            ->whereColumn('approvable_id', 'atk_stock_usages.id')
+                                            ->where('approvable_type', AtkStockUsage::class)
+                                            ->orderByDesc('performed_at')
+                                            ->limit(1);
+                                    })->where('action', $value);
+                                });
+                            }
+                        );
+                    }),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
                     ->successNotificationTitle('Penggunaan stok ATK berhasil diperbarui')
+                    ->mutateFormDataUsing(function (array $data) {
+                        $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+
+                        return $data;
+                    })
                     ->authorize(static function ($record) {
                         $user = auth()->user();
 

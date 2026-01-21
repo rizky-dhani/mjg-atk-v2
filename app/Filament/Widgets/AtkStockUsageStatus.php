@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
 use App\Models\AtkStockUsage;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -58,17 +59,20 @@ class AtkStockUsageStatus extends StatsOverviewWidget
             Stat::make('Pending Requests', $pendingCount)
                 ->description('Waiting for approval')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('warning'),
+                ->color('warning')
+                ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'pending'])),
 
             Stat::make('On Progress', $onProgressCount)
                 ->description('Partially approved')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('info'),
+                ->color('info')
+                ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'partially_approved'])),
 
             Stat::make('Approved', $approvedCount)
                 ->description('Successfully approved')
                 ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
+                ->color('success')
+                ->url(AtkStockUsageResource::getUrl('index', ['tableFilters[approval_status][value]' => 'approved'])),
         ];
     }
 }

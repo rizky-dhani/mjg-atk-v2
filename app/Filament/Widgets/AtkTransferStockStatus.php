@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Models\AtkTransferStock;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -32,13 +33,13 @@ class AtkTransferStockStatus extends StatsOverviewWidget
                 $query->where('requesting_division_id', $divisionId)
                     ->orWhere('source_division_id', $divisionId);
             })
-                ->whereDoesntHave('approvalHistories', function ($query) {
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'rejected');
                 })
-                ->whereDoesntHave('approvalHistories', function ($query) {
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');
                 })
-                ->whereDoesntHave('approvalHistories', function ($query) {
+                ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
                 })
                 ->count();
@@ -49,7 +50,7 @@ class AtkTransferStockStatus extends StatsOverviewWidget
                 $query->where('requesting_division_id', $divisionId)
                     ->orWhere('source_division_id', $divisionId);
             })
-                ->whereHas('approvalHistories', function ($query) {
+                ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
                 })
                 ->count();
@@ -60,7 +61,7 @@ class AtkTransferStockStatus extends StatsOverviewWidget
                 $query->where('requesting_division_id', $divisionId)
                     ->orWhere('source_division_id', $divisionId);
             })
-                ->whereHas('approvalHistories', function ($query) {
+                ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');
                 })
                 ->count();
@@ -70,17 +71,20 @@ class AtkTransferStockStatus extends StatsOverviewWidget
             Stat::make('Pending Transfers', $pendingCount)
                 ->description('Waiting for approval')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('warning'),
+                ->color('warning')
+                ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'pending'])),
 
             Stat::make('On Progress', $onProgressCount)
                 ->description('Partially approved')
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
-                ->color('info'),
+                ->color('info')
+                ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'partially_approved'])),
 
             Stat::make('Approved', $approvedCount)
                 ->description('Successfully approved')
                 ->descriptionIcon('heroicon-m-check-circle')
-                ->color('success'),
+                ->color('success')
+                ->url(AtkTransferStockResource::getUrl('index', ['tableFilters[status][value]' => 'approved'])),
         ];
     }
 }

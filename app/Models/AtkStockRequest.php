@@ -18,7 +18,20 @@ class AtkStockRequest extends Model
         'division_id',
         'notes',
         'request_type',
+        'status',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => \App\Enums\AtkStockRequestStatus::class,
+        ];
+    }
 
     public function requester(): BelongsTo
     {
