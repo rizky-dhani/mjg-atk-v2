@@ -52,3 +52,13 @@ Then the "Save to Draft", "Publish", and "Unpublish" buttons/actions MUST NOT be
 Given a user is on the ATK Stock Request list page,
 When the user views the filters,
 Then there MUST be an option to filter requests by their `status` (`'draft'` or `'published'`).
+
+#### Scenario: Approval flow only sees and processes published requests
+
+Given an `AtkStockRequest` exists with a `status` of `'draft'`,
+When an approval flow attempts to view or process this request,
+Then the `AtkStockRequest` MUST NOT be visible or accessible to the approval flow.
+
+Given an `AtkStockRequest` exists with a `status` of `'published'`,
+When an approval flow attempts to view or process this request,
+Then the `AtkStockRequest` MUST be visible and accessible to the approval flow for approval or rejection.

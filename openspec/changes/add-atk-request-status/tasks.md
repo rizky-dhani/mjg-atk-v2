@@ -16,10 +16,11 @@ This document outlines the tasks required to implement the "Add Status Column to
         *   Add "Publish" action for `draft` requests, visible only to division administrators, changing the status to `published`.
         *   Add "Unpublish" action for `published` requests, visible only to division administrators, changing the status to `draft`.
         *   Implement filtering for `draft` and `published` requests on the list page.
-
+    *   Implement logic to ensure the approval flow only displays and processes `AtkStockRequest`s with `published` status.
 3.  **Testing:**
     *   Add unit/feature tests for the database migration.
     *   Add feature tests for Filament actions/buttons, verifying `status` changes and authorization.
+    *   Add feature tests for the approval flow's interaction with `published` status.
 
 4.  **Refactor/Optimize (if necessary):**
     *   Review the code for performance and maintainability.

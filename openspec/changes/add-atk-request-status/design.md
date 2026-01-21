@@ -50,6 +50,8 @@ The list page for `AtkStockRequests` will include:
 
 Access to the "Save to Draft", "Publish", and "Unpublish" actions will be restricted. Only users with the "division admin" role (or equivalent policy check) for the relevant division will be able to perform these actions. This will be enforced via Filament's built-in authorization mechanisms (e.g., policies).
 
+Additionally, the approval flow will only be able to see and process `AtkStockRequest`s that have a `published` status. Any `AtkStockRequest` in `draft` status SHALL NOT be visible or modifiable through the approval flow.
+
 ## Implementation Details
 
 *   **Migration**: A standard Laravel migration will be created using `Schema::table('atk_stock_requests', function (Blueprint $table) { ... });`
@@ -59,5 +61,4 @@ Access to the "Save to Draft", "Publish", and "Unpublish" actions will be restri
 ## Future Considerations
 
 *   Notification system for status changes.
-*   Workflow for approvals of `published` requests.
 *   More granular permissions for draft/publish.
