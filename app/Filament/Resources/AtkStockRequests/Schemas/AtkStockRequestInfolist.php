@@ -28,11 +28,6 @@ class AtkStockRequestInfolist
                         ->label('Expected Approvers & Progress')
                         ->columns(4)
                         ->schema([
-                            TextEntry::make('step_name')
-                                ->label('Step Name')
-                                ->formatStateUsing(fn ($state, $record) => "Step {$record['step_number']}: {$state}"),
-                            TextEntry::make('role')
-                                ->label('Required Role'),
                             TextEntry::make('potential_approvers')
                                 ->label('Approver(s)')
                                 ->formatStateUsing(function ($state, $record) {
@@ -41,7 +36,7 @@ class AtkStockRequestInfolist
                                     }
 
                                     // Check if $state is a collection or array before calling isEmpty()
-                                    $isEmpty = is_array($state) ? empty($state) : (method_exists($state, 'isEmpty') ? $state->isEmpty() : !$state);
+                                    $isEmpty = is_array($state) ? empty($state) : (method_exists($state, 'isEmpty') ? $state->isEmpty() : ! $state);
 
                                     if ($isEmpty) {
                                         return 'No approvers found matching role/division';
@@ -76,87 +71,17 @@ class AtkStockRequestInfolist
                                     'blocked' => 'gray',
                                     default => 'gray',
                                 }),
+                            TextEntry::make('approved_at')
+                                ->label('Approved/Rejected At')
+                                ->dateTime(),
+                            TextEntry::make('notes')
+                                ->label('Rejection Reason')
+                                ->hidden(fn ($record) => $record['status'] !== 'rejected'),
                         ])
                         ->state(function ($record) {
                             return $record->approval?->getApprovalProgress() ?? collect();
                         })
                         ->columnSpanFull(),
-                ])
-                ->columnSpanFull(),
-            // 3. Stock Request Approval section
-            Section::make('Stock Request Approval')
-                ->schema([
-                    RepeatableEntry::make('approvalHistory')
-                        ->label('Approval History')
-                        ->columns(4)
-                        ->schema([
-                            TextEntry::make('user.name')
-                                ->label('Approver')
-                                ->formatStateUsing(function ($record) {
-                                    $user = $record?->user;
-                                    $division = $user?->division;
-
-                                    if ($division) {
-                                        $divisionInitial =
-                                            $division->initial ?? 'N/A'; // Use division initial
-                                        $approverName =
-                                            $user?->name ?? 'Unknown';
-
-                                        return "{$divisionInitial} {$approverName}";
-                                    } else {
-                                        $approverName =
-                                            $user?->name ?? 'Unknown';
-
-                                        return $approverName;
-                                    }
-                                }),
-                            TextEntry::make('action')
-                                ->label('Approval Type')
-                                ->badge()
-                                ->formatStateUsing(function ($state) {
-                                    return ucfirst($state);
-                                })
-                                ->color(function ($state) {
-                                    return match ($state) {
-                                        'approved' => 'success',
-                                        'rejected' => 'danger',
-                                        default => 'gray',
-                                    };
-                                }),
-                            TextEntry::make('performed_at')
-                                ->label(function ($state, $get) {
-                                    $action = $get('action');
-
-                                    return $action === 'approved'
-                                        ? 'Approved At'
-                                        : ($action === 'rejected'
-                                            ? 'Rejected At'
-                                            : 'Performed At');
-                                })
-                                ->dateTime(),
-                            TextEntry::make('rejection_reason')
-                                ->label('Rejection Reason')
-                                ->hidden(function ($get) {
-                                    $action = $get('action');
-
-                                    return $action !== 'rejected';
-                                }),
-                        ])
-                        ->state(function ($record) {
-                            if ($record) {
-                                return $record
-                                    ->approvalHistory()
-                                    ->with(['user.division']) // Include division information for the user
-                                    ->whereIn('action', [
-                                        'approved',
-                                        'rejected',
-                                    ]) // Only show approved and rejected
-                                    ->orderByDesc('performed_at')
-                                    ->get();
-                            }
-
-                            return collect();
-                        }),
                 ])
                 ->columnSpanFull(),
         ]);
