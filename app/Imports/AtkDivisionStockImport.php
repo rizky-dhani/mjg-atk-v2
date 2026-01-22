@@ -27,6 +27,11 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
         $this->divisionId = $divisionId;
     }
 
+    public function headingRow(): int
+    {
+        return 7;
+    }
+
     /**
      * @param  Collection  $collection
      */
@@ -97,10 +102,10 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
                 ]
             );
 
-            if ($atkDivisionStock && isset($row['quantity']) && $row['quantity'] !== '') {
-                // Update the current_stock with the "Quantity" from Excel if present
+            if ($atkDivisionStock && isset($row['qty']) && $row['qty'] !== '') {
+                // Update the current_stock with the "Qty" from Excel if present
                 $atkDivisionStock->update([
-                    'current_stock' => $row['quantity'],
+                    'current_stock' => $row['qty'],
                 ]);
                 $updated = true;
             }
@@ -136,7 +141,7 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
             'item_description' => 'nullable|string|max:255',
             'uom' => 'nullable|string|max:50',
             'name' => 'nullable|string|max:255',
-            'quantity' => 'nullable|integer|min:0',
+            'qty' => 'nullable|integer|min:0',
             'stok_umum' => 'nullable|integer|min:0',
             'satuan' => 'nullable|string|max:50',
             'deskripsi' => 'nullable|string',
@@ -148,8 +153,8 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
         return [
             'item_description.string' => 'The Item Description field must be a string.',
             'name.string' => 'The name field must be a string.',
-            'quantity.integer' => 'The Quantity field must be an integer.',
-            'quantity.min' => 'The Quantity field must be at least 0.',
+            'qty.integer' => 'The Qty field must be an integer.',
+            'qty.min' => 'The Qty field must be at least 0.',
             'stok_umum.integer' => 'The Stok Umum field must be an integer.',
             'stok_umum.min' => 'The Stok Umum field must be at least 0.',
         ];
