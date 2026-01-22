@@ -64,9 +64,7 @@ it('can partially fulfill a stock request item', function () {
     ])
         ->assertCanSeeTableRecords([$this->requestItem])
         ->mountTableAction('store_stock', $this->requestItem->id)
-        ->setTableActionData([
-            'qty' => 4,
-        ])
+        ->set('mountedActions.0.data.qty', 4)
         ->callMountedTableAction()
         ->assertHasNoTableActionErrors();
 
@@ -90,9 +88,7 @@ it('can fully fulfill a stock request item', function () {
     ])
         ->assertCanSeeTableRecords([$this->requestItem])
         ->mountTableAction('store_stock', $this->requestItem->id)
-        ->setTableActionData([
-            'qty' => 10,
-        ])
+        ->set('mountedActions.0.data.qty', 10)
         ->callMountedTableAction()
         ->assertHasNoTableActionErrors();
 

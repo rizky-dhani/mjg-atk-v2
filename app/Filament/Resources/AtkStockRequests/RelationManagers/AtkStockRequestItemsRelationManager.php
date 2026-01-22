@@ -58,13 +58,13 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                 Tables\Filters\SelectFilter::make('status')
                     ->options(AtkStockRequestItemStatus::class),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('store_stock')
                     ->label('Simpan Stok')
                     ->icon(Heroicon::ArchiveBoxArrowDown)
                     ->color('success')
-                    ->visible(fn (AtkStockRequestItem $record): bool => 
-                        $record->request->approval?->status === 'approved' && 
+                    ->visible(fn (AtkStockRequestItem $record): bool =>
+                        $record->request->approval?->status === 'approved' &&
                         !$record->isFullyReceived()
                     )
                     ->form(fn (AtkStockRequestItem $record) => [
@@ -78,7 +78,6 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                     ->action(function (AtkStockRequestItem $record, array $data): void {
                         try {
                             app(FulfillmentService::class)->receiveItem($record, $data['qty']);
-                            
                             Notification::make()
                                 ->title('Stok Berhasil Disimpan')
                                 ->success()
@@ -92,13 +91,13 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                         }
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkAction::make('bulk_store_stock')
                         ->label('Simpan Stok Terpilih')
                         ->icon(Heroicon::ArchiveBoxArrowDown)
                         ->color('success')
-                        ->visible(fn (RelationManager $livewire): bool => 
+                        ->visible(fn (RelationManager $livewire): bool =>
                             $livewire->getOwnerRecord()->approval?->status === 'approved'
                         )
                         ->action(function (Collection $records): void {
