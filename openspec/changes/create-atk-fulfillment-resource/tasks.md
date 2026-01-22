@@ -1,0 +1,7 @@
+- [x] Create the `AtkFulfillment` Filament Resource, Page, and Policy.
+- [x] Implement filtering logic to display only fully approved `AtkStockRequest` records for divisions with "IPC initial".
+- [x] Design the table for `AtkFulfillment` to show relevant `AtkStockRequest` information.
+- [x] Create a detailed view for `AtkStockRequest` within `AtkFulfillment` to manage `AtkStockRequestItem` fulfillment.
+- [x] Implement forms/actions to update `received_quantity` for `AtkStockRequestItem`s.
+- [x] Update `FulfillmentStatus` automatically based on `received_quantity` changes.
+- [x] Write unit and feature tests for the `AtkFulfillment` resource and its policies.
