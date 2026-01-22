@@ -28,6 +28,7 @@ class UserDivisionSeeder extends Seeder
             ['name' => 'Marketing Hospital', 'initial' => 'MHO'],
             ['name' => 'Marketing Primary Care', 'initial' => 'MPC'],
             ['name' => 'Marketing Primary Health', 'initial' => 'MPH'],
+            ['name' => 'Operations', 'initial' => 'OPR'],
             ['name' => 'Marketing Support', 'initial' => 'MKS'],
             ['name' => 'Regulatory Affairs', 'initial' => 'RA'],
             ['name' => 'Quality Assurance', 'initial' => 'QA'],
