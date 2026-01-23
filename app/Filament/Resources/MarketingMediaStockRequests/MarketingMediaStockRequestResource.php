@@ -15,7 +15,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MarketingMediaStockRequestResource extends Resource
 {
@@ -29,9 +28,12 @@ class MarketingMediaStockRequestResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Permintaan Marketing Media';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowDownTray;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::RectangleStack;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing Media';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.marketing_media');
+    }
 
     protected static ?string $recordTitleAttribute = 'request_number';
 

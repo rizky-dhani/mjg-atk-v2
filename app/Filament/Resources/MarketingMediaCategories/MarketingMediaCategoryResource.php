@@ -8,7 +8,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MarketingMediaCategoryResource extends Resource
 {
@@ -16,7 +15,15 @@ class MarketingMediaCategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Folder;
 
-    protected static ?string $navigationParentItem = 'Stok Inventaris';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.marketing_media');
+    }
+
+    public static function getNavigationParentItem(): ?string
+    {
+        return __('filament.navigation.parent_item.inventory_stock');
+    }
 
     protected static ?string $navigationLabel = 'Kategori';
 
@@ -25,8 +32,6 @@ class MarketingMediaCategoryResource extends Resource
     protected static ?string $pluralLabel = 'Kategori Marketing Media';
 
     protected static ?string $slug = 'marketing-media-categories';
-
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing Media';
 
     public static function form(Schema $schema): Schema
     {

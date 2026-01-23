@@ -9,7 +9,6 @@ use App\Filament\Resources\AtkFulfillments\Schemas\AtkFulfillmentInfolist;
 use App\Filament\Resources\AtkFulfillments\Tables\AtkFulfillmentsTable;
 use App\Models\AtkFulfillment;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -29,7 +28,10 @@ class AtkFulfillmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ClipboardDocumentCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
 
     protected static ?string $recordTitleAttribute = 'request_number';
 

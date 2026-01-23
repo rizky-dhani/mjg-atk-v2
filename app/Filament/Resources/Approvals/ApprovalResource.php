@@ -16,7 +16,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class ApprovalResource extends Resource
 {
@@ -24,7 +23,10 @@ class ApprovalResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CheckCircle;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Approval Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.approval_management');
+    }
 
     public static function form(Schema $schema): Schema
     {

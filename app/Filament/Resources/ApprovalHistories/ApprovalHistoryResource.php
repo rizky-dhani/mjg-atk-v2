@@ -12,19 +12,17 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use UnitEnum;
 
 class ApprovalHistoryResource extends Resource
 {
     protected static ?string $model = ApprovalHistory::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::Clock;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ListBullet;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Approval Management';
-
-    protected static ?string $pluralModelLabel = 'Approval History';
-
-    protected static ?string $modelLabel = 'Approval History';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.approval_management');
+    }
 
     public static function form(Schema $schema): Schema
     {

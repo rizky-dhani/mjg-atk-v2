@@ -16,7 +16,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use UnitEnum;
 
 class ApprovalAtkTransferStock extends ListRecords
 {
@@ -26,7 +25,10 @@ class ApprovalAtkTransferStock extends ListRecords
 
     protected static ?string $navigationLabel = 'Persetujuan Transfer Stok ATK';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Approval Permintaan';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.request_approval');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
 

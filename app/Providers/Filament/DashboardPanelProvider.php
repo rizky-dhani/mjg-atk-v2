@@ -48,23 +48,23 @@ class DashboardPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->navigationGroups([
-                'Alat Tulis Kantor',
-                'Marketing Media',
-                'Approval Permintaan',
-                'Settings',
+                __('filament.navigation.group.atk'),
+                __('filament.navigation.group.marketing_media'),
+                __('filament.navigation.group.request_approval'),
+                __('filament.navigation.group.settings'),
             ])
             ->navigationItems([
                 // Marketing Media
                 NavigationItem::make('Permintaan Marketing Media')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => MarketingMediaStockRequestResource::getUrl('index'))
-                    ->group('Marketing Media')
+                    ->group(__('filament.navigation.group.marketing_media'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockRequestResource::getUrl('index'))
                     ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
                 NavigationItem::make('Pengeluaran Marketing Media')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => MarketingMediaStockUsageResource::getUrl('index'))
-                    ->group('Marketing Media')
+                    ->group(__('filament.navigation.group.marketing_media'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockUsageResource::getUrl('index'))
                     ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
 
@@ -72,37 +72,37 @@ class DashboardPanelProvider extends PanelProvider
                 NavigationItem::make('Persetujuan Permintaan ATK')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Permintaan Stok Umum ATK')
                     ->icon(fn () => Heroicon::ArrowTopRightOnSquare)
                     ->url(fn () => \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Transfer Stok ATK')
                     ->icon(fn () => Heroicon::ArrowsRightLeft)
                     ->url(fn () => AtkTransferStockResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Permintaan Marketing Media')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => MarketingMediaStockRequestResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Pengeluaran Marketing Media')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => MarketingMediaStockUsageResource::getUrl('approval'))
-                    ->group('Approval Permintaan')
+                    ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
 
@@ -110,13 +110,13 @@ class DashboardPanelProvider extends PanelProvider
                 NavigationItem::make('Item Inventaris - ATK')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => AtkItemResource::getUrl('index'))
-                    ->group('Settings')
+                    ->group(__('filament.navigation.group.settings'))
                     ->isActiveWhen(fn () => request()->url() === AtkItemResource::getUrl('index'))
                     ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
                 NavigationItem::make('Item Inventaris - Marketing Media')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => MarketingMediaItemResource::getUrl('index'))
-                    ->group('Settings')
+                    ->group(__('filament.navigation.group.settings'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaItemResource::getUrl('index'))
                     ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
 

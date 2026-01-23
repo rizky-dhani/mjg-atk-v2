@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AtkCategoryResource extends Resource
 {
@@ -26,11 +25,17 @@ class AtkCategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Kategori';
 
-    protected static ?string $navigationParentItem = 'Stok Inventaris';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
+
+    public static function getNavigationParentItem(): ?string
+    {
+        return __('filament.navigation.parent_item.inventory_stock');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Tag;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
     protected static ?string $recordTitleAttribute = 'name';
 

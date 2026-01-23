@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MarketingMediaDivisionStockSettingResource extends Resource
 {
@@ -19,9 +18,12 @@ class MarketingMediaDivisionStockSettingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Cog6Tooth;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.settings');
+    }
 
-    protected static ?string $navigationLabel = 'Stock Limit - Marketing Media';
+    protected static ?string $navigationLabel = 'Stock Limit - Media';
 
     protected static ?string $modelLabel = 'Marketing Media Stock Limit';
 

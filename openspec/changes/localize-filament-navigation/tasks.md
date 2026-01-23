@@ -1,0 +1,6 @@
+- [ ] Identify all Filament resources using `navigationGroup` and `navigationParentItem`.
+- [ ] For each identified resource, replace hardcoded strings in `navigationGroup` with `__('filament.navigation.group.key')`.
+- [ ] For each identified resource, replace hardcoded strings in `navigationParentItem` with `__('filament.navigation.parent_item.key')`.
+- [ ] Create or update Bahasa translation files (`lang/id/filament.php`) with corresponding keys and translated values for navigation groups and parent items.
+- [ ] Verify the localization by navigating through the Filament admin panel with Bahasa selected as the language.
+- [ ] Write unit/feature tests to ensure `navigationGroup` and `navigationParentItem` are correctly localized.

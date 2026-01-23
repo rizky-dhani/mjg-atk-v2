@@ -15,7 +15,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
-use UnitEnum;
 
 class ApprovalMarketingMediaStockRequest extends ListRecords
 {
@@ -23,9 +22,12 @@ class ApprovalMarketingMediaStockRequest extends ListRecords
 
     protected static ?string $slug = 'marketing-media/stock-requests/approval';
 
-    protected static ?string $navigationLabel = 'Approval Permintaan Marketing Media';
+    protected static ?string $navigationLabel = 'Approval Permintaan Media';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing Media';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.marketing_media');
+    }
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentCheck;
 

@@ -13,7 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AtkItemPriceHistoryResource extends Resource
 {
@@ -21,17 +20,23 @@ class AtkItemPriceHistoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Histori Harga';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
+
+    public static function getNavigationParentItem(): ?string
+    {
+        return __('filament.navigation.parent_item.item_price');
+    }
+
     protected static ?string $slug = 'atk/price-histories';
 
     protected static ?string $modelLabel = 'Histori Harga Item';
 
     protected static ?string $pluralModelLabel = 'Histori Harga Item';
 
-    protected static ?string $navigationParentItem = 'Harga Item';
-
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
 
     public static function form(Schema $schema): Schema
     {

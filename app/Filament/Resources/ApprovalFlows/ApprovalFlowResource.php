@@ -27,7 +27,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\File;
-use UnitEnum;
 
 class ApprovalFlowResource extends Resource
 {
@@ -35,7 +34,10 @@ class ApprovalFlowResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::NumberedList;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Approval Management';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.approval_management');
+    }
 
     protected static ?string $recordTitleAttribute = 'name';
 

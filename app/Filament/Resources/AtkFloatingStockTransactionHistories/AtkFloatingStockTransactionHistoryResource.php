@@ -12,7 +12,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AtkFloatingStockTransactionHistoryResource extends Resource
 {
@@ -20,9 +19,15 @@ class AtkFloatingStockTransactionHistoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
 
-    protected static ?string $navigationParentItem = 'Stok Umum';
+    public static function getNavigationParentItem(): ?string
+    {
+        return __('filament.navigation.parent_item.floating_stock');
+    }
 
     protected static ?string $navigationLabel = 'Riwayat Transaksi';
 

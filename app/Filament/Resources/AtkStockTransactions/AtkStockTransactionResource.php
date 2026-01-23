@@ -14,13 +14,22 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AtkStockTransactionResource extends Resource
 {
     protected static ?string $model = AtkStockTransaction::class;
 
     protected static ?string $navigationLabel = 'Riwayat Transfer';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
+
+    public static function getNavigationParentItem(): ?string
+    {
+        return __('filament.navigation.parent_item.stock_transfer');
+    }
 
     protected static ?string $slug = 'atk/stock-transactions';
 
@@ -29,10 +38,6 @@ class AtkStockTransactionResource extends Resource
     protected static ?string $pluralModelLabel = 'Riwayat Transfer';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
-
-    protected static ?string $navigationParentItem = 'Transfer Stok ATK';
 
     public static function form(Schema $schema): Schema
     {

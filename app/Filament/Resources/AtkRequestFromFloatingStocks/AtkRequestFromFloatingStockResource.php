@@ -13,7 +13,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class AtkRequestFromFloatingStockResource extends Resource
 {
@@ -27,9 +26,12 @@ class AtkRequestFromFloatingStockResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Permintaan Stok Umum';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowTopRightOnSquare;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsUpDown;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Alat Tulis Kantor';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.atk');
+    }
 
     protected static ?string $recordTitleAttribute = 'request_number';
 

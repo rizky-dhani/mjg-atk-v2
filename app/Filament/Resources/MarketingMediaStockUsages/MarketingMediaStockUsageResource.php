@@ -14,7 +14,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class MarketingMediaStockUsageResource extends Resource
 {
@@ -30,7 +29,10 @@ class MarketingMediaStockUsageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowUpTray;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Marketing Media';
+    public static function getNavigationGroup(): ?string
+    {
+        return __('filament.navigation.group.marketing_media');
+    }
 
     protected static ?string $recordTitleAttribute = 'request_number';
 
