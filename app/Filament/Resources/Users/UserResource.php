@@ -40,6 +40,10 @@ class UserResource extends Resource
                     ->label('Email address')
                     ->email()
                     ->required(),
+                TextInput::make('initial')
+                    ->label('Initial')
+                    ->required()
+                    ->maxLength(4),
                 Select::make('roles')
                     ->required()
                     ->multiple()
