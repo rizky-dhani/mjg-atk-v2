@@ -27,12 +27,18 @@ class AtkStockRequestForm
                             ->schema([
                                 Select::make('division_id')
                                     ->label('Divisi')
-                                    ->relationship('division', 'name')
+                                    ->options(function () {
+                                        if (auth()->user()->isSuperAdmin()) {
+                                            return \App\Models\UserDivision::all()->pluck('name', 'id');
+                                        }
+
+                                        return auth()->user()->divisions->pluck('name', 'id');
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->hidden(fn () => ! auth()->user()->isSuperAdmin())
-                                    ->default(fn () => auth()->user()->division_id)
+                                    ->live()
+                                    ->default(fn () => auth()->user()->divisions->first()?->id)
                                     ->dehydrated(),
                                 TextInput::make('request_number')
                                     ->label('Nomor Permintaan')
@@ -40,8 +46,7 @@ class AtkStockRequestForm
                                     ->disabled()
                                     ->dehydrated(false),
                             ]),
-                    ])
-                    ->visible(fn () => auth()->user()->isSuperAdmin()),
+                    ]),
                 Section::make('Rejection Details')
                     ->visible(function ($get, $record) {
                         // Show this section only when there's a rejection
@@ -171,7 +176,7 @@ class AtkStockRequestForm
 
                                         // Update current_mac when item_id changes
                                         if ($state) {
-                                            $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                            $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                 ->where('item_id', $state)
                                                 ->first();
 
@@ -197,7 +202,7 @@ class AtkStockRequestForm
                                             $quantity = $get('quantity') ?? 0;
                                             if ($quantity > 0) {
                                                 // Get current stock data
-                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $state)
                                                     ->first();
 
@@ -217,7 +222,7 @@ class AtkStockRequestForm
                                                 $set('new_mac_estimate', 'Rp '.number_format((int) round($newMac), 0, ',', '.'));
                                             } else {
                                                 // If quantity is 0, just show current MAC
-                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $state)
                                                     ->first();
 
@@ -245,11 +250,11 @@ class AtkStockRequestForm
                                             return '';
                                         }
 
-                                        $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                        $setting = AtkDivisionStockSetting::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
-                                        $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                        $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -271,12 +276,12 @@ class AtkStockRequestForm
 
                                         // First run the original validation logic
                                         if ($itemId && $state) {
-                                            $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                            $setting = AtkDivisionStockSetting::where('division_id', $get('../../division_id'))
                                                 ->where('item_id', $itemId)
                                                 ->first();
 
                                             if ($setting) {
-                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 
@@ -305,7 +310,7 @@ class AtkStockRequestForm
                                             $itemPrice = $priceModel ? $priceModel->unit_price : 0;
 
                                             // Get current stock data
-                                            $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                            $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                 ->where('item_id', $itemId)
                                                 ->first();
 
@@ -326,7 +331,7 @@ class AtkStockRequestForm
                                         } elseif (! $state) {
                                             // If quantity is 0, get current MAC (if item exists)
                                             if ($itemId) {
-                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 
@@ -359,7 +364,7 @@ class AtkStockRequestForm
                                                     return;
                                                 }
 
-                                                $setting = AtkDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                                $setting = AtkDivisionStockSetting::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 
@@ -367,7 +372,7 @@ class AtkStockRequestForm
                                                     return;
                                                 }
 
-                                                $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 
@@ -393,7 +398,7 @@ class AtkStockRequestForm
                                             return '';
                                         }
 
-                                        $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                        $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 

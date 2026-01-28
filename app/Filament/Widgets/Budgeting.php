@@ -17,51 +17,59 @@ class Budgeting extends StatsOverviewWidget
     {
         $user = Auth::user();
 
-        if (! $user || ! $user->division_id) {
+        if (! $user || $user->divisions->isEmpty()) {
             return [
-                Stat::make(__('No Access'), __('Please log in to view budget information'))
-                    ->description(__('Budget data is only available for authenticated users'))
+                Stat::make(__('No Access'), __('Please log in or assign to a division to view budget information'))
+                    ->description(__('Budget data is only available for users assigned to divisions'))
                     ->color('warning'),
             ];
         }
 
         $currentYear = now()->year;
 
-        // Get the budget for the current user's division
-        $budgeting = AtkBudgeting::where('division_id', $user->division_id)
+        // Get the budget for the user's divisions
+        $budgetings = AtkBudgeting::whereIn('division_id', $user->divisions->pluck('id'))
             ->where('fiscal_year', $currentYear)
-            ->first();
+            ->get();
 
-        if (! $budgeting) {
+        if ($budgetings->isEmpty()) {
             return [
-                Stat::make(__('Budget Information'), __('No budget set for your division'))
+                Stat::make(__('Budget Information'), __('No budget set for your divisions'))
                     ->description(__('Contact administrator to set budget for :year', ['year' => $currentYear]))
                     ->color('warning'),
             ];
         }
 
+        $totalBudget = $budgetings->sum('budget_amount');
+        $totalUsed = $budgetings->sum('used_amount');
+        $totalRemaining = $budgetings->sum('remaining_amount');
+
         // Format the budget amounts with 'Rp' prefix
-        $budgetAmount = 'Rp '.number_format($budgeting->budget_amount, 0, ',', '.');
-        $usedAmount = 'Rp '.number_format($budgeting->used_amount, 0, ',', '.');
-        $remainingAmount = 'Rp '.number_format($budgeting->remaining_amount, 0, ',', '.');
+        $budgetAmountLabel = 'Rp '.number_format($totalBudget, 0, ',', '.');
+        $usedAmountLabel = 'Rp '.number_format($totalUsed, 0, ',', '.');
+        $remainingAmountLabel = 'Rp '.number_format($totalRemaining, 0, ',', '.');
 
         // Calculate utilization percentage
-        $utilizationPercentage = $budgeting->budget_amount > 0
-            ? round(($budgeting->used_amount / $budgeting->budget_amount) * 100, 2).'%'
+        $utilizationPercentage = $totalBudget > 0
+            ? round(($totalUsed / $totalBudget) * 100, 2).'%'
             : '0%';
 
+        $divisionLabel = $user->divisions->count() > 1
+            ? __('All assigned divisions')
+            : $user->divisions->first()->name;
+
         return [
-            Stat::make(__('Total Budget'), $budgetAmount)
-                ->description($user->division->name.' - '.$currentYear)
+            Stat::make(__('Total Budget'), $budgetAmountLabel)
+                ->description($divisionLabel.' - '.$currentYear)
                 ->descriptionIcon('heroicon-m-currency-dollar')
                 ->color('primary'),
 
-            Stat::make(__('Used Amount'), $usedAmount)
+            Stat::make(__('Used Amount'), $usedAmountLabel)
                 ->description(__(':percentage Utilized', ['percentage' => $utilizationPercentage]))
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning'),
 
-            Stat::make(__('Remaining Budget'), $remainingAmount)
+            Stat::make(__('Remaining Budget'), $remainingAmountLabel)
                 ->description(__('Available for use'))
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),

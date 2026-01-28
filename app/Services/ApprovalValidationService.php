@@ -61,12 +61,12 @@ class ApprovalValidationService
                     // Division Head step - check against requesting division
                     $canApprove = isset($model->requesting_division_id) &&
                                  $model->requesting_division_id !== null &&
-                                 $user->division_id == $model->requesting_division_id;
+                                 $user->belongsToDivision($model->requesting_division_id);
                 } elseif ($currentStep->step_name == 'Source Division Head') {
                     // Source Division Head step - check against source division
                     $canApprove = isset($model->source_division_id) &&
                                  $model->source_division_id !== null &&
-                                 $user->division_id == $model->source_division_id;
+                                 $user->belongsToDivision($model->source_division_id);
                 }
 
                 if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
@@ -82,7 +82,7 @@ class ApprovalValidationService
                 // For other models, check if user's role matches and user's division matches model's division
                 if (in_array($currentStep->role_id, $userRoleIds) &&
                     isset($model->division_id) && $model->division_id !== null &&
-                    $user->division_id == $model->division_id) {
+                    $user->belongsToDivision($model->division_id)) {
 
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()
@@ -96,7 +96,7 @@ class ApprovalValidationService
         } else {
             // For non-null division_id steps, check if both role and division match
             // These users can approve requests from any division
-            if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
+            if (in_array($currentStep->role_id, $userRoleIds) && $user->belongsToDivision($currentStep->division_id)) {
 
                 // Check if this step hasn't been approved yet by this user
                 $existingApproval = $approval->approvalStepApprovals()
@@ -158,12 +158,12 @@ class ApprovalValidationService
                         // Division Head step - check against requesting division
                         $canApprove = isset($model->requesting_division_id) &&
                                      $model->requesting_division_id !== null &&
-                                     $user->division_id == $model->requesting_division_id;
+                                     $user->belongsToDivision($model->requesting_division_id);
                     } elseif ($currentStep->step_name == 'Source Division Head') {
                         // Source Division Head step - check against source division
                         $canApprove = isset($model->source_division_id) &&
                                      $model->source_division_id !== null &&
-                                     $user->division_id == $model->source_division_id;
+                                     $user->belongsToDivision($model->source_division_id);
                     }
 
                     if ($canApprove && in_array($currentStep->role_id, $userRoleIds)) {
@@ -181,7 +181,7 @@ class ApprovalValidationService
                     // For other models, check if user's role matches and user's division matches model's division
                     if (in_array($currentStep->role_id, $userRoleIds) &&
                         isset($model->division_id) && $model->division_id !== null &&
-                        $user->division_id == $model->division_id) {
+                        $user->belongsToDivision($model->division_id)) {
 
                         // Check if this step hasn't been approved yet by this user
                         $existingApproval = $approval->approvalStepApprovals()
@@ -197,7 +197,7 @@ class ApprovalValidationService
             } else {
                 // For non-null division_id steps, check if both role and division match
                 // These users can approve requests from any division
-                if (in_array($currentStep->role_id, $userRoleIds) && $currentStep->division_id == $user->division_id) {
+                if (in_array($currentStep->role_id, $userRoleIds) && $user->belongsToDivision($currentStep->division_id)) {
 
                     // Check if this step hasn't been approved yet by this user
                     $existingApproval = $approval->approvalStepApprovals()

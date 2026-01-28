@@ -25,12 +25,18 @@ class AtkRequestFromFloatingStockForm
                             ->schema([
                                 Select::make('division_id')
                                     ->label('Divisi')
-                                    ->relationship('division', 'name')
+                                    ->options(function () {
+                                        if (auth()->user()->isSuperAdmin()) {
+                                            return \App\Models\UserDivision::all()->pluck('name', 'id');
+                                        }
+
+                                        return auth()->user()->divisions->pluck('name', 'id');
+                                    })
                                     ->searchable()
                                     ->preload()
                                     ->required()
-                                    ->hidden(fn () => ! auth()->user()->isSuperAdmin())
-                                    ->default(fn () => auth()->user()->division_id)
+                                    ->live()
+                                    ->default(fn () => auth()->user()->divisions->first()?->id)
                                     ->dehydrated(),
                                 TextInput::make('request_number')
                                     ->label('Request Number')

@@ -60,13 +60,13 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => MarketingMediaStockRequestResource::getUrl('index'))
                     ->group(__('filament.navigation.group.marketing_media'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockRequestResource::getUrl('index'))
-                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->divisions()->where('name', 'like', '%Marketing%')->exists() || Auth::user()->hasRole('Super Admin')),
                 NavigationItem::make('Pengeluaran Marketing Media')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => MarketingMediaStockUsageResource::getUrl('index'))
                     ->group(__('filament.navigation.group.marketing_media'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaStockUsageResource::getUrl('index'))
-                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division && stripos(Auth::user()->division->name, 'Marketing') !== false || Auth::user()->hasRole('Super Admin')),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->divisions()->where('name', 'like', '%Marketing%')->exists() || Auth::user()->hasRole('Super Admin')),
 
                 // Approval Permintaan
                 NavigationItem::make('Persetujuan Permintaan ATK')
@@ -112,13 +112,13 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => AtkItemResource::getUrl('index'))
                     ->group(__('filament.navigation.group.settings'))
                     ->isActiveWhen(fn () => request()->url() === AtkItemResource::getUrl('index'))
-                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->isGA()),
                 NavigationItem::make('Item Inventaris - Marketing Media')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => MarketingMediaItemResource::getUrl('index'))
                     ->group(__('filament.navigation.group.settings'))
                     ->isActiveWhen(fn () => request()->url() === MarketingMediaItemResource::getUrl('index'))
-                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->division->initial === 'GA'),
+                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->isGA()),
 
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -174,7 +174,7 @@ class DashboardPanelProvider extends PanelProvider
                 // Step is available for the user's own division OR for specific division
                 $query
                     ->whereNull('division_id')
-                    ->orWhere('division_id', $user->division_id);
+                    ->orWhereIn('division_id', $user->divisions->pluck('id'));
             })
             ->get();
 

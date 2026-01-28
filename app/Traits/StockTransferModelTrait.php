@@ -20,7 +20,7 @@ trait StockTransferModelTrait
             }
 
             if (empty($model->requesting_division_id) && auth()->check()) {
-                $model->requesting_division_id = auth()->user()->division_id;
+                $model->requesting_division_id = auth()->user()->divisions->first()?->id;
             }
 
             if (empty($model->transfer_number) && ! empty($model->requesting_division_id)) {

@@ -13,7 +13,9 @@ class AtkStockTransactionsTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->where('division_id', auth()->user()->division_id)->orderByDesc('created_at'))
+                fn (Builder $query) => $query
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))
+                    ->orderByDesc('created_at'))
             ->columns([
                 TextColumn::make('id')
                     ->label('Transaction ID')

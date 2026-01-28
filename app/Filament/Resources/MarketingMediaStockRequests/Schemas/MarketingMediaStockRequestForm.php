@@ -22,6 +22,32 @@ class MarketingMediaStockRequestForm
     {
         return $schema
             ->components([
+                Section::make('General Information')
+                    ->schema([
+                        Grid::make(2)
+                            ->schema([
+                                Select::make('division_id')
+                                    ->label('Divisi')
+                                    ->options(function () {
+                                        if (auth()->user()->isSuperAdmin()) {
+                                            return \App\Models\UserDivision::all()->pluck('name', 'id');
+                                        }
+
+                                        return auth()->user()->divisions->pluck('name', 'id');
+                                    })
+                                    ->searchable()
+                                    ->preload()
+                                    ->required()
+                                    ->live()
+                                    ->default(fn () => auth()->user()->divisions->first()?->id)
+                                    ->dehydrated(),
+                                TextInput::make('request_number')
+                                    ->label('Nomor Permintaan')
+                                    ->placeholder('Auto-generated')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ]),
+                    ]),
                 Section::make('Rejection Details')
                     ->visible(function ($get, $record) {
                         // Show this section only when there's a rejection
@@ -162,7 +188,7 @@ class MarketingMediaStockRequestForm
                                             return '';
                                         }
 
-                                        $setting = MarketingMediaDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                        $setting = MarketingMediaDivisionStockSetting::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -170,7 +196,7 @@ class MarketingMediaStockRequestForm
                                             return 'No inventory limit set for this item';
                                         }
 
-                                        $stock = MarketingMediaDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                        $stock = MarketingMediaDivisionStock::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -187,7 +213,7 @@ class MarketingMediaStockRequestForm
                                             return;
                                         }
 
-                                        $setting = MarketingMediaDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                        $setting = MarketingMediaDivisionStockSetting::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -195,7 +221,7 @@ class MarketingMediaStockRequestForm
                                             return;
                                         }
 
-                                        $stock = MarketingMediaDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                        $stock = MarketingMediaDivisionStock::where('division_id', $get('../../division_id'))
                                             ->where('item_id', $itemId)
                                             ->first();
 
@@ -234,7 +260,7 @@ class MarketingMediaStockRequestForm
                                                     return;
                                                 }
 
-                                                $setting = MarketingMediaDivisionStockSetting::where('division_id', auth()->user()->division_id ?? null)
+                                                $setting = MarketingMediaDivisionStockSetting::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 
@@ -242,7 +268,7 @@ class MarketingMediaStockRequestForm
                                                     return;
                                                 }
 
-                                                $stock = MarketingMediaDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                                $stock = MarketingMediaDivisionStock::where('division_id', $get('../../division_id'))
                                                     ->where('item_id', $itemId)
                                                     ->first();
 

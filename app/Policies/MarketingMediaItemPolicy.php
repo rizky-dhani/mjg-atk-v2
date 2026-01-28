@@ -14,12 +14,12 @@ class MarketingMediaItemPolicy
     public function viewAny(User $user): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -30,8 +30,8 @@ class MarketingMediaItemPolicy
 
             foreach ($approvalFlowSteps as $step) {
                 // Check if the user has the role specified in the step and matches the division
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -46,12 +46,12 @@ class MarketingMediaItemPolicy
     public function view(User $user, MarketingMediaItem $marketingMediaItem): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -62,8 +62,8 @@ class MarketingMediaItemPolicy
 
             foreach ($approvalFlowSteps as $step) {
                 // Check if the user has the role specified in the step and matches the division
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -78,12 +78,12 @@ class MarketingMediaItemPolicy
     public function create(User $user): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -94,8 +94,8 @@ class MarketingMediaItemPolicy
 
             foreach ($approvalFlowSteps as $step) {
                 // Check if the user has the role specified in the step and matches the division
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -110,12 +110,12 @@ class MarketingMediaItemPolicy
     public function update(User $user, MarketingMediaItem $marketingMediaItem): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -126,8 +126,8 @@ class MarketingMediaItemPolicy
 
             foreach ($approvalFlowSteps as $step) {
                 // Check if the user has the role specified in the step and matches the division
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -142,12 +142,12 @@ class MarketingMediaItemPolicy
     public function delete(User $user, MarketingMediaItem $marketingMediaItem): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -158,8 +158,8 @@ class MarketingMediaItemPolicy
 
             foreach ($approvalFlowSteps as $step) {
                 // Check if the user has the role specified in the step and matches the division
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -174,12 +174,12 @@ class MarketingMediaItemPolicy
     public function manageItems(User $user): bool
     {
         // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') && $user->division->initial === 'GA') {
+        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
             return true;
         }
 
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 

@@ -14,7 +14,7 @@ class MarketingMediaStockUsagePolicy
     public function viewAny(User $user): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -24,8 +24,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -33,7 +33,7 @@ class MarketingMediaStockUsagePolicy
 
         // Allow users with "Admin Marketing" role or regular admins,
         // plus users from any division with "Marketing" in the name (fallback)
-        return $user->division && stripos($user->division->name, 'Marketing') !== false;
+        return $user->divisions()->where('name', 'like', '%Marketing%')->exists();
     }
 
     /**
@@ -42,7 +42,7 @@ class MarketingMediaStockUsagePolicy
     public function view(User $user, MarketingMediaStockUsage $marketingMediaStockUsage): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -52,8 +52,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -65,9 +65,8 @@ class MarketingMediaStockUsagePolicy
         }
 
         // Allow users from a marketing division to view usages from the same division
-        return $user->division &&
-               stripos($user->division->name, 'Marketing') !== false &&
-               $user->division->id === $marketingMediaStockUsage->division_id;
+        return $user->divisions()->where('name', 'like', '%Marketing%')->exists() &&
+               $user->belongsToDivision($marketingMediaStockUsage->division_id);
     }
 
     /**
@@ -76,7 +75,7 @@ class MarketingMediaStockUsagePolicy
     public function create(User $user): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -86,8 +85,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -99,7 +98,7 @@ class MarketingMediaStockUsagePolicy
         }
 
         // Allow users from any division with "Marketing" in the name to create usages
-        return $user->division && stripos($user->division->name, 'Marketing') !== false;
+        return $user->divisions()->where('name', 'like', '%Marketing%')->exists();
     }
 
     /**
@@ -108,7 +107,7 @@ class MarketingMediaStockUsagePolicy
     public function update(User $user, MarketingMediaStockUsage $marketingMediaStockUsage): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -118,8 +117,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -132,9 +131,8 @@ class MarketingMediaStockUsagePolicy
 
         // Regular users can update their own pending usages if they're from a marketing division
         return $user->id === $marketingMediaStockUsage->requester_id &&
-            $user->division &&
-            stripos($user->division->name, 'Marketing') !== false &&
-            $user->division->id === $marketingMediaStockUsage->division_id &&
+            $user->divisions()->where('name', 'like', '%Marketing%')->exists() &&
+            $user->belongsToDivision($marketingMediaStockUsage->division_id) &&
             $marketingMediaStockUsage->approval &&
             $marketingMediaStockUsage->approval->status === 'pending';
     }
@@ -145,7 +143,7 @@ class MarketingMediaStockUsagePolicy
     public function delete(User $user, MarketingMediaStockUsage $marketingMediaStockUsage): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -155,8 +153,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     return true;
                 }
             }
@@ -169,9 +167,8 @@ class MarketingMediaStockUsagePolicy
 
         // Regular users can delete their own pending usages if they're from a marketing division
         return $user->id === $marketingMediaStockUsage->requester_id &&
-            $user->division &&
-            stripos($user->division->name, 'Marketing') !== false &&
-            $user->division->id === $marketingMediaStockUsage->division_id &&
+            $user->divisions()->where('name', 'like', '%Marketing%')->exists() &&
+            $user->belongsToDivision($marketingMediaStockUsage->division_id) &&
             $marketingMediaStockUsage->approval &&
             $marketingMediaStockUsage->approval->status === 'pending';
     }
@@ -182,7 +179,7 @@ class MarketingMediaStockUsagePolicy
     public function approve(User $user, MarketingMediaStockUsage $marketingMediaStockUsage): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -192,8 +189,8 @@ class MarketingMediaStockUsagePolicy
             $approvalFlowSteps = $marketingMediaApprovalFlow->approvalFlowSteps;
 
             foreach ($approvalFlowSteps as $step) {
-                if ($user->hasRole($step->role) &&
-                    (! $step->division_id || $user->division_id == $step->division_id)) {
+                if ($user->hasRole($step->role->name) &&
+                    (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                     // Check if this step is for the current approval's next step
                     if (! $marketingMediaStockUsage->approval ||
                         $marketingMediaStockUsage->approval->current_step == $step->step_number) {
@@ -218,8 +215,8 @@ class MarketingMediaStockUsagePolicy
 
         foreach ($approvalFlowSteps as $step) {
             // Check if the user has the role required for this step and belongs to the right division
-            if ($user->hasRole($step->role) &&
-                (! $step->division_id || $user->division_id == $step->division_id)) {
+            if ($user->hasRole($step->role->name) &&
+                (! $step->division_id || $user->belongsToDivision($step->division_id))) {
                 // Check if this step is for the current approval's next step
                 if ($marketingMediaStockUsage->approval->current_step == $step->step_number) {
                     return true;
@@ -242,9 +239,8 @@ class MarketingMediaStockUsagePolicy
 
         // Regular users can resubmit their own rejected usages if they're from a marketing division
         return $user->id === $marketingMediaStockUsage->requester_id &&
-            $user->division &&
-            stripos($user->division->name, 'Marketing') !== false &&
-            $user->division->id === $marketingMediaStockUsage->division_id &&
+            $user->divisions()->where('name', 'like', '%Marketing%')->exists() &&
+            $user->belongsToDivision($marketingMediaStockUsage->division_id) &&
             $marketingMediaStockUsage->approval &&
             $marketingMediaStockUsage->approval->status === 'rejected';
     }

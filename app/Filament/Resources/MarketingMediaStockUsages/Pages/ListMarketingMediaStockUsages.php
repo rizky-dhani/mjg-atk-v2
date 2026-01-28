@@ -17,7 +17,7 @@ class ListMarketingMediaStockUsages extends ListRecords
         return [
             CreateAction::make()
                 ->mutateFormDataUsing(function (array $data) {
-                    $data['division_id'] = auth()->user()->division_id;
+                    $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
                     $data['requester_id'] = auth()->user()->id;
 
                     return $data;

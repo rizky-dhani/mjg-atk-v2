@@ -25,12 +25,11 @@ class AtkStockRequestStatus extends StatsOverviewWidget
         $fulfilledCount = 0;
         $pendingFulfillmentCount = 0;
 
-        if ($user && $user->division_id) {
-            // Get the user's division ID for filtering
-            $divisionId = $user->division_id;
+        if ($user) {
+            $divisionIds = $user->isSuperAdmin() ? null : $user->divisions->pluck('id');
 
             // Count pending requests: division's requests where there is no approval history or the latest approval history action is not 'approved' or 'rejected'
-            $pendingCount = AtkStockRequest::where('division_id', $divisionId)
+            $pendingCount = AtkStockRequest::when($divisionIds, fn ($q) => $q->whereIn('division_id', $divisionIds))
                 ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'rejected');
                 })
@@ -43,21 +42,21 @@ class AtkStockRequestStatus extends StatsOverviewWidget
                 ->count();
 
             // Count approved requests: division's requests where the latest approval history action is 'approved'
-            $approvedCount = AtkStockRequest::where('division_id', $divisionId)
+            $approvedCount = AtkStockRequest::when($divisionIds, fn ($q) => $q->whereIn('division_id', $divisionIds))
                 ->whereHas('approvalHistory', function ($query) {
                     $query->orderBy('performed_at', 'desc')->limit(1)->where('action', 'approved');
                 })
                 ->count();
 
             // Count on progress requests: This may need to be adjusted based on your specific business logic
-            $onProgressCount = AtkStockRequest::where('division_id', $divisionId)
+            $onProgressCount = AtkStockRequest::when($divisionIds, fn ($q) => $q->whereIn('division_id', $divisionIds))
                 ->whereHas('approvalHistory', function ($query) {
                     $query->orderBy('performed_at', 'desc')->limit(1)->where('action', 'partially_approved');
                 })
                 ->count();
 
             // Count fulfilled requests (fully received)
-            $fulfilledCount = AtkStockRequest::where('division_id', $divisionId)
+            $fulfilledCount = AtkStockRequest::when($divisionIds, fn ($q) => $q->whereIn('division_id', $divisionIds))
                 ->where('status', \App\Enums\AtkStockRequestStatus::Published)
                 ->whereHas('approval', fn ($q) => $q->where('status', 'approved'))
                 ->get()
@@ -65,7 +64,7 @@ class AtkStockRequestStatus extends StatsOverviewWidget
                 ->count();
 
             // Count pending fulfillment (approved but not yet fully received)
-            $pendingFulfillmentCount = AtkStockRequest::where('division_id', $divisionId)
+            $pendingFulfillmentCount = AtkStockRequest::when($divisionIds, fn ($q) => $q->whereIn('division_id', $divisionIds))
                 ->where('status', \App\Enums\AtkStockRequestStatus::Published)
                 ->whereHas('approval', fn ($q) => $q->where('status', 'approved'))
                 ->get()

@@ -15,7 +15,7 @@ class AtkItemPricesTable
                 $user = auth()->user();
                 if ($user && $user->division_id) {
                     $query->whereHas('item.atkDivisionStocks', function ($q) use ($user) {
-                        $q->where('division_id', $user->division_id);
+                        $q->whereIn('division_id', $user->divisions->pluck('id'));
                     });
                 }
                 // Order by created_at in descending order

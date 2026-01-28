@@ -29,7 +29,7 @@ class AtkDivisionStockSettingsTable
                 if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
                     // Super Admin, Admin, or GA division users can see all records
                 } else {
-                    $query->where('division_id', $user->division_id);
+                    $query->whereIn('division_id', $user->divisions->pluck('id'));
                 }
             })
             ->columns([
@@ -114,7 +114,7 @@ class AtkDivisionStockSettingsTable
                         if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
                             AtkDivisionStockSetting::update(['max_limit' => $data['max_limit']]);
                         } else {
-                            AtkDivisionStockSetting::where('division_id', $user->division_id)
+                            AtkDivisionStockSetting::whereIn('division_id', $user->divisions->pluck('id'))
                                 ->update(['max_limit' => $data['max_limit']]);
                         }
 

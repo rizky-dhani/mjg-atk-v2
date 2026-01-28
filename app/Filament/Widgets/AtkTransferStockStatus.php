@@ -23,15 +23,14 @@ class AtkTransferStockStatus extends StatsOverviewWidget
         $onProgressCount = 0;
         $approvedCount = 0;
 
-        if ($user && $user->division_id) {
-            // Get the user's division ID for filtering
-            $divisionId = $user->division_id;
+        if ($user) {
+            $divisionIds = $user->isSuperAdmin() ? null : $user->divisions->pluck('id');
 
             // Count pending requests: division's requests where there is no approval history or the latest approval history action is not 'approved' or 'rejected'
-            $pendingCount = AtkTransferStock::where(function ($query) use ($divisionId) {
+            $pendingCount = AtkTransferStock::when($divisionIds, function ($query) use ($divisionIds) {
                 // Either requesting or source division matches user's division
-                $query->where('requesting_division_id', $divisionId)
-                    ->orWhere('source_division_id', $divisionId);
+                $query->whereIn('requesting_division_id', $divisionIds)
+                    ->orWhereIn('source_division_id', $divisionIds);
             })
                 ->whereDoesntHave('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'rejected');
@@ -45,10 +44,10 @@ class AtkTransferStockStatus extends StatsOverviewWidget
                 ->count();
 
             // Count approved requests: requests where the latest approval history action is 'approved'
-            $approvedCount = AtkTransferStock::where(function ($query) use ($divisionId) {
+            $approvedCount = AtkTransferStock::when($divisionIds, function ($query) use ($divisionIds) {
                 // Either requesting or source division matches user's division
-                $query->where('requesting_division_id', $divisionId)
-                    ->orWhere('source_division_id', $divisionId);
+                $query->whereIn('requesting_division_id', $divisionIds)
+                    ->orWhereIn('source_division_id', $divisionIds);
             })
                 ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'approved');
@@ -56,10 +55,10 @@ class AtkTransferStockStatus extends StatsOverviewWidget
                 ->count();
 
             // Count on progress requests: requests where the latest approval history action is 'partially_approved'
-            $onProgressCount = AtkTransferStock::where(function ($query) use ($divisionId) {
+            $onProgressCount = AtkTransferStock::when($divisionIds, function ($query) use ($divisionIds) {
                 // Either requesting or source division matches user's division
-                $query->where('requesting_division_id', $divisionId)
-                    ->orWhere('source_division_id', $divisionId);
+                $query->whereIn('requesting_division_id', $divisionIds)
+                    ->orWhereIn('source_division_id', $divisionIds);
             })
                 ->whereHas('approvalHistory', function ($query) {
                     $query->orderByDesc('performed_at')->where('action', 'partially_approved');

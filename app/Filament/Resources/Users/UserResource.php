@@ -51,7 +51,8 @@ class UserResource extends Resource
                     ->preload(),
                 Select::make('divisions')
                     ->required()
-                    ->relationship('division', 'name')
+                    ->multiple()
+                    ->relationship('divisions', 'name')
                     ->preload(),
             ]);
     }
@@ -72,12 +73,17 @@ class UserResource extends Resource
                     ->limit(3)
                     ->tooltip(function (TextColumn $column): ?string {
                         $state = $column->getState();
-                        if (count($state) > 3) {
+                        if (is_array($state) && count($state) > 3) {
                             return implode(', ', $state);
                         }
 
                         return null;
                     }),
+                TextColumn::make('divisions.initial')
+                    ->label('Divisi')
+                    ->badge()
+                    ->separator(',')
+                    ->limit(3),
             ])
             ->filters([
                 //

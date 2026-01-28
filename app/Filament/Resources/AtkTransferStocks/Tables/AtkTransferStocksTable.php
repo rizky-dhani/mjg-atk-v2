@@ -21,7 +21,10 @@ class AtkTransferStocksTable
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                $query->where('requesting_division_id', auth()->user()->division_id)->orderByDesc('created_at');
+                if (! auth()->user()->isSuperAdmin()) {
+                    $query->whereIn('requesting_division_id', auth()->user()->divisions->pluck('id'));
+                }
+                $query->orderByDesc('created_at');
             })
             ->columns([
                 TextColumn::make('transfer_number')
@@ -146,8 +149,11 @@ class AtkTransferStocksTable
                     ->modalWidth(Width::SevenExtraLarge)
                     ->visible(function ($record) {
                         $user = \Illuminate\Support\Facades\Auth::user();
+                        if (! $user) {
+                            return false;
+                        }
                         $isRequester = $user->id == $record->requester_id;
-                        $hasDivision = $user->division && (strtolower($user->division->initial) === 'GA' || strtolower($user->division->name) === 'General Affair' || strtolower($user->division->name) === 'General Affairs');
+                        $isGA = $user->isGA();
                         $hasRole = $user->hasRole('Admin') || $user->hasRole('Super Admin');
 
                         // Only allow editing if the request hasn't been approved yet and the user is authorized
@@ -155,7 +161,7 @@ class AtkTransferStocksTable
                         $approval = $record->approval;
                         if ($approval && $approval->status === 'pending') {
                             // Can edit if user is the requester, GA division user, or has admin role
-                            $canEdit = $isRequester || $hasDivision || $hasRole;
+                            $canEdit = $isRequester || $isGA || $hasRole;
                         }
 
                         return $canEdit;

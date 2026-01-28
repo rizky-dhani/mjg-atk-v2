@@ -19,7 +19,7 @@ class ListAtkRequestFromFloatingStocks extends ListRecords
                 ->modalWidth(Width::SevenExtraLarge)
                 ->mutateFormDataUsing(function (array $data): array {
                     $data['requester_id'] = auth()->id();
-                    $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                    $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
 
                     return $data;
                 })

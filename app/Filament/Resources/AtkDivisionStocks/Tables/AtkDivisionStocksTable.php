@@ -23,7 +23,7 @@ class AtkDivisionStocksTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->when(! (auth()->user()->hasRole('Admin') && auth()->user()->isGA()), fn ($q) => $q->where('division_id', auth()->user()->division_id))->orderBy('category_id')->orderBy('created_at'))
+                fn (Builder $query) => $query->when(! (auth()->user()->isGA() || auth()->user()->isSuperAdmin()), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))->orderBy('category_id')->orderBy('created_at'))
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()

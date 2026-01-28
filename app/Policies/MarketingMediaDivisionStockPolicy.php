@@ -13,13 +13,13 @@ class MarketingMediaDivisionStockPolicy
     public function viewAny(User $user): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
         // Allow users with "Admin Marketing" role or regular admins,
         // plus users from any division with "Marketing" in the name (fallback)
-        return $user->division && stripos($user->division->name, 'Marketing') !== false;
+        return $user->divisions()->where('name', 'like', '%Marketing%')->exists();
     }
 
     /**
@@ -28,7 +28,7 @@ class MarketingMediaDivisionStockPolicy
     public function view(User $user, MarketingMediaDivisionStock $marketingMediaDivisionStock): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -38,8 +38,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to view stocks
-        return $user->division &&
-               $user->division->id === $marketingMediaDivisionStock->division_id;
+        return $user->belongsToDivision($marketingMediaDivisionStock->division_id);
     }
 
     /**
@@ -48,7 +47,7 @@ class MarketingMediaDivisionStockPolicy
     public function create(User $user): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -58,7 +57,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from any division with "Marketing" in the name to create stocks
-        return $user->division && stripos($user->division->name, 'Marketing') !== false;
+        return $user->divisions()->where('name', 'like', '%Marketing%')->exists();
     }
 
     /**
@@ -67,7 +66,7 @@ class MarketingMediaDivisionStockPolicy
     public function update(User $user, MarketingMediaDivisionStock $marketingMediaDivisionStock): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -77,8 +76,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to update stocks
-        return $user->division &&
-               $user->division->id === $marketingMediaDivisionStock->division_id;
+        return $user->belongsToDivision($marketingMediaDivisionStock->division_id);
     }
 
     /**
@@ -87,7 +85,7 @@ class MarketingMediaDivisionStockPolicy
     public function delete(User $user, MarketingMediaDivisionStock $marketingMediaDivisionStock): bool
     {
         // Check if user has 'admin' role and belongs to Marketing division
-        if ($user->hasRole('Admin') && $user->division && stripos($user->division->name, 'Marketing') !== false) {
+        if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;
         }
 
@@ -97,8 +95,7 @@ class MarketingMediaDivisionStockPolicy
         }
 
         // Allow users from the same division to delete stocks
-        return $user->division &&
-               $user->division->id === $marketingMediaDivisionStock->division_id;
+        return $user->belongsToDivision($marketingMediaDivisionStock->division_id);
     }
 
     /**

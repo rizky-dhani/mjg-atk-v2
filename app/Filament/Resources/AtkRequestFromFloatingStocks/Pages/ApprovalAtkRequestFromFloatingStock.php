@@ -46,7 +46,7 @@ class ApprovalAtkRequestFromFloatingStock extends ListRecords
                 // Step is available for the user's own division OR for specific division
                 $query
                     ->whereNull('division_id')
-                    ->orWhere('division_id', $user->division_id);
+                    ->orWhereIn('division_id', $user->divisions->pluck('id'));
             })
             ->pluck('id');
 

@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +26,6 @@ class User extends Authenticatable
         'email',
         'password',
         'initial',
-        'division_id',
     ];
 
     /**
@@ -59,18 +60,33 @@ class User extends Authenticatable
         });
     }
 
-    public function isSuperAdmin()
+    public function isSuperAdmin(): bool
     {
         return $this->hasRole('Super Admin');
     }
 
-    public function isGA()
+    public function isGA(): bool
     {
-        return $this->division?->initial === 'GA' || $this->isSuperAdmin();
+        return $this->divisions()->where('initial', 'GA')->exists() || $this->isSuperAdmin();
     }
 
-    public function division()
+    /**
+     * @deprecated Use divisions() instead.
+     */
+    public function division(): BelongsTo
     {
         return $this->belongsTo(UserDivision::class, 'division_id');
+    }
+
+    public function divisions(): BelongsToMany
+    {
+        return $this->belongsToMany(UserDivision::class, 'division_user', 'user_id', 'division_id');
+    }
+
+    public function belongsToDivision(int|UserDivision $division): bool
+    {
+        $divisionId = $division instanceof UserDivision ? $division->id : $division;
+
+        return $this->divisions()->where('user_divisions.id', $divisionId)->exists();
     }
 }

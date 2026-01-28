@@ -23,7 +23,7 @@ class MarketingMediaStockUsagesTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division'])
-                    ->where('division_id', auth()->user()->division_id)
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))
                     ->orderByDesc('created_at'),
             )
             ->columns([

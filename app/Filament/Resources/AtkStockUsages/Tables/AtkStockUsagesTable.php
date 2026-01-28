@@ -25,7 +25,7 @@ class AtkStockUsagesTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division', 'approval', 'approvalHistory'])
-                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('division_id', auth()->user()->division_id))
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -87,7 +87,7 @@ class AtkStockUsagesTable
                 EditAction::make()
                     ->successNotificationTitle('Penggunaan stok ATK berhasil diperbarui')
                     ->mutateFormDataUsing(function (array $data) {
-                        $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                        $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
 
                         return $data;
                     })

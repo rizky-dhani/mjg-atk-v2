@@ -22,10 +22,8 @@ class MarketingMediaDivisionStockSettingsTable
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                if (auth()->user()->hasRole('Super Admin')) {
-                    MarketingMediaDivisionStockSetting::all();
-                } else {
-                    $query->where('division_id', auth()->user()->division_id);
+                if (! auth()->user()->hasRole('Super Admin')) {
+                    $query->whereIn('division_id', auth()->user()->divisions->pluck('id'));
                 }
             })
             ->columns([
@@ -87,8 +85,12 @@ class MarketingMediaDivisionStockSettingsTable
                             ->minValue(0),
                     ])
                     ->action(function (array $data) {
-                        // Update all stock settings for the current division
-                        MarketingMediaDivisionStockSetting::where('division_id', auth()->user()->division_id)
+                        // Update all stock settings for the user's divisions
+                        $divisionIds = auth()->user()->isSuperAdmin()
+                            ? \App\Models\UserDivision::pluck('id')
+                            : auth()->user()->divisions->pluck('id');
+
+                        MarketingMediaDivisionStockSetting::whereIn('division_id', $divisionIds)
                             ->update(['max_limit' => $data['max_limit']]);
 
                         Notification::make()

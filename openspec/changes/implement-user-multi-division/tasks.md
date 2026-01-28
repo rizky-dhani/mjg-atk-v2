@@ -1,0 +1,19 @@
+- [x] Create a migration to add the `division_user` pivot table and migrate data from `users.division_id`.
+- [x] Update `User` model:
+    - [x] Add `divisions()` belongsToMany relationship.
+    - [x] Update `isGA()` method to check all divisions for 'GA' initial.
+    - [x] Add `belongsToDivision(int|UserDivision $division)` helper method.
+- [x] Update `UserDivision` model:
+    - [x] Change `users()` relationship to `belongsToMany`.
+- [x] Update `UserResource`:
+    - [x] Change `divisions` select to `multiple()` and link to `divisions` relationship.
+    - [x] Add `divisions.initial` column to the table with badges.
+- [x] Update `AtkStockRequestForm`:
+    - [x] Update `division_id` select to only show divisions assigned to the user (unless Super Admin).
+    - [x] Ensure all reactive logic in the form uses `$get('division_id')` instead of `auth()->user()->division_id`.
+- [x] Update `AtkStockUsageForm` (and other similar forms):
+    - [x] Perform similar updates as `AtkStockRequestForm`.
+- [x] Update Policies:
+    - [x] Review and update `AtkStockRequestPolicy`, `AtkStockUsagePolicy`, etc., to check if user belongs to the requested division.
+- [x] Write Feature tests to verify many-to-many relationship and updated logic.
+- [x] Run `vendor/bin/pint --dirty` to ensure code style compliance.

@@ -32,7 +32,7 @@ class AtkStockRequestsTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['requester', 'division', 'approval', 'approvalHistory'])
-                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->where('division_id', auth()->user()->division_id))
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -144,7 +144,7 @@ class AtkStockRequestsTable
                     })
                     ->modalSubmitActionLabel(fn ($record) => $record->status === AtkStockRequestStatus::Draft ? 'Publish' : 'Save Changes')
                     ->mutateFormDataUsing(function (array $data, $record) {
-                        $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                        $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
                         if ($record->status === AtkStockRequestStatus::Draft) {
                             $data['status'] = AtkStockRequestStatus::Published;
                         }

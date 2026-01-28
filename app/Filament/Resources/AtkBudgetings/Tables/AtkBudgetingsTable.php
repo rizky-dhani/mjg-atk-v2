@@ -14,7 +14,10 @@ class AtkBudgetingsTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->where('division_id', auth()->user()->division_id)->orderBy('fiscal_year', 'desc')->orderBy('created_at', 'desc'))
+                fn (Builder $query) => $query
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))
+                    ->orderBy('fiscal_year', 'desc')
+                    ->orderBy('created_at', 'desc'))
             ->columns([
                 TextColumn::make('division.name')
                     ->label('Division')

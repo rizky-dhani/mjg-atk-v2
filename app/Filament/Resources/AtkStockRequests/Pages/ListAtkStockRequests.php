@@ -21,7 +21,7 @@ class ListAtkStockRequests extends ListRecords
                 ->label('Buat Draft')
                 ->modalHeading('Buat Draft Permintaan Stok ATK')
                 ->mutateFormDataUsing(function (array $data) {
-                    $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                    $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
                     $data['requester_id'] = auth()->user()->id;
                     $data['status'] = AtkStockRequestStatus::Draft;
 
@@ -35,7 +35,7 @@ class ListAtkStockRequests extends ListRecords
                 ->modalHeading('Buat & Publish Permintaan Stok ATK')
                 ->color('success')
                 ->mutateFormDataUsing(function (array $data) {
-                    $data['division_id'] = $data['division_id'] ?? auth()->user()->division_id;
+                    $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
                     $data['requester_id'] = auth()->user()->id;
                     $data['status'] = AtkStockRequestStatus::Published;
 

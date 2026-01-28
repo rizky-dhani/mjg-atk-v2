@@ -19,10 +19,7 @@ class MarketingMediaDivisionStocksTable
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
                     ->with(['item', 'category'])
-                    ->where(
-                        'division_id',
-                        auth()->user()->division_id,
-                    ),
+                    ->when(! auth()->user()->isSuperAdmin(), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id'))),
             )
             ->columns([
                 TextColumn::make('item.name')

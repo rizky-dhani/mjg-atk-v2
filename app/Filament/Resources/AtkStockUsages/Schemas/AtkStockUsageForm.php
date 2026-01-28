@@ -29,12 +29,18 @@ class AtkStockUsageForm
                         ->schema([
                             Select::make('division_id')
                                 ->label('Divisi')
-                                ->relationship('division', 'name')
+                                ->options(function () {
+                                    if (auth()->user()->isSuperAdmin()) {
+                                        return \App\Models\UserDivision::all()->pluck('name', 'id');
+                                    }
+
+                                    return auth()->user()->divisions->pluck('name', 'id');
+                                })
                                 ->searchable()
                                 ->preload()
                                 ->required()
-                                ->hidden(fn () => ! auth()->user()->isSuperAdmin())
-                                ->default(fn () => auth()->user()->division_id)
+                                ->live()
+                                ->default(fn () => auth()->user()->divisions->first()?->id)
                                 ->dehydrated(),
                             TextInput::make('request_number')
                                 ->label('Nomor Penggunaan')
@@ -161,7 +167,7 @@ class AtkStockUsageForm
                                         }
 
                                         // Set the moving_average_cost based on the selected item
-                                        $divisionId = auth()->user()->division_id ?? null;
+                                        $divisionId = $get('../../division_id');
                                         if ($divisionId) {
                                             $stock = AtkDivisionStock::where('division_id', $divisionId)->where('item_id', $state)->first();
 
@@ -196,7 +202,7 @@ class AtkStockUsageForm
                                         return '';
                                     }
 
-                                    $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                    $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                         ->where('item_id', $itemId)
                                         ->first();
 
@@ -213,7 +219,7 @@ class AtkStockUsageForm
                                         return;
                                     }
 
-                                    $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                    $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                         ->where('item_id', $itemId)
                                         ->first();
 
@@ -248,10 +254,10 @@ class AtkStockUsageForm
                                 })
                                 ->rules([
                                     function () {
-                                        return function (string $attribute, $value, \Closure $fail, $livewire) {
+                                        return function (string $attribute, $value, \Closure $fail, $livewire, $get) {
                                             // Extract the repeater index from the attribute name
                                             // e.g., "data.items.0.quantity" -> index 0
-                                            preg_match('/atkStockUsageItems\\.(\\d+)\\./quantity/', $attribute, $matches);
+                                            preg_match('/atkStockUsageItems\\.(\\d+)\\.quantity/', $attribute, $matches);
                                             $index = $matches[1] ?? null;
 
                                             if ($index === null) {
@@ -271,7 +277,7 @@ class AtkStockUsageForm
                                                 return;
                                             }
 
-                                            $stock = AtkDivisionStock::where('division_id', auth()->user()->division_id ?? null)
+                                            $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
                                                 ->where('item_id', $itemId)
                                                 ->first();
 
@@ -321,8 +327,8 @@ class AtkStockUsageForm
                             ->label('Current Budget')
                             ->dehydrated(false)
                             ->prefix('Rp')
-                            ->formatStateUsing(function () {
-                                $divisionId = auth()->user()->division_id ?? null;
+                            ->formatStateUsing(function (callable $get) {
+                                $divisionId = $get('division_id');
                                 $currentYear = now()->year;
 
                                 if (! $divisionId) {
@@ -369,7 +375,7 @@ class AtkStockUsageForm
                                 $set('potential_cost', $potentialCost);
 
                                 // Calculate potential remaining budget
-                                $divisionId = auth()->user()->division_id ?? null;
+                                $divisionId = $get('division_id');
                                 $currentYear = now()->year;
 
                                 if ($divisionId) {
