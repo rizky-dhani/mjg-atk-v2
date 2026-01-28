@@ -45,7 +45,8 @@ class AtkStockRequestInfolist
                                     // If it's a collection, map it
                                     if (method_exists($state, 'map')) {
                                         return $state->map(function ($user) {
-                                            $divisionInitial = $user->division?->initial ? "[{$user->division->initial}] " : '';
+                                            $initials = $user->divisions->pluck('initial')->implode(',');
+                                            $divisionInitial = $initials ? "[{$initials}] " : '';
 
                                             return "{$divisionInitial}{$user->name}";
                                         })->implode(', ');
@@ -53,7 +54,8 @@ class AtkStockRequestInfolist
 
                                     // If it's a single User object (Filament sometimes iterates)
                                     if ($state instanceof \App\Models\User) {
-                                        $divisionInitial = $state->division?->initial ? "[{$state->division->initial}] " : '';
+                                        $initials = $state->divisions->pluck('initial')->implode(',');
+                                        $divisionInitial = $initials ? "[{$initials}] " : '';
 
                                         return "{$divisionInitial}{$state->name}";
                                     }

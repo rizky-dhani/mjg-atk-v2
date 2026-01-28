@@ -67,15 +67,12 @@ class User extends Authenticatable
 
     public function isGA(): bool
     {
-        return $this->divisions()->where('initial', 'GA')->exists() || $this->isSuperAdmin();
+        return $this->hasDivisionInitial('GA') || $this->isSuperAdmin();
     }
 
-    /**
-     * @deprecated Use divisions() instead.
-     */
-    public function division(): BelongsTo
+    public function hasDivisionInitial(string $initial): bool
     {
-        return $this->belongsTo(UserDivision::class, 'division_id');
+        return $this->divisions()->where('user_divisions.initial', $initial)->exists();
     }
 
     public function divisions(): BelongsToMany

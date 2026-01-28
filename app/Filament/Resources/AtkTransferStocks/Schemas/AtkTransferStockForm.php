@@ -181,20 +181,37 @@ class AtkTransferStockForm
                 Section::make('Informasi Transfer Stok')
                     ->description('Data permintaan transfer stok')
                     ->schema([
+                        Select::make('requesting_division_id')
+                            ->label('Divisi Pemohon')
+                            ->options(function () {
+                                if (auth()->user()->isSuperAdmin()) {
+                                    return UserDivision::pluck('name', 'id');
+                                }
+
+                                return auth()->user()->divisions->pluck('name', 'id');
+                            })
+                            ->default(fn () => auth()->user()->divisions->first()?->id)
+                            ->required()
+                            ->live()
+                            ->searchable()
+                            ->preload(),
                         Select::make('source_division_id')
                             ->label('Divisi Sumber')
                             ->columnSpanFull()
                             ->options(function (callable $get) {
-                                $userDivisionId = auth()->user()?->division_id;
+                                $userDivisionIds = auth()->user()->divisions->pluck('id')->toArray();
+                                $selectedRequestingDivisionId = $get('requesting_division_id');
 
                                 // Get all items and their quantities from the repeater
                                 $transferItems = $get('transferStockItems') ?? [];
 
                                 if (empty($transferItems)) {
-                                    // If no items yet, return all divisions except user's division
+                                    // If no items yet, return all divisions except user's divisions
                                     $query = UserDivision::query();
-                                    if ($userDivisionId) {
-                                        $query->where('id', '!=', $userDivisionId);
+                                    if (! empty($userDivisionIds) && ! auth()->user()->isSuperAdmin()) {
+                                        $query->whereNotIn('id', $userDivisionIds);
+                                    } elseif ($selectedRequestingDivisionId) {
+                                        $query->where('id', '!=', $selectedRequestingDivisionId);
                                     }
 
                                     return $query->pluck('name', 'id');
@@ -223,15 +240,17 @@ class AtkTransferStockForm
 
                                 // If no items have been specified yet, return all divisions
                                 if ($validDivisionIds->isEmpty()) {
-                                    // If no divisions have all items, return empty options
-                                    // This will effectively block the form submission until user adjusts quantities or items
                                     $validDivisionIds = collect();
                                 }
 
-                                // Filter out user's own division
-                                if ($userDivisionId) {
-                                    $validDivisionIds = $validDivisionIds->filter(function ($id) use ($userDivisionId) {
-                                        return $id != $userDivisionId;
+                                // Filter out user's divisions or selected requesting division
+                                if (! auth()->user()->isSuperAdmin()) {
+                                    $validDivisionIds = $validDivisionIds->filter(function ($id) use ($userDivisionIds) {
+                                        return ! in_array($id, $userDivisionIds);
+                                    });
+                                } elseif ($selectedRequestingDivisionId) {
+                                    $validDivisionIds = $validDivisionIds->filter(function ($id) use ($selectedRequestingDivisionId) {
+                                        return $id != $selectedRequestingDivisionId;
                                     });
                                 }
 

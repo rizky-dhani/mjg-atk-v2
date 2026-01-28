@@ -12,7 +12,7 @@ class AtkFulfillmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return ($user->division?->initial === 'IPC' || $user->isSuperAdmin()) && 
+        return ($user->hasDivisionInitial('IPC') || $user->isSuperAdmin()) && 
                $user->can('view-any atk-fulfillment');
     }
 
@@ -21,7 +21,7 @@ class AtkFulfillmentPolicy
      */
     public function view(User $user, AtkFulfillment $atkFulfillment): bool
     {
-        return ($user->division?->initial === 'IPC' || $user->isSuperAdmin()) && 
+        return ($user->hasDivisionInitial('IPC') || $user->isSuperAdmin()) && 
                $user->can('view atk-fulfillment');
     }
 
@@ -38,7 +38,7 @@ class AtkFulfillmentPolicy
      */
     public function update(User $user, AtkFulfillment $atkFulfillment): bool
     {
-        return ($user->division?->initial === 'IPC' || $user->isSuperAdmin()) && 
+        return ($user->hasDivisionInitial('IPC') || $user->isSuperAdmin()) && 
                $user->can('edit atk-fulfillment') &&
                $atkFulfillment->approval?->status === 'approved';
     }

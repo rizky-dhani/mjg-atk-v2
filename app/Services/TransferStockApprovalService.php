@@ -38,7 +38,7 @@ class TransferStockApprovalService
 
         if ($currentStep->division_id) {
             // For steps with a specific division, check both role and division
-            $canApprove = $userHasRole && $currentStep->division_id == $user->division_id;
+            $canApprove = $userHasRole && $user->belongsToDivision($currentStep->division_id);
         } elseif (is_null($currentStep->division_id) && $userHasRole) {
             // For steps with null division_id, check based on the step name:
             // - "Division Head": should match requesting division
@@ -46,16 +46,16 @@ class TransferStockApprovalService
             // - For other step names with null division_id: this should not happen for AtkTransferStock based on the seeder data
             if ($currentStep->step_name == 'Division Head') {
                 // Division Head step - check against requesting division
-                $canApprove = $user->division_id == $transferStock->requesting_division_id;
+                $canApprove = $user->belongsToDivision($transferStock->requesting_division_id);
             } elseif ($currentStep->step_name == 'Source Division Head') {
                 // Source Division Head step - check against source division
-                $canApprove = $user->division_id == $transferStock->source_division_id;
+                $canApprove = $user->belongsToDivision($transferStock->source_division_id);
             } else {
                 // For other step names with null division_id, if user has the required role
                 // Default to checking against requesting division (as per your requirement)
                 // However, for AtkTransferStock, there shouldn't be other step names besides the two above
                 // based on the ApprovalFlowSeeder, so this case shouldn't occur in normal flow
-                $canApprove = $user->division_id == $transferStock->requesting_division_id;
+                $canApprove = $user->belongsToDivision($transferStock->requesting_division_id);
             }
         }
 

@@ -37,7 +37,8 @@ class MarketingMediaStockUsageInfolist
                                 ->label('Approver')
                                 ->formatStateUsing(function ($record) {
                                     $user = $record?->user;
-                                    $division = $user?->division;
+                                    $step = $record?->step;
+                                    $division = $step?->division ?? $user?->divisions->first();
 
                                     if ($division) {
                                         $divisionInitial =
@@ -89,7 +90,7 @@ class MarketingMediaStockUsageInfolist
                             if ($record) {
                                 return $record
                                     ->approvalHistory()
-                                    ->with(['user.division']) // Include division information for the user
+                                    ->with(['user.divisions', 'step.division']) // Include division information for the user and step
                                     ->whereIn('action', [
                                         'approved',
                                         'rejected',

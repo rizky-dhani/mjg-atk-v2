@@ -67,13 +67,13 @@ class ApprovalFlowStep extends Model
 
         // 1. Filter by Division
         if ($this->division_id) {
-            $query->where('division_id', $this->division_id);
+            $query->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $this->division_id));
         } else {
             // Logic for relative division
             if (isset($approvable->division_id) && $approvable->division_id !== null) {
-                $query->where('division_id', $approvable->division_id);
-            } elseif (method_exists($approvable, 'requestingDivision') && $approvable->requestingDivision()) {
-                $query->where('division_id', $approvable->requesting_division_id);
+                $query->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $approvable->division_id));
+            } elseif (isset($approvable->requesting_division_id) && $approvable->requesting_division_id !== null) {
+                $query->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $approvable->requesting_division_id));
             }
         }
 
@@ -84,6 +84,6 @@ class ApprovalFlowStep extends Model
             });
         }
 
-        return $query->with('division')->get();
+        return $query->with('divisions')->get();
     }
 }

@@ -26,9 +26,9 @@ class StockUsageService
     public function createStockUsage(User $user, array $data): AtkStockUsage
     {
         return DB::transaction(function () use ($user, $data) {
-            // Get the user's division for the initial
-            $userDivision = $user->division;
-            $divisionInitial = substr(strtoupper($userDivision->name), 0, 3);
+            // Get the selected division for the initial
+            $selectedDivision = \App\Models\UserDivision::find($data['division_id']);
+            $divisionInitial = $selectedDivision ? $selectedDivision->initial : 'USE';
 
             // Generate usage number
             $lastUsage = AtkStockUsage::orderBy('id', 'desc')->first();

@@ -26,7 +26,7 @@ class AtkDivisionStockSettingsTable
                 $query->with(['division', 'item', 'item.category']);
                 $user = auth()->user();
 
-                if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
+                if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || $user->isGA()) {
                     // Super Admin, Admin, or GA division users can see all records
                 } else {
                     $query->whereIn('division_id', $user->divisions->pluck('id'));
@@ -111,7 +111,7 @@ class AtkDivisionStockSettingsTable
 
                         // Update all stock settings for the current division
                         // If user is Super Admin, Admin, or from GA division, update all records
-                        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || optional($user->division)->initial === 'GA') {
+                        if ($user->hasRole('Super Admin') || $user->hasRole('Admin') || $user->isGA()) {
                             AtkDivisionStockSetting::update(['max_limit' => $data['max_limit']]);
                         } else {
                             AtkDivisionStockSetting::whereIn('division_id', $user->divisions->pluck('id'))

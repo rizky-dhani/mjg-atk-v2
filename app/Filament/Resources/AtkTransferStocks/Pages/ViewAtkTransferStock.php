@@ -19,8 +19,11 @@ class ViewAtkTransferStock extends ViewRecord
 
         // Check if user is authorized to edit (requester, users with GA initial, or Admin role)
         $user = Auth::user();
+        if (! $user) {
+            return [];
+        }
         $isRequester = $user->id == $record->requester_id;
-        $hasDivision = $user->division && (strtolower($user->division->initial) === 'GA' || strtolower($user->division->name) === 'General Affair' || strtolower($user->division->name) === 'General Affairs');
+        $isGA = $user->isGA();
         $hasRole = $user->hasRole('Admin') || $user->hasRole('Super Admin');
 
         // Only allow editing if the request hasn't been approved yet and the user is authorized
@@ -28,7 +31,7 @@ class ViewAtkTransferStock extends ViewRecord
         $approval = $record->approval;
         if ($approval && $approval->status === 'pending') {
             // Can edit if user is the requester, GA division user, or has admin role
-            $canEdit = $isRequester || $hasDivision || $hasRole;
+            $canEdit = $isRequester || $isGA || $hasRole;
         }
 
         $actions = [];

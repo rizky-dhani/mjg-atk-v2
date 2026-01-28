@@ -36,17 +36,20 @@ class AtkTransferStockInfolist
                                 // Get the latest approval step approval
                                 $latestApproval = $approval
                                     ->approvalStepApprovals()
-                                    ->with(['user', 'user.division'])
+                                    ->with(['user.divisions', 'step.division'])
                                     ->latest('approved_at')
                                     ->first();
 
                                 if ($latestApproval) {
                                     $status = ucfirst($latestApproval->status);
+                                    $user = $latestApproval->user;
+                                    $step = $latestApproval->step;
+                                    $division = $step?->division ?? $user?->divisions->first();
 
-                                    if ($latestApproval->user && $latestApproval->user->division) {
+                                    if ($user && $division) {
                                         // Get division's initial and user's first role name
-                                        $divisionInitial = $latestApproval->user->division->initial ?? 'N/A';
-                                        $roleNames = $latestApproval->user->getRoleNames();
+                                        $divisionInitial = $division->initial ?? 'N/A';
+                                        $roleNames = $user->getRoleNames();
                                         $role = $roleNames->first() ?? 'N/A';
 
                                         return "{$status} by {$divisionInitial} {$role}";

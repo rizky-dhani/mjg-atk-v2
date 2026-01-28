@@ -12,7 +12,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view-any atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
+        return $user->can('view-any atk-division-stock-setting') || ($user->hasRole('Admin') && ($user->isGA() || $user->hasDivisionInitial('IPC')));
     }
 
     /**
@@ -20,7 +20,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function view(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('view atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
+        return $user->can('view atk-division-stock-setting') || ($user->hasRole('Admin') && ($user->isGA() || $user->hasDivisionInitial('IPC')));
     }
 
     /**
@@ -28,7 +28,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
+        return $user->can('create atk-division-stock-setting') || ($user->hasRole('Admin') && ($user->isGA() || $user->hasDivisionInitial('IPC')));
     }
 
     /**
@@ -36,7 +36,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function update(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('edit atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
+        return $user->can('edit atk-division-stock-setting') || ($user->hasRole('Admin') && ($user->isGA() || $user->hasDivisionInitial('IPC')));
     }
 
     /**
@@ -44,7 +44,7 @@ class AtkDivisionStockSettingPolicy
      */
     public function delete(User $user, AtkDivisionStockSetting $atkDivisionStockSetting): bool
     {
-        return $user->can('delete atk-division-stock-setting') || $user->hasRole('Admin') && $user->division->initial === 'GA' || $user->hasRole('Admin') && $user->division->initial === 'IPC';
+        return $user->can('delete atk-division-stock-setting') || ($user->hasRole('Admin') && ($user->isGA() || $user->hasDivisionInitial('IPC')));
     }
 
     /**
