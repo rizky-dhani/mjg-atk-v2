@@ -22,6 +22,7 @@ class AtkStockRequestForm
         return $schema
             ->components([
                 Section::make('General Information')
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)
                             ->schema([

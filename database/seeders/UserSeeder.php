@@ -32,8 +32,8 @@ class UserSeeder extends Seeder
                 'email' => strtolower($div->initial).'.head@medquest.co.id',
                 'initial' => 'H'.$div->initial,
                 'password' => Hash::make('Atk2025!'),
-                'division_id' => $div->id,
             ]);
+            $head->divisions()->attach($div->id);
             $head->assignRole('Head');
 
             $admin = User::create([
@@ -41,9 +41,24 @@ class UserSeeder extends Seeder
                 'email' => strtolower($div->initial).'.admin@medquest.co.id',
                 'initial' => 'A'.$div->initial,
                 'password' => Hash::make('Atk2025!'),
-                'division_id' => $div->id,
             ]);
+            $admin->divisions()->attach($div->id);
             $admin->assignRole('Admin');
+        }
+
+        // Example: Create a user that belongs to multiple divisions
+        $gaDiv = UserDivision::where('initial', 'GA')->first();
+        $itDiv = UserDivision::where('initial', 'ITD')->first();
+
+        if ($gaDiv && $itDiv) {
+            $multiDivUser = User::create([
+                'name' => 'Multi Division User',
+                'email' => 'multi@medquest.co.id',
+                'initial' => 'MULTI',
+                'password' => Hash::make('Atk2025!'),
+            ]);
+            $multiDivUser->divisions()->attach([$gaDiv->id, $itDiv->id]);
+            $multiDivUser->assignRole('Admin');
         }
 
         // Assign default permission to Head and Admin role
@@ -105,6 +120,5 @@ class UserSeeder extends Seeder
                 }
             }
         }
-
     }
 }
