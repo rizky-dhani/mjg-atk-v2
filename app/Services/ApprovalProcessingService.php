@@ -693,11 +693,13 @@ class ApprovalProcessingService
         $approvers = User::query();
 
         if ($nextStep->division_id) {
-            $approvers->where('division_id', $nextStep->division_id);
+            $approvers->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $nextStep->division_id));
         } else {
             $approvable = $approval->approvable;
             if (isset($approvable->division_id)) {
-                $approvers->where('division_id', $approvable->division_id);
+                $approvers->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $approvable->division_id));
+            } elseif (isset($approvable->requesting_division_id)) {
+                $approvers->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $approvable->requesting_division_id));
             }
         }
 
