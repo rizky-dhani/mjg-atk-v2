@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\Approval;
 use App\Models\MarketingMediaCategory;
 use App\Models\MarketingMediaDivisionStock;

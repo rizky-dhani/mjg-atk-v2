@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Mail\AtkRequestFromFloatingStockMail;
 use App\Models\ApprovalFlow;
 use App\Models\AtkRequestFromFloatingStock;

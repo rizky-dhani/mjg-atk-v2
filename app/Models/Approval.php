@@ -35,7 +35,7 @@ class Approval extends Model
     public function getApprovalProgress(): \Illuminate\Support\Collection
     {
         $approvable = $this->approvable;
-        $steps = $this->approvalFlow->approvalFlowSteps()->with('role')->orderBy('step_number')->get();
+        $steps = $this->approvalFlow->approvalFlowSteps()->with(['role', 'user'])->orderBy('step_number')->get();
         $approvals = $this->approvalStepApprovals()->with('user')->get();
 
         return $steps->map(function ($step) use ($approvable, $approvals) {

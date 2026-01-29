@@ -73,7 +73,12 @@ class ApprovalFlowStep extends Model
 
         // 0. Priority: Specific User
         if ($this->user_id) {
-            return collect([$this->user])->filter();
+            $pinnedUser = $this->user;
+            if ($pinnedUser) {
+                $pinnedUser->loadMissing('divisions');
+            }
+
+            return collect([$pinnedUser])->filter();
         }
 
         // 1. Filter by Division
