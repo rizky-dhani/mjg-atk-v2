@@ -43,13 +43,37 @@ class ApprovalFlowStepsRelationManager extends RelationManager
                 Select::make('role_id')
                     ->label('Role')
                     ->relationship('role', 'name')
-                    ->required(),
+                    ->required()
+                    ->live(),
                 Select::make('division_id')
                     ->label('Division')
                     ->relationship('division', 'name')
-                    ->columnSpanFull()
                     ->nullable()
-                    ->helperText('Leave empty to make this step available to all divisions'),
+                    ->helperText('Leave empty to make this step available to all divisions')
+                    ->live(),
+                Select::make('user_id')
+                    ->label('Specific User')
+                    ->options(function ($get) {
+                        $roleId = $get('role_id');
+                        $divisionId = $get('division_id');
+
+                        $query = \App\Models\User::query();
+
+                        if ($roleId) {
+                            $query->whereHas('roles', fn ($q) => $q->where('roles.id', $roleId));
+                        }
+
+                        if ($divisionId) {
+                            $query->whereHas('divisions', fn ($q) => $q->where('user_divisions.id', $divisionId));
+                        }
+
+                        return $query->pluck('name', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->nullable()
+                    ->helperText('Select a specific user to pin to this step. If left empty, any user with the matching role and division can approve.')
+                    ->columnSpanFull(),
                 TextInput::make('description')
                     ->default(null)
                     ->columnSpanFull(),
@@ -78,6 +102,10 @@ class ApprovalFlowStepsRelationManager extends RelationManager
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('Specific User')
+                    ->sortable()
+                    ->placeholder('Any'),
                 TextColumn::make('description')
                     ->searchable(),
                 IconColumn::make('allow_resubmission')

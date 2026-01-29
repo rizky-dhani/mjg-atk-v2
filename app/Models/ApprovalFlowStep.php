@@ -12,6 +12,7 @@ class ApprovalFlowStep extends Model
         'step_number',
         'role_id',
         'division_id',
+        'user_id',
         'description',
         'allow_resubmission',
     ];
@@ -33,6 +34,11 @@ class ApprovalFlowStep extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_approval_flow_steps', 'step_id', 'user_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function division()
@@ -64,6 +70,11 @@ class ApprovalFlowStep extends Model
     public function getPotentialApprovers($approvable): \Illuminate\Support\Collection
     {
         $query = User::query();
+
+        // 0. Priority: Specific User
+        if ($this->user_id) {
+            return collect([$this->user])->filter();
+        }
 
         // 1. Filter by Division
         if ($this->division_id) {

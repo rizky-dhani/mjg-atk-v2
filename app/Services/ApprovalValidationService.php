@@ -49,6 +49,21 @@ class ApprovalValidationService
         // Check if the current step matches the user's role and division
         $userRoleIds = $user->roles->pluck('id')->toArray();
 
+        // 0. Priority: Specific User
+        if ($currentStep->user_id) {
+            if ($user->id === $currentStep->user_id) {
+                // Check if this step hasn't been approved yet by this user
+                $existingApproval = $approval->approvalStepApprovals()
+                    ->where('step_id', $currentStep->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                return ! $existingApproval;
+            }
+
+            return false;
+        }
+
         if (is_null($currentStep->division_id)) {
             // For null division_id steps, the logic depends on the model type
             if (get_class($model) === \App\Models\AtkTransferStock::class) {
@@ -145,6 +160,23 @@ class ApprovalValidationService
         if ($currentStep) {
             // Check if the current step matches the user's role and division
             $userRoleIds = $user->roles->pluck('id')->toArray();
+
+            // 0. Priority: Specific User
+            if ($currentStep->user_id) {
+                if ($user->id === $currentStep->user_id) {
+                    // Check if this step hasn't been approved yet by this user
+                    $existingApproval = $approval->approvalStepApprovals()
+                        ->where('step_id', $currentStep->id)
+                        ->where('user_id', $user->id)
+                        ->first();
+
+                    if (! $existingApproval) {
+                        $eligibleSteps->push($currentStep);
+                    }
+                }
+
+                return $eligibleSteps;
+            }
 
             if (is_null($currentStep->division_id)) {
                 // For null division_id steps, the logic depends on the model type

@@ -690,6 +690,11 @@ class ApprovalProcessingService
             return collect();
         }
 
+        // 0. Priority: Specific User
+        if ($nextStep->user_id) {
+            return User::where('id', $nextStep->user_id)->get();
+        }
+
         $approvers = User::query();
 
         if ($nextStep->division_id) {
