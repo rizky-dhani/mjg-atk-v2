@@ -21,7 +21,8 @@ class EditProfile extends BaseEditProfile
                     ->schema([
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
                 Section::make('Informasi Profil')
                     ->aside()
                     ->schema([
@@ -30,7 +31,9 @@ class EditProfile extends BaseEditProfile
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
                     ])
-                    ->hidden(fn () => ! auth()->user()->has_changed_password),
+                    ->columnSpanFull()
+                    ->hidden(fn () => ! auth()->user()->has_changed_password)
+                    ->columnSpanFull(),
             ]);
     }
 
