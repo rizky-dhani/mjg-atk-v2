@@ -12,6 +12,7 @@ class EditProfile extends BaseEditProfile
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make('Keamanan Akun')
                     ->description('Silakan ganti kata sandi default Anda untuk mengamankan akun sebelum menggunakan website.')
