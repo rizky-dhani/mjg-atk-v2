@@ -126,6 +126,7 @@ class DashboardPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            ->profile(\App\Filament\Pages\Auth\EditProfile::class)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 \App\Filament\Widgets\AtkStockRequestStatus::class,
@@ -146,6 +147,7 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\CheckPasswordChanged::class,
             ]);
     }
 
