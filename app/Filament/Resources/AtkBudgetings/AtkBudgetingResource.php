@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\AtkBudgetings;
 
+use App\Filament\Resources\AtkBudgetings\Pages\CreateAtkBudgeting;
+use App\Filament\Resources\AtkBudgetings\Pages\EditAtkBudgeting;
 use App\Filament\Resources\AtkBudgetings\Pages\ListAtkBudgetings;
 use App\Filament\Resources\AtkBudgetings\Pages\ViewAtkBudgeting;
 use App\Filament\Resources\AtkBudgetings\Schemas\AtkBudgetingForm;
@@ -59,7 +61,9 @@ class AtkBudgetingResource extends Resource
     {
         return [
             'index' => ListAtkBudgetings::route('/'),
+            'create' => CreateAtkBudgeting::route('/create'),
             'view' => ViewAtkBudgeting::route('/view/{record}'),
+            'edit' => EditAtkBudgeting::route('/{record}/edit'),
         ];
     }
 }
