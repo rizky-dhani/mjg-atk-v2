@@ -11,14 +11,6 @@ class AtkItemPricesTable
     {
         return $table
             ->modifyQueryUsing(function (Builder $query) {
-                // Filter to only show item prices for items that exist in the logged-in user's division
-                $user = auth()->user();
-                if ($user && $user->divisions->isNotEmpty()) {
-                    $query->whereHas('item.atkDivisionStocks', function ($q) use ($user) {
-                        $q->whereIn('division_id', $user->divisions->pluck('id'));
-                    });
-                }
-                // Order by created_at in descending order
                 $query->latest('created_at');
             })
             ->columns([

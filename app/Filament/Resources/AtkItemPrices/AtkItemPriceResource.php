@@ -51,7 +51,7 @@ class AtkItemPriceResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\PriceHistoriesRelationManager::class,
         ];
     }
 

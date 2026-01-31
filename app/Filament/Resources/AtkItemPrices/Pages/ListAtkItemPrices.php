@@ -12,6 +12,7 @@ class ListAtkItemPrices extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            \App\Filament\Actions\ImportAtkItemPriceAction::make(),
             \Filament\Actions\CreateAction::make()
                 ->successNotificationTitle('ATK Item Price created'),
         ];

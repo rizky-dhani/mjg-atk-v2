@@ -9,7 +9,7 @@ class AtkItemPriceInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->schema([
-            \Filament\Infolists\Components\Section::make('Price Details')
+            \Filament\Schemas\Components\Section::make('Price Details')
                 ->schema([
                     \Filament\Infolists\Components\TextEntry::make('item.name')
                         ->label('Item'),

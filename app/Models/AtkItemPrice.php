@@ -35,7 +35,7 @@ class AtkItemPrice extends Model
 
     public function priceHistories(): HasMany
     {
-        return $this->hasMany(AtkItemPriceHistory::class, 'item_id');
+        return $this->hasMany(AtkItemPriceHistory::class, 'item_id', 'item_id');
     }
 
     protected static function boot()

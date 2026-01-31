@@ -8,11 +8,12 @@ use App\Models\AtkFloatingStock;
 use App\Models\AtkItem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValidation
+class AtkDivisionStockImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, WithValidation
 {
     protected $divisionId;
 
@@ -102,10 +103,12 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
                 ]
             );
 
-            if ($atkDivisionStock && isset($row['qty']) && $row['qty'] !== '') {
+            $qty = isset($row['qty']) && is_numeric($row['qty']) ? $row['qty'] : null;
+
+            if ($atkDivisionStock && $qty !== null) {
                 // Update the current_stock with the "Qty" from Excel if present
                 $atkDivisionStock->update([
-                    'current_stock' => $row['qty'],
+                    'current_stock' => $qty,
                 ]);
                 $updated = true;
             }
@@ -121,10 +124,12 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
                 ]
             );
 
-            if ($atkFloatingStock && isset($row['stok_umum']) && $row['stok_umum'] !== '') {
+            $stokUmum = isset($row['stok_umum']) && is_numeric($row['stok_umum']) ? $row['stok_umum'] : null;
+
+            if ($atkFloatingStock && $stokUmum !== null) {
                 // Update the current_stock with the "Stok Umum" from Excel if present
                 $atkFloatingStock->update([
-                    'current_stock' => $row['stok_umum'],
+                    'current_stock' => $stokUmum,
                 ]);
                 $updated = true;
             }
@@ -141,8 +146,8 @@ class AtkDivisionStockImport implements ToCollection, WithHeadingRow, WithValida
             'item_description' => 'nullable|string|max:255',
             'uom' => 'nullable|string|max:50',
             'name' => 'nullable|string|max:255',
-            'qty' => 'nullable|integer|min:0',
-            'stok_umum' => 'nullable|integer|min:0',
+            'qty' => 'nullable',
+            'stok_umum' => 'nullable',
             'satuan' => 'nullable|string|max:50',
             'deskripsi' => 'nullable|string',
         ];

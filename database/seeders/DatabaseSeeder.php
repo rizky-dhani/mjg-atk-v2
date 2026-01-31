@@ -19,13 +19,13 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             AtkCategorySeeder::class,
             AtkItemSeeder::class,
-            AtkItemPriceSeeder::class,
+            // AtkItemPriceSeeder::class,
             AtkDivisionStockSettingSeeder::class,
             // AtkDivisionStockSeeder::class,
-            MarketingMediaCategorySeeder::class,
-            MarketingMediaItemSeeder::class,
-            MarketingMediaDivisionStockSettingSeeder::class,
-            MarketingMediaDivisionStockSeeder::class,
+            // MarketingMediaCategorySeeder::class,
+            // MarketingMediaItemSeeder::class,
+            // MarketingMediaDivisionStockSettingSeeder::class,
+            // MarketingMediaDivisionStockSeeder::class,
             ApprovalFlowSeeder::class,
             // MovingAverageCostDemoSeeder::class, // Add this line
         ]);
