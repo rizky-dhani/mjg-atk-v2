@@ -31,7 +31,7 @@ class ApprovalAtkStockUsage extends ListRecords
         return __('filament.navigation.group.atk');
     }
 
-    protected string $view = 'filament.resources.atk-stock-usages.pages.approval-atk-stock-usage';
+    protected static string $view = 'filament.resources.atk-stock-usages.pages.approval-atk-stock-usage';
 
     protected static ?string $title = 'Approval Pengeluaran ATK';
 
