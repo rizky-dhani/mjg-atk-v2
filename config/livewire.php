@@ -30,7 +30,7 @@ return [
 
     /*
     |---------------------------------------------------------------------------
-    | Layout
+    | Component Layout
     |---------------------------------------------------------------------------
     | The view that will be used as the layout when rendering a single component
     | as an entire page via `Route::get('/post/create', CreatePost::class);`.
@@ -38,7 +38,7 @@ return [
     |
     */
 
-    'layout' => 'components.layouts.app',
+    'component_layout' => 'layouts::app',
 
     /*
     |---------------------------------------------------------------------------
