@@ -22,6 +22,11 @@ class AtkStockRequest extends Model
         'status',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'request_number';
+    }
+
     /**
      * Get the attributes that should be cast.
      *

@@ -17,6 +17,11 @@ class MarketingMediaStockRequest extends Model
         'request_type',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'request_number';
+    }
+
     public function requester()
     {
         return $this->belongsTo(User::class, 'requester_id');

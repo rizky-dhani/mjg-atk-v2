@@ -18,6 +18,11 @@ class AtkStockUsage extends Model
         'potential_cost',
     ];
 
+    public function getRouteKeyName(): string
+    {
+        return 'request_number';
+    }
+
     protected $casts = [
         'potential_cost' => 'integer',
     ];
