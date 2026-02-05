@@ -11,11 +11,14 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -89,6 +92,26 @@ class UserResource extends Resource
                 //
             ])
             ->recordActions([
+                Action::make('resetPassword')
+                    ->label('Reset Password')
+                    ->icon('heroicon-o-key')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Reset Password')
+                    ->modalDescription('Are you sure you want to reset this user\'s password to the default "Atk2025!"? They will be forced to change it upon next login.')
+                    ->visible(fn () => auth()->user()->isSuperAdmin())
+                    ->action(function (User $record) {
+                        $record->update([
+                            'password' => Hash::make('Atk2025!'),
+                            'has_changed_password' => false,
+                        ]);
+
+                        Notification::make()
+                            ->title('Password Reset')
+                            ->body('Password for '.$record->name.' has been reset to default.')
+                            ->success()
+                            ->send();
+                    }),
                 EditAction::make()
                     ->successNotificationTitle('User updated'),
                 DeleteAction::make()

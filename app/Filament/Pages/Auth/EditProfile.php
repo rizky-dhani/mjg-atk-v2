@@ -52,6 +52,8 @@ class EditProfile extends BaseEditProfile
                 ->body('Terima kasih telah memperbarui kata sandi Anda. Sekarang Anda dapat menggunakan seluruh fitur website.')
                 ->success()
                 ->send();
+
+            $this->redirect(route('filament.dashboard.pages.dashboard'));
         }
     }
 }
