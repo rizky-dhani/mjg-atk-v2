@@ -45,12 +45,14 @@ class AtkItemPricesTable
             ->actions([
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\EditAction::make()
-                    ->successNotificationTitle('ATK Item Price updated'),
+                    ->successNotificationTitle('ATK Item Price updated')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
             ])
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Item Prices deleted'),
+                        ->successNotificationTitle('ATK Item Prices deleted')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }

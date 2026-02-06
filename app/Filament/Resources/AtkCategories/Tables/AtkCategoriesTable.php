@@ -30,14 +30,17 @@ class AtkCategoriesTable
             ])
             ->actions([
                 EditAction::make()
-                    ->successNotificationTitle('Kategori ATK berhasil diperbarui'),
+                    ->successNotificationTitle('Kategori ATK berhasil diperbarui')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 DeleteAction::make()
-                    ->successNotificationTitle('Kategori ATK berhasil dihapus'),
+                    ->successNotificationTitle('Kategori ATK berhasil dihapus')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('Kategori ATK berhasil dihapus'),
+                        ->successNotificationTitle('Kategori ATK berhasil dihapus')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }

@@ -44,7 +44,8 @@ class AtkItemPriceHistoriesTable
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make()
-                        ->successNotificationTitle('ATK Item Price Histories deleted'),
+                        ->successNotificationTitle('ATK Item Price Histories deleted')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }

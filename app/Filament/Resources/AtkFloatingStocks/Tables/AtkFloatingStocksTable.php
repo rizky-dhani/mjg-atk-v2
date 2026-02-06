@@ -114,13 +114,15 @@ class AtkFloatingStocksTable
                         );
                     }),
                 EditAction::make()
-                    ->successNotificationTitle('Stok Umum ATK berhasil diperbarui'),
+                    ->successNotificationTitle('Stok Umum ATK berhasil diperbarui')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkTransferFloatingStockAction::make(),
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('Stok Umum ATK berhasil dihapus'),
+                        ->successNotificationTitle('Stok Umum ATK berhasil dihapus')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }

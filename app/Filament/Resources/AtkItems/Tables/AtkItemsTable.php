@@ -33,6 +33,7 @@ class AtkItemsTable
                 ViewAction::make(),
                 EditAction::make()
                     ->successNotificationTitle('Item ATK berhasil diperbarui')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin'))
                     ->using(function ($record, array $data) {
                         $selectedDivisions = $data['divisions'] ?? [];
                         unset($data['divisions']);
@@ -66,12 +67,14 @@ class AtkItemsTable
                         return $record;
                     }),
                 DeleteAction::make()
-                    ->successNotificationTitle('Item ATK berhasil dihapus'),
+                    ->successNotificationTitle('Item ATK berhasil dihapus')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('Item ATK berhasil dihapus'),
+                        ->successNotificationTitle('Item ATK berhasil dihapus')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }

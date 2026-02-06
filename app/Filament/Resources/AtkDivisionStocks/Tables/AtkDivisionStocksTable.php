@@ -90,7 +90,8 @@ class AtkDivisionStocksTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->successNotificationTitle('Stok Divisi ATK berhasil diperbarui'),
+                    ->successNotificationTitle('Stok Divisi ATK berhasil diperbarui')
+                    ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 Action::make('move_to_floating')
                     ->label('Move to Floating Stock')
                     ->icon('heroicon-o-arrow-right-circle')
@@ -124,7 +125,8 @@ class AtkDivisionStocksTable
                 BulkActionGroup::make([
                     BulkMoveToFloatingAction::make(),
                     DeleteBulkAction::make()
-                        ->successNotificationTitle('Stok Divisi ATK berhasil dihapus'),
+                        ->successNotificationTitle('Stok Divisi ATK berhasil dihapus')
+                        ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 ]),
             ]);
     }
