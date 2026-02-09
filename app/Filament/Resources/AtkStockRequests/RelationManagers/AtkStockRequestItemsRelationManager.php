@@ -63,9 +63,8 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                     ->label('Simpan Stok')
                     ->icon(Heroicon::ArchiveBoxArrowDown)
                     ->color('success')
-                    ->visible(fn (AtkStockRequestItem $record): bool =>
-                        $record->request->approval?->status === 'approved' &&
-                        !$record->isFullyReceived()
+                    ->visible(fn (AtkStockRequestItem $record): bool => $record->request->approval?->status === 'approved' &&
+                        ! $record->isFullyReceived()
                     )
                     ->form(fn (AtkStockRequestItem $record) => [
                         TextInput::make('qty')
@@ -97,15 +96,14 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                         ->label('Simpan Stok Terpilih')
                         ->icon(Heroicon::ArchiveBoxArrowDown)
                         ->color('success')
-                        ->visible(fn (RelationManager $livewire): bool =>
-                            $livewire->getOwnerRecord()->approval?->status === 'approved'
+                        ->visible(fn (RelationManager $livewire): bool => $livewire->getOwnerRecord()->approval?->status === 'approved'
                         )
                         ->action(function (Collection $records): void {
                             $fulfillmentService = app(FulfillmentService::class);
                             $successCount = 0;
-                            
+
                             foreach ($records as $record) {
-                                if (!$record->isFullyReceived()) {
+                                if (! $record->isFullyReceived()) {
                                     $fulfillmentService->receiveItem($record, $record->remaining_quantity);
                                     $successCount++;
                                 }

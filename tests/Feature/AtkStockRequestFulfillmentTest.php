@@ -2,15 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Enums\AtkStockRequestItemStatus;
+use App\Enums\FulfillmentStatus;
+use App\Filament\Resources\AtkStockRequests\RelationManagers\AtkStockRequestItemsRelationManager;
 use App\Models\AtkCategory;
 use App\Models\AtkDivisionStock;
 use App\Models\AtkItem;
 use App\Models\AtkStockRequest;
 use App\Models\User;
 use App\Models\UserDivision;
-use App\Enums\AtkStockRequestItemStatus;
-use App\Enums\FulfillmentStatus;
-use App\Filament\Resources\AtkStockRequests\RelationManagers\AtkStockRequestItemsRelationManager;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -21,7 +21,7 @@ beforeEach(function () {
     $this->seed(\Database\Seeders\RoleSeeder::class);
     $this->seed(\Database\Seeders\UserDivisionSeeder::class);
     $this->seed(\Database\Seeders\ApprovalFlowSeeder::class);
-    
+
     Filament::setCurrentPanel(Filament::getPanel('dashboard'));
 
     $this->division = UserDivision::where('initial', 'ITD')->first();
@@ -77,7 +77,7 @@ it('can partially fulfill a stock request item', function () {
     $stock = AtkDivisionStock::where('division_id', $this->division->id)
         ->where('item_id', $this->item->id)
         ->first();
-    
+
     expect($stock->current_stock)->toBe(4);
 });
 

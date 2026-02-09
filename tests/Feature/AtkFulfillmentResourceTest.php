@@ -2,13 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\AtkFulfillments\AtkFulfillmentResource;
 use App\Models\AtkCategory;
 use App\Models\AtkItem;
 use App\Models\AtkStockRequest;
 use App\Models\User;
 use App\Models\UserDivision;
-use App\Models\AtkFulfillment;
-use App\Filament\Resources\AtkFulfillments\AtkFulfillmentResource;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -20,7 +19,7 @@ beforeEach(function () {
     $this->seed(\Database\Seeders\UserDivisionSeeder::class);
     $this->seed(\Database\Seeders\PermissionSeeder::class);
     $this->seed(\Database\Seeders\ApprovalFlowSeeder::class);
-    
+
     Filament::setCurrentPanel(Filament::getPanel('dashboard'));
 
     $this->ipcDivision = UserDivision::where('initial', 'IPC')->first();
@@ -76,7 +75,7 @@ it('denies non-IPC users from seeing the fulfillment list via policy', function 
 it('allows super admin to see the fulfillment list', function () {
     $superAdmin = User::factory()->create();
     $superAdmin->assignRole('Super Admin');
-    
+
     $this->actingAs($superAdmin);
 
     Livewire::test(\App\Filament\Resources\AtkFulfillments\Pages\ListAtkFulfillments::class)

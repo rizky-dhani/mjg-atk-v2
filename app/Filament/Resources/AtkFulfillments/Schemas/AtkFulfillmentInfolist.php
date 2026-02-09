@@ -25,7 +25,7 @@ class AtkFulfillmentInfolist
                 ])
                 ->columns(4)
                 ->columnSpanFull(),
-                
+
             Section::make('Progress Approval')
                 ->schema([
                     RepeatableEntry::make('approvalProgress')

@@ -191,6 +191,8 @@ class AtkTransferStockForm
                                 return auth()->user()->divisions->pluck('name', 'id');
                             })
                             ->default(fn () => auth()->user()->divisions->first()?->id)
+                            ->hidden(fn () => ! auth()->user()->isSuperAdmin() && auth()->user()->divisions()->count() <= 1)
+                            ->dehydrated()
                             ->required()
                             ->live()
                             ->searchable()

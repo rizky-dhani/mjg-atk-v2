@@ -23,7 +23,7 @@ beforeEach(function () {
 
     // Create users
     $this->requester = User::factory()->create(['division_id' => $this->marketing->id]);
-    
+
     $this->divHead = User::factory()->create(['division_id' => $this->marketing->id]);
     $this->divHead->assignRole($this->divHeadRole);
 
@@ -79,7 +79,7 @@ test('it updates status to approved after all steps are completed', function () 
 
     expect($approval->current_step)->toBe(2);
     expect($approval->status)->toBe('pending'); // Still pending until final
-    
+
     // 2. GA Admin approves (FINAL STEP)
     $service->processApprovalStep($approval, $this->gaAdmin, 'approve');
     $request->refresh();

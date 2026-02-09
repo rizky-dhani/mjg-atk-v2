@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class AtkStockRequestExport implements FromQuery, WithHeadings, WithMapping, ShouldAutoSize
+class AtkStockRequestExport implements FromQuery, ShouldAutoSize, WithHeadings, WithMapping
 {
     public function __construct(protected array|int $requestIds)
     {

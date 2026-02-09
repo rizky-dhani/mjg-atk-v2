@@ -8,8 +8,8 @@ use App\Models\AtkRequestFromFloatingStock;
 use App\Models\AtkRequestFromFloatingStockItem;
 use App\Models\User;
 use App\Models\UserDivision;
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class AtkRequestFromFloatingStockMailTest extends TestCase
 {
@@ -19,7 +19,7 @@ class AtkRequestFromFloatingStockMailTest extends TestCase
     {
         $division = UserDivision::create(['name' => 'Marketing', 'initial' => 'MKT']);
         $requester = User::factory()->create(['name' => 'John Doe']);
-        
+
         $request = AtkRequestFromFloatingStock::create([
             'request_number' => 'ATK-FS-20260113-0001',
             'requester_id' => $requester->id,
@@ -29,7 +29,7 @@ class AtkRequestFromFloatingStockMailTest extends TestCase
         $category = \App\Models\AtkCategory::create(['name' => 'Stationery']);
 
         $item = AtkItem::create([
-            'name' => 'Paper', 
+            'name' => 'Paper',
             'slug' => 'paper',
             'category_id' => $category->id,
             'unit_of_measure' => 'rim',

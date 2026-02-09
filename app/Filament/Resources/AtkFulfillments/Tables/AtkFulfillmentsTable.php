@@ -2,10 +2,7 @@
 
 namespace App\Filament\Resources\AtkFulfillments\Tables;
 
-use App\Models\AtkFulfillment;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\ViewAction;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;

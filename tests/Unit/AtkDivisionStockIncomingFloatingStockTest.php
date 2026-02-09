@@ -20,7 +20,7 @@ class AtkDivisionStockIncomingFloatingStockTest extends TestCase
     {
         $division = UserDivision::create(['name' => 'Marketing', 'initial' => 'MKT']);
         $otherDivision = UserDivision::create(['name' => 'IT', 'initial' => 'IT']);
-        
+
         $category = AtkCategory::create(['name' => 'Paper']);
         $item = AtkItem::create(['name' => 'A4 Paper', 'slug' => 'a4-paper', 'category_id' => $category->id, 'unit_of_measure' => 'rim']);
         $otherItem = AtkItem::create(['name' => 'Pen', 'slug' => 'pen', 'category_id' => $category->id, 'unit_of_measure' => 'pcs']);

@@ -4,10 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\UserDivision;
+use App\Notifications\TestNotification;
 use Filament\Notifications\Livewire\DatabaseNotifications;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use App\Notifications\TestNotification;
 
 uses(RefreshDatabase::class);
 
@@ -23,7 +23,7 @@ beforeEach(function () {
 });
 
 it('can mark a notification as read', function () {
-    $this->user->notify(new TestNotification());
+    $this->user->notify(new TestNotification);
 
     $this->actingAs($this->user);
 
@@ -38,8 +38,8 @@ it('can mark a notification as read', function () {
 });
 
 it('can mark all notifications as read', function () {
-    $this->user->notify(new TestNotification());
-    $this->user->notify(new TestNotification());
+    $this->user->notify(new TestNotification);
+    $this->user->notify(new TestNotification);
 
     $this->actingAs($this->user);
 

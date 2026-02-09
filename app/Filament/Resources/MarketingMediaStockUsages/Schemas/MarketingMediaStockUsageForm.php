@@ -39,6 +39,7 @@ class MarketingMediaStockUsageForm
                                     ->required()
                                     ->live()
                                     ->default(fn () => auth()->user()->divisions->first()?->id)
+                                    ->hidden(fn () => ! auth()->user()->isSuperAdmin() && auth()->user()->divisions()->count() <= 1)
                                     ->dehydrated(),
                                 TextInput::make('request_number')
                                     ->label('Nomor Penggunaan')

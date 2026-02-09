@@ -41,6 +41,7 @@ class AtkStockUsageForm
                                 ->required()
                                 ->live()
                                 ->default(fn () => auth()->user()->divisions->first()?->id)
+                                ->hidden(fn () => ! auth()->user()->isSuperAdmin() && auth()->user()->divisions()->count() <= 1)
                                 ->dehydrated(),
                             TextInput::make('request_number')
                                 ->label('Nomor Penggunaan')
@@ -49,7 +50,7 @@ class AtkStockUsageForm
                                 ->dehydrated(false),
                         ]),
                 ])
-                ->visible(fn () => auth()->user()->isSuperAdmin()),
+                ->visible(fn () => auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
             Section::make('Rejection Details')
                 ->visible(function ($get, $record) {
                     // Show this section only when there's a rejection

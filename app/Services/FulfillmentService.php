@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\AtkStockRequest;
-use App\Models\AtkStockRequestItem;
 use App\Enums\AtkStockRequestItemStatus;
-use App\Enums\FulfillmentStatus;
+use App\Models\AtkStockRequestItem;
 use Illuminate\Support\Facades\DB;
 
 class FulfillmentService
@@ -33,10 +31,10 @@ class FulfillmentService
 
         return DB::transaction(function () use ($item, $receivedQuantity, $notes) {
             $request = $item->request;
-            
+
             // 1. Update the received quantity on the item
             $newReceivedQuantity = $item->received_quantity + $receivedQuantity;
-            
+
             // 2. Determine new item status
             $newStatus = AtkStockRequestItemStatus::PartiallyReceived;
             if ($newReceivedQuantity >= $item->quantity) {
@@ -74,8 +72,8 @@ class FulfillmentService
 
     /**
      * Process stock receipt for multiple items
-     * 
-     * @param array $itemsData Array of ['id' => itemId, 'quantity' => quantity]
+     *
+     * @param  array  $itemsData  Array of ['id' => itemId, 'quantity' => quantity]
      */
     public function bulkReceive(array $itemsData, ?string $notes = null): bool
     {
@@ -84,6 +82,7 @@ class FulfillmentService
                 $item = AtkStockRequestItem::findOrFail($data['id']);
                 $this->receiveItem($item, $data['quantity'], $notes);
             }
+
             return true;
         });
     }
