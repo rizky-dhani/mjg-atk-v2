@@ -32,7 +32,7 @@ class AtkDivisionStocksTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('division.name')
-                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin()),
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
                 TextColumn::make('current_stock')->numeric()->sortable(),
                 TextColumn::make('moving_average_cost')
                     ->label('Average Cost')
@@ -84,8 +84,8 @@ class AtkDivisionStocksTable
             ->filters([
                 SelectFilter::make('division_id')
                     ->label('Division')
-                    ->options(UserDivision::pluck('name', 'id'))
-                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin()),
+                    ->options(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() ? UserDivision::pluck('name', 'id') : auth()->user()->divisions->pluck('name', 'id'))
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
             ])
             ->recordActions([
                 ViewAction::make(),

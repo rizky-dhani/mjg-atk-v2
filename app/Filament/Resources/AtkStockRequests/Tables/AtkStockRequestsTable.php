@@ -46,7 +46,8 @@ class AtkStockRequestsTable
                     ->searchable(),
                 TextColumn::make('division.name')
                     ->label('Division')
-                    ->searchable(),
+                    ->searchable()
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
                 TextColumn::make('status')
                     ->label('Status Request')
                     ->badge()
@@ -76,6 +77,10 @@ class AtkStockRequestsTable
                     ->searchable(),
             ])
             ->filters([
+                SelectFilter::make('division_id')
+                    ->label('Division')
+                    ->options(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() ? \App\Models\UserDivision::pluck('name', 'id') : auth()->user()->divisions->pluck('name', 'id'))
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
                 SelectFilter::make('status')
                     ->options(AtkStockRequestStatus::class),
                 SelectFilter::make('approval_status')

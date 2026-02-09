@@ -37,7 +37,8 @@ class AtkStockUsagesTable
                     ->searchable(),
                 TextColumn::make('division.name')
                     ->label('Division')
-                    ->searchable(),
+                    ->searchable()
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
                 TextColumn::make('approval_status')
                     ->label('Status')
                     ->badge()
@@ -56,6 +57,10 @@ class AtkStockUsagesTable
                     ->searchable(),
             ])
             ->filters([
+                SelectFilter::make('division_id')
+                    ->label('Division')
+                    ->options(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() ? \App\Models\UserDivision::pluck('name', 'id') : auth()->user()->divisions->pluck('name', 'id'))
+                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
                 SelectFilter::make('approval_status')
                     ->label('Approval Status')
                     ->options([
