@@ -150,9 +150,12 @@ class AtkStockRequestsTable
                         return $user && $user->id === $record->requester_id;
                     })
                     ->modalSubmitActionLabel(fn ($record) => $record->status === AtkStockRequestStatus::Draft ? 'Publish' : 'Save Changes')
-                    ->mutateFormDataUsing(function (array $data, $record) {
+                    ->mutateFormDataUsing(function (array $data, $record, array $arguments) {
                         $data['division_id'] = $data['division_id'] ?? auth()->user()->divisions->first()?->id;
-                        if ($record->status === AtkStockRequestStatus::Draft) {
+
+                        if ($arguments['draft'] ?? false) {
+                            $data['status'] = AtkStockRequestStatus::Draft;
+                        } elseif ($record->status === AtkStockRequestStatus::Draft) {
                             $data['status'] = AtkStockRequestStatus::Published;
                         }
 
@@ -163,19 +166,11 @@ class AtkStockRequestsTable
                             app(ApprovalProcessingService::class)->createApproval($record, AtkStockRequest::class);
                         }
                     })
-                    ->extraModalFooterActions([
-                        Action::make('save_as_draft')
+                    ->extraModalFooterActions(fn (EditAction $action): array => [
+                        $action->makeModalSubmitAction('save_as_draft', arguments: ['draft' => true])
                             ->label('Save as Draft')
                             ->color('gray')
-                            ->visible(fn ($record) => $record->status === AtkStockRequestStatus::Draft)
-                            ->action(function (EditAction $action, AtkStockRequest $record) {
-                                $action->mutateFormDataUsing(function (array $data) {
-                                    $data['status'] = AtkStockRequestStatus::Draft;
-
-                                    return $data;
-                                });
-                                $action->call('save');
-                            }),
+                            ->visible(fn ($record) => $record->status === AtkStockRequestStatus::Draft),
                     ])
                     ->successNotificationTitle('Permintaan stok ATK berhasil diperbarui'),
                 Action::make('publish')
