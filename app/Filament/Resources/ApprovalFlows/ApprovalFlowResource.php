@@ -53,11 +53,20 @@ class ApprovalFlowResource extends Resource
                     ->default(null)
                     ->maxLength(6535)
                     ->columnSpanFull(),
-                Select::make('model_type')
-                    ->options(self::getModelOptions())
-                    ->required()
-                    ->searchable()
-                    ->helperText('Select the model type that this approval flow applies to'),
+                Grid::make(2)
+                    ->schema([
+                        Select::make('model_type')
+                            ->options(self::getModelOptions())
+                            ->required()
+                            ->searchable()
+                            ->helperText('Select the model type that this approval flow applies to'),
+                        Select::make('division_id')
+                            ->label('Division')
+                            ->options(fn () => \App\Models\UserDivision::pluck('name', 'id'))
+                            ->nullable()
+                            ->searchable()
+                            ->helperText('Leave empty for global flow (applies to all divisions)'),
+                    ]),
                 Toggle::make('is_active')
                     ->required(),
             ]);
@@ -71,6 +80,10 @@ class ApprovalFlowResource extends Resource
                     ->searchable(),
                 TextColumn::make('model_type')
                     ->searchable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
+                    ->placeholder('Global (All Divisions)'),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
@@ -99,10 +112,13 @@ class ApprovalFlowResource extends Resource
             ->components([
                 Section::make('Approval Flow')
                     ->schema([
-                        Grid::make(3)
+                        Grid::make(4)
                             ->schema([
                                 TextEntry::make('name'),
                                 TextEntry::make('model_type'),
+                                TextEntry::make('division.name')
+                                    ->label('Division')
+                                    ->placeholder('Global (All Divisions)'),
                                 IconEntry::make('is_active')
                                     ->trueIcon('heroicon-o-check-circle')
                                     ->trueColor('success')

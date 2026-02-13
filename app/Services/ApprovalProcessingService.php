@@ -197,8 +197,14 @@ class ApprovalProcessingService
     public function createApproval($model, string $modelType): \App\Models\Approval
     {
         // Find the active approval flow for this model type
+        // Prioritize division-specific flow, then fall back to global flow (null division_id)
         $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($model))
             ->where('is_active', true)
+            ->where(function ($query) use ($model) {
+                $query->where('division_id', $model->division_id)
+                    ->orWhereNull('division_id');
+            })
+            ->orderByRaw('CASE WHEN division_id IS NOT NULL THEN 0 ELSE 1 END')
             ->first();
 
         if (! $approvalFlow) {
