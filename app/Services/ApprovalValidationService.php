@@ -17,6 +17,26 @@ class ApprovalValidationService
      */
     public function canUserApprove($model, User $user): bool
     {
+        // Check if model has a draft status and prevent approval if it's still in draft
+        if (method_exists($model, 'getStatusAttribute') || isset($model->getAttributes()['status'])) {
+            $status = $model->status;
+
+            // Check for known Draft statuses
+            if ($status instanceof \App\Enums\AtkStockRequestStatus && $status === \App\Enums\AtkStockRequestStatus::Draft) {
+                return false;
+            }
+
+            // Generic check for any enum with 'Draft' case
+            if ($status instanceof \BackedEnum) {
+                $enumClass = get_class($status);
+                if (enum_exists($enumClass) && defined("{$enumClass}::Draft")) {
+                    if ($status->value === 'draft' || $status->name === 'Draft') {
+                        return false;
+                    }
+                }
+            }
+        }
+
         // Find the active approval flow for this model type
         $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
             ->where('is_active', true)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AtkStockRequestStatus;
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalFlowStep;
 use App\Models\AtkStockRequest;
@@ -73,6 +74,7 @@ beforeEach(function () {
         'requester_id' => $this->staff->id,
         'division_id' => $this->division->id,
         'request_type' => 'addition',
+        'status' => AtkStockRequestStatus::Published,
     ]);
 
     $this->actingAs($this->staff);

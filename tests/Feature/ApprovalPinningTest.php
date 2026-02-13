@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AtkStockRequestStatus;
 use App\Models\ApprovalFlow;
 use App\Models\AtkStockRequest;
 use App\Models\User;
@@ -43,6 +44,7 @@ it('only allows the pinned user to approve', function () {
     $request = AtkStockRequest::factory()->create([
         'division_id' => $this->division->id,
         'requester_id' => User::factory()->create()->id,
+        'status' => AtkStockRequestStatus::Published,
     ]);
 
     // Pinned user should be able to approve
@@ -64,6 +66,7 @@ it('allows any user with matching role and division to approve if no user is pin
     $request = AtkStockRequest::factory()->create([
         'division_id' => $this->division->id,
         'requester_id' => User::factory()->create()->id,
+        'status' => AtkStockRequestStatus::Published,
     ]);
 
     // Both users should be able to approve
