@@ -144,7 +144,6 @@ class AtkStockRequestsTable
                 ViewAction::make(),
                 EditAction::make()
                     ->modalWidth(Width::SevenExtraLarge)
-                    ->createAnother(false)
                     ->authorize(function ($record) {
                         $user = auth()->user();
 
