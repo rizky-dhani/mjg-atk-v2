@@ -60,10 +60,10 @@ class ApprovalFlowResource extends Resource
                             ->required()
                             ->searchable()
                             ->helperText('Select the model type that this approval flow applies to'),
-                        Select::make('division_id')
-                            ->label('Division')
+                        Select::make('division_ids')
+                            ->label('Divisions')
                             ->options(fn () => \App\Models\UserDivision::pluck('name', 'id'))
-                            ->nullable()
+                            ->multiple()
                             ->searchable()
                             ->helperText('Leave empty for global flow (applies to all divisions)'),
                     ]),
@@ -80,10 +80,16 @@ class ApprovalFlowResource extends Resource
                     ->searchable(),
                 TextColumn::make('model_type')
                     ->searchable(),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->placeholder('Global (All Divisions)'),
+                TextColumn::make('division_names')
+                    ->label('Divisions')
+                    ->getStateUsing(function ($record) {
+                        if (empty($record->division_ids)) {
+                            return 'Global (All Divisions)';
+                        }
+                        $divisions = \App\Models\UserDivision::whereIn('id', $record->division_ids)->pluck('name');
+
+                        return $divisions->implode(', ');
+                    }),
                 IconColumn::make('is_active')
                     ->boolean(),
             ])
@@ -116,9 +122,16 @@ class ApprovalFlowResource extends Resource
                             ->schema([
                                 TextEntry::make('name'),
                                 TextEntry::make('model_type'),
-                                TextEntry::make('division.name')
-                                    ->label('Division')
-                                    ->placeholder('Global (All Divisions)'),
+                                TextEntry::make('division_names')
+                                    ->label('Divisions')
+                                    ->getStateUsing(function ($record) {
+                                        if (empty($record->division_ids)) {
+                                            return 'Global (All Divisions)';
+                                        }
+                                        $divisions = \App\Models\UserDivision::whereIn('id', $record->division_ids)->pluck('name');
+
+                                        return $divisions->implode(', ');
+                                    }),
                                 IconEntry::make('is_active')
                                     ->trueIcon('heroicon-o-check-circle')
                                     ->trueColor('success')
