@@ -31,8 +31,24 @@ trait StockTransferModelTrait
 
         static::created(function ($model) {
             // Find an appropriate approval flow for this model type
+            // Prioritize division-specific flow, then fall back to global flow
+            // Check multiple division fields depending on model type
+            $divisionId = $model->division_id ?? $model->requesting_division_id ?? null;
+
             $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
                 ->where('is_active', true)
+                ->where(function ($query) use ($divisionId) {
+                    // Division-specific flow: check if model's division_id is in the array
+                    if ($divisionId) {
+                        $query->whereJsonContains('division_ids', $divisionId);
+                    }
+                    // OR global flow: empty/null division_ids
+                    $query->orWhere(function ($q) {
+                        $q->whereNull('division_ids')
+                            ->orWhereRaw('division_ids = "[]"');
+                    });
+                })
+                ->orderByRaw('CASE WHEN division_ids IS NOT NULL AND division_ids != "[]" THEN 0 ELSE 1 END')
                 ->first();
 
             if ($approvalFlow) {

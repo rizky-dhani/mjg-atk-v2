@@ -6,7 +6,6 @@ use App\Enums\AtkStockRequestStatus;
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use App\Models\AtkStockRequest;
 use App\Services\ApprovalProcessingService;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\Width;
@@ -28,8 +27,8 @@ class ListAtkStockRequests extends ListRecords
 
                     return $data;
                 })
-                ->extraModalFooterActions([
-                    Action::make('publish')
+                ->extraModalFooterActions(fn (CreateAction $action): array => [
+                    $action->makeModalSubmitAction('publish')
                         ->label('Publish')
                         ->color('success')
                         ->mutateFormDataUsing(function (array $data) {

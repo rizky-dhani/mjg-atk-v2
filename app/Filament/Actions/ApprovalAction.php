@@ -41,9 +41,20 @@ class ApprovalAction
 
                 $user = auth()->user();
 
-                // Find the active approval flow for this model type
+                // Find the active approval flow for this model type (division-aware)
                 $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($record))
                     ->where('is_active', true)
+                    ->where(function ($query) use ($record) {
+                        $divisionId = $record->division_id ?? $record->requesting_division_id ?? null;
+                        if ($divisionId) {
+                            $query->whereJsonContains('division_ids', $divisionId);
+                        }
+                        $query->orWhere(function ($q) {
+                            $q->whereNull('division_ids')
+                                ->orWhereRaw('division_ids = "[]"');
+                        });
+                    })
+                    ->orderByRaw('CASE WHEN division_ids IS NOT NULL AND division_ids != "[]" THEN 0 ELSE 1 END')
                     ->first();
 
                 if (! $approvalFlow) {
@@ -118,9 +129,20 @@ class ApprovalAction
 
                 $user = auth()->user();
 
-                // Find the active approval flow for this model type
+                // Find the active approval flow for this model type (division-aware)
                 $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($record))
                     ->where('is_active', true)
+                    ->where(function ($query) use ($record) {
+                        $divisionId = $record->division_id ?? $record->requesting_division_id ?? null;
+                        if ($divisionId) {
+                            $query->whereJsonContains('division_ids', $divisionId);
+                        }
+                        $query->orWhere(function ($q) {
+                            $q->whereNull('division_ids')
+                                ->orWhereRaw('division_ids = "[]"');
+                        });
+                    })
+                    ->orderByRaw('CASE WHEN division_ids IS NOT NULL AND division_ids != "[]" THEN 0 ELSE 1 END')
                     ->first();
 
                 if (! $approvalFlow) {
@@ -192,9 +214,20 @@ class ApprovalAction
 
                 $user = auth()->user();
 
-                // Find the active approval flow for this model type
+                // Find the active approval flow for this model type (division-aware)
                 $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($record))
                     ->where('is_active', true)
+                    ->where(function ($query) use ($record) {
+                        $divisionId = $record->division_id ?? $record->requesting_division_id ?? null;
+                        if ($divisionId) {
+                            $query->whereJsonContains('division_ids', $divisionId);
+                        }
+                        $query->orWhere(function ($q) {
+                            $q->whereNull('division_ids')
+                                ->orWhereRaw('division_ids = "[]"');
+                        });
+                    })
+                    ->orderByRaw('CASE WHEN division_ids IS NOT NULL AND division_ids != "[]" THEN 0 ELSE 1 END')
                     ->first();
 
                 if (! $approvalFlow) {
@@ -258,9 +291,20 @@ class ApprovalAction
 
                 $user = auth()->user();
 
-                // Find the active approval flow for this model type
+                // Find the active approval flow for this model type (division-aware)
                 $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($record))
                     ->where('is_active', true)
+                    ->where(function ($query) use ($record) {
+                        $divisionId = $record->division_id ?? $record->requesting_division_id ?? null;
+                        if ($divisionId) {
+                            $query->whereJsonContains('division_ids', $divisionId);
+                        }
+                        $query->orWhere(function ($q) {
+                            $q->whereNull('division_ids')
+                                ->orWhereRaw('division_ids = "[]"');
+                        });
+                    })
+                    ->orderByRaw('CASE WHEN division_ids IS NOT NULL AND division_ids != "[]" THEN 0 ELSE 1 END')
                     ->first();
 
                 if (! $approvalFlow) {
