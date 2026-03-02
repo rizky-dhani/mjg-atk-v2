@@ -18,6 +18,7 @@ class AtkStockRequestInfolist
                     TextEntry::make('request_number')->label('Request Number'),
                     TextEntry::make('requester.name')->label('Requester Name'),
                     TextEntry::make('division.name')->label('Division Name'),
+                    TextEntry::make('created_at')->label('Created At')->dateTime(),
                 ])
                 ->columns(3)
                 ->columnSpanFull(),

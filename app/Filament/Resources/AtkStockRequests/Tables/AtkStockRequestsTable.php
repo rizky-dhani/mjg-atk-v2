@@ -75,6 +75,9 @@ class AtkStockRequestsTable
                     ->label('Approved By')
                     ->getStateUsing(fn ($record) => $record->approved_by?->name)
                     ->searchable(),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime(),
             ])
             ->filters([
                 SelectFilter::make('division_id')
