@@ -255,9 +255,9 @@ class AtkStockUsageForm
                                 })
                                 ->rules([
                                     function () {
-                                        return function (string $attribute, $value, \Closure $fail, $livewire, $get) {
+                                        return function (string $attribute, $value, \Closure $fail, $validator = null) {
                                             // Extract the repeater index from the attribute name
-                                            // e.g., "data.items.0.quantity" -> index 0
+                                            // e.g., "data.atkStockUsageItems.0.quantity" -> index 0
                                             preg_match('/atkStockUsageItems\\.(\\d+)\\.quantity/', $attribute, $matches);
                                             $index = $matches[1] ?? null;
 
@@ -265,8 +265,10 @@ class AtkStockUsageForm
                                                 return;
                                             }
 
-                                            // Get the item_id for this repeater item
-                                            $itemId = data_get($livewire, "data.atkStockUsageItems.{$index}.item_id");
+                                            $data = $validator?->getData() ?? [];
+
+                                            // Get the item_id for this repeater item from the validator's data
+                                            $itemId = data_get($data, "data.atkStockUsageItems.{$index}.item_id");
 
                                             if (! $itemId || ! $value) {
                                                 return;
@@ -278,7 +280,7 @@ class AtkStockUsageForm
                                                 return;
                                             }
 
-                                            $stock = AtkDivisionStock::where('division_id', $get('../../division_id'))
+                                            $stock = AtkDivisionStock::where('division_id', data_get($data, 'data.division_id'))
                                                 ->where('item_id', $itemId)
                                                 ->first();
 
