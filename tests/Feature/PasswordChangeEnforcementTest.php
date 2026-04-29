@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Filament\Facades\Filament;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\withoutMiddleware;
@@ -48,7 +48,7 @@ it('allows logout even if password has not been changed', function () {
         'has_changed_password' => false,
     ]);
 
-    withoutMiddleware(VerifyCsrfToken::class)
+    withoutMiddleware(PreventRequestForgery::class)
         ->actingAs($user)
         ->post(Filament::getPanel('dashboard')->getLogoutUrl())
         ->assertRedirect();

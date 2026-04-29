@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\ApprovalFlow;
 use App\Models\ApprovalFlowStep;
+use App\Models\Role;
+use App\Models\UserDivision;
 use Illuminate\Database\Seeder;
 
 class ApprovalFlowSeeder extends Seeder
@@ -13,60 +15,74 @@ class ApprovalFlowSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing to avoid ID issues in tests if needed
-        // but since we use fresh in tests, usually it's fine.
-        // The issue is using insert() with hardcoded role_ids/division_ids that might not match.
-        // We should fetch them or use relationship create.
+        // NOTE: ApprovalFlow uses firstOrCreate() so this seeder is idempotent.
+        // ApprovalFlowStep uses insert() so steps are NOT idempotent — only run
+        // this seeder on a fresh DB (migrate:fresh --seed) or if no steps exist.
 
-        $divGA = \App\Models\UserDivision::where('initial', 'GA')->first()?->id ?? 5;
-        $divIPC = \App\Models\UserDivision::where('initial', 'IPC')->first()?->id ?? 7;
-        $divHCG = \App\Models\UserDivision::where('initial', 'HCG')->first()?->id ?? 6;
+        $divGA = UserDivision::where('initial', 'GA')->first()?->id ?? 5;
+        $divIPC = UserDivision::where('initial', 'IPC')->first()?->id ?? 7;
+        $divHCG = UserDivision::where('initial', 'HCG')->first()?->id ?? 6;
 
-        $roleAdmin = \App\Models\Role::where('name', 'Admin')->first()?->id ?? 3;
-        $roleDivHead = \App\Models\Role::where('name', 'Head')->first()?->id ?? 2;
+        $roleAdmin = Role::where('name', 'Admin')->first()?->id ?? 3;
+        $roleDivHead = Role::where('name', 'Head')->first()?->id ?? 2;
 
-        //  Create Approval Flow
-        $atkRequestFlow = ApprovalFlow::create([
-            'name' => 'ATK Stock Request',
-            'description' => 'Approval flow for ATK Stock Request (Penambahan stock ATK)',
-            'model_type' => 'App\Models\AtkStockRequest',
-            'is_active' => true,
-        ]);
+        // Clear existing steps to avoid duplicates on re-run
+        ApprovalFlowStep::query()->delete();
 
-        $atkUsageFlow = ApprovalFlow::create([
-            'name' => 'ATK Stock Usage',
-            'description' => 'Approval flow for ATK Stock Usage (Pengeluaran stock ATK)',
-            'model_type' => 'App\Models\AtkStockUsage',
-            'is_active' => true,
-        ]);
+        // Create or retrieve Approval Flows (idempotent — safe to re-run)
+        $atkRequestFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\AtkStockRequest', 'division_ids' => null],
+            [
+                'name' => 'ATK Stock Request',
+                'description' => 'Approval flow for ATK Stock Request (Penambahan stock ATK)',
+                'is_active' => true,
+            ],
+        );
 
-        $mmRequestFlow = ApprovalFlow::create([
-            'name' => 'Marketing Media Stock Request',
-            'description' => 'Approval flow for Marketing Media Stock Request (Penambahan stock Marketing Media)',
-            'model_type' => 'App\Models\MarketingMediaStockRequest',
-            'is_active' => true,
-        ]);
+        $atkUsageFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\AtkStockUsage', 'division_ids' => null],
+            [
+                'name' => 'ATK Stock Usage',
+                'description' => 'Approval flow for ATK Stock Usage (Pengeluaran stock ATK)',
+                'is_active' => true,
+            ],
+        );
 
-        $mmUsageFlow = ApprovalFlow::create([
-            'name' => 'Marketing Media Stock Usage',
-            'description' => 'Approval flow for Marketing Media Stock Usage (Pengeluaran stock Marketing Media)',
-            'model_type' => 'App\Models\MarketingMediaStockUsage',
-            'is_active' => true,
-        ]);
+        $mmRequestFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\MarketingMediaStockRequest', 'division_ids' => null],
+            [
+                'name' => 'Marketing Media Stock Request',
+                'description' => 'Approval flow for Marketing Media Stock Request (Penambahan stock Marketing Media)',
+                'is_active' => true,
+            ],
+        );
 
-        $transferFlow = ApprovalFlow::create([
-            'name' => 'Transfer Stock',
-            'description' => 'Approval flow for Transfer Stock between divisions',
-            'model_type' => 'App\Models\AtkTransferStock',
-            'is_active' => true,
-        ]);
+        $mmUsageFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\MarketingMediaStockUsage', 'division_ids' => null],
+            [
+                'name' => 'Marketing Media Stock Usage',
+                'description' => 'Approval flow for Marketing Media Stock Usage (Pengeluaran stock Marketing Media)',
+                'is_active' => true,
+            ],
+        );
 
-        $floatingRequestFlow = ApprovalFlow::create([
-            'name' => 'ATK Request from Floating Stock',
-            'description' => 'Approval flow for requesting ATK items from Floating Stock',
-            'model_type' => 'App\Models\AtkRequestFromFloatingStock',
-            'is_active' => true,
-        ]);
+        $transferFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\AtkTransferStock', 'division_ids' => null],
+            [
+                'name' => 'Transfer Stock',
+                'description' => 'Approval flow for Transfer Stock between divisions',
+                'is_active' => true,
+            ],
+        );
+
+        $floatingRequestFlow = ApprovalFlow::firstOrCreate(
+            ['model_type' => 'App\Models\AtkRequestFromFloatingStock', 'division_ids' => null],
+            [
+                'name' => 'ATK Request from Floating Stock',
+                'description' => 'Approval flow for requesting ATK items from Floating Stock',
+                'is_active' => true,
+            ],
+        );
 
         // ATK Stock Request
         ApprovalFlowStep::insert([

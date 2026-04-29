@@ -25,10 +25,10 @@ test('budget model is created with correct fields', function () {
     $budget->refresh(); // Reload from database
 
     expect($budget->division_id)->toBe($division->id)
-        ->and($budget->budget_amount)->toBe(1000.00)
-        ->and($budget->used_amount)->toBe(250.00)
+        ->and($budget->budget_amount)->toBe(1000)
+        ->and($budget->used_amount)->toBe(250)
         ->and($budget->fiscal_year)->toBe(2025)
-        ->and($budget->remaining_amount)->toBe(750.00);
+        ->and($budget->remaining_amount)->toBe(750);
 });
 
 test('budget relationship with division works', function () {
@@ -78,9 +78,9 @@ test('budget service can set budget', function () {
     $budget = $budgetService->setBudget($division->id, 5000.00, 2025);
 
     expect($budget->division_id)->toBe($division->id)
-        ->and($budget->budget_amount)->toBe(5000.00)
+        ->and($budget->budget_amount)->toBe(5000)
         ->and($budget->used_amount)->toBe(0)
-        ->and($budget->remaining_amount)->toBe(5000.00)
+        ->and($budget->remaining_amount)->toBe(5000)
         ->and($budget->fiscal_year)->toBe(2025);
 });
 
@@ -96,8 +96,8 @@ test('budget service can deduct from budget', function () {
 
     $budget->refresh();
 
-    expect($budget->used_amount)->toBe(250.50)
-        ->and($budget->remaining_amount)->toBe(749.50);
+    expect($budget->used_amount)->toBe(250)
+        ->and($budget->remaining_amount)->toBe(750);
 });
 
 test('budget service can add back to budget', function () {
@@ -113,8 +113,8 @@ test('budget service can add back to budget', function () {
 
     $budget->refresh();
 
-    expect($budget->used_amount)->toBe(200.00)
-        ->and($budget->remaining_amount)->toBe(800.00);
+    expect($budget->used_amount)->toBe(200)
+        ->and($budget->remaining_amount)->toBe(800);
 });
 
 test('budget validation service can check sufficient budget', function () {

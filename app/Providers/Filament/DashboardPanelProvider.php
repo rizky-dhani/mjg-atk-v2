@@ -2,13 +2,21 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\EditProfile;
 use App\Filament\Resources\AtkItems\AtkItemResource;
+use App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource;
 use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
 use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 use App\Filament\Resources\MarketingMediaItems\MarketingMediaItemResource;
 use App\Filament\Resources\MarketingMediaStockRequests\MarketingMediaStockRequestResource;
 use App\Filament\Resources\MarketingMediaStockUsages\MarketingMediaStockUsageResource;
+use App\Filament\Widgets\AtkStockRequestStatus;
+use App\Filament\Widgets\AtkStockUsageStatus;
+use App\Filament\Widgets\AtkTransferStockStatus;
+use App\Filament\Widgets\Budgeting;
+use App\Http\Middleware\CheckPasswordChanged;
+use App\Models\ApprovalFlowStep;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -22,7 +30,7 @@ use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
@@ -77,9 +85,9 @@ class DashboardPanelProvider extends PanelProvider
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Permintaan Stok Umum ATK')
                     ->icon(fn () => Heroicon::ArrowTopRightOnSquare)
-                    ->url(fn () => \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
+                    ->url(fn () => AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
-                    ->isActiveWhen(fn () => request()->url() === \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('approval'))
+                    ->isActiveWhen(fn () => request()->url() === AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 NavigationItem::make('Persetujuan Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
@@ -126,13 +134,13 @@ class DashboardPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            ->profile(\App\Filament\Pages\Auth\EditProfile::class)
+            ->profile(EditProfile::class)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                \App\Filament\Widgets\AtkStockRequestStatus::class,
-                \App\Filament\Widgets\AtkStockUsageStatus::class,
-                \App\Filament\Widgets\AtkTransferStockStatus::class,
-                \App\Filament\Widgets\Budgeting::class,
+                AtkStockRequestStatus::class,
+                AtkStockUsageStatus::class,
+                AtkTransferStockStatus::class,
+                Budgeting::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -140,14 +148,14 @@ class DashboardPanelProvider extends PanelProvider
                 StartSession::class,
                 AuthenticateSession::class,
                 ShareErrorsFromSession::class,
-                VerifyCsrfToken::class,
+                PreventRequestForgery::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
-                \App\Http\Middleware\CheckPasswordChanged::class,
+                CheckPasswordChanged::class,
             ]);
     }
 
@@ -169,7 +177,7 @@ class DashboardPanelProvider extends PanelProvider
         }
 
         // Find approval flow steps that match the user's role and division
-        $matchingSteps = \App\Models\ApprovalFlowStep::whereHas('role', function ($query) use ($user) {
+        $matchingSteps = ApprovalFlowStep::whereHas('role', function ($query) use ($user) {
             $query->whereIn('id', $user->roles->pluck('id'));
         })
             ->where(function ($query) use ($user) {
