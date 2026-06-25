@@ -48,6 +48,7 @@ class DashboardPanelProvider extends PanelProvider
             ->databaseNotifications()
             // ->spa()
             ->databaseTransactions()
+            ->brandName('MJG ATK')
             ->brandLogo(fn () => asset('assets/images/LOGO-MEDQUEST-HD.png'))
             ->brandLogoHeight('2em')
             ->favicon(fn () => asset('assets/images/Medquest-Favicon.png'))
