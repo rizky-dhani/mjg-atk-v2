@@ -23,7 +23,7 @@ class AtkDivisionStocksTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->when(! (auth()->user()->isGA() || auth()->user()->isSuperAdmin()), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))->orderBy('category_id')->orderBy('created_at'))
+                fn (Builder $query) => $query->when(! (auth()->user()->isGA() || auth()->user()->isSuperAdmin()), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))->orderBy('current_stock', 'desc'))
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
@@ -42,7 +42,6 @@ class AtkDivisionStocksTable
                 TextColumn::make('max_limit')
                     ->label('Max Stock Limit')
                     ->numeric()
-                    ->sortable()
                     ->getStateUsing(function ($record) {
                         $setting = AtkDivisionStockSetting::where('division_id', $record->division_id)
                             ->where('item_id', $record->item_id)
