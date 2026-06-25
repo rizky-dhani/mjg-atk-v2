@@ -87,11 +87,35 @@ class UserResource extends Resource
                     ->badge()
                     ->separator(',')
                     ->limit(3),
+                TextColumn::make('is_active')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (User $record): string => $record->is_active ? 'success' : 'danger')
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Active' : 'Inactive'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
+                Action::make('toggleActive')
+                    ->label(fn (User $record): string => $record->is_active ? 'Deactivate' : 'Activate')
+                    ->icon(fn (User $record): string => $record->is_active ? 'heroicon-o-no-symbol' : 'heroicon-o-check-circle')
+                    ->color(fn (User $record): string => $record->is_active ? 'danger' : 'success')
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (User $record): string => $record->is_active ? 'Deactivate User' : 'Activate User')
+                    ->modalDescription(fn (User $record): string => $record->is_active
+                        ? 'This user will be logged out and unable to access the system until reactivated.'
+                        : 'This user will be able to login and access the system again.')
+                    ->visible(fn () => auth()->user()->isSuperAdmin())
+                    ->action(function (User $record) {
+                        $record->update(['is_active' => ! $record->is_active]);
+
+                        Notification::make()
+                            ->title($record->is_active ? 'User Activated' : 'User Deactivated')
+                            ->body($record->name.' is now '.($record->is_active ? 'active' : 'inactive').'.')
+                            ->success()
+                            ->send();
+                    }),
                 Action::make('resetPassword')
                     ->label('Reset Password')
                     ->icon('heroicon-o-key')
@@ -119,6 +143,42 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 BulkActionGroup::make([
+                    Action::make('bulkActivate')
+                        ->label('Activate')
+                        ->icon('heroicon-o-check-circle')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalHeading('Activate Users')
+                        ->modalDescription('Selected users will be able to login and access the system.')
+                        ->visible(fn () => auth()->user()->isSuperAdmin())
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($records) {
+                            $records->each->update(['is_active' => true]);
+
+                            Notification::make()
+                                ->title('Users Activated')
+                                ->body($records->count().' user(s) activated.')
+                                ->success()
+                                ->send();
+                        }),
+                    Action::make('bulkDeactivate')
+                        ->label('Deactivate')
+                        ->icon('heroicon-o-no-symbol')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Deactivate Users')
+                        ->modalDescription('Selected users will be logged out and unable to access the system.')
+                        ->visible(fn () => auth()->user()->isSuperAdmin())
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function ($records) {
+                            $records->each->update(['is_active' => false]);
+
+                            Notification::make()
+                                ->title('Users Deactivated')
+                                ->body($records->count().' user(s) deactivated.')
+                                ->success()
+                                ->send();
+                        }),
                     DeleteBulkAction::make()
                         ->successNotificationTitle('Users deleted'),
                 ]),
