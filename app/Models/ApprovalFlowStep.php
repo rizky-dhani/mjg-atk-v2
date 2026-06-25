@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Spatie\Permission\Models\Role;
 
 class ApprovalFlowStep extends Model
 {
@@ -28,7 +30,7 @@ class ApprovalFlowStep extends Model
 
     public function role()
     {
-        return $this->belongsTo(\Spatie\Permission\Models\Role::class, 'role_id');
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function users()
@@ -67,13 +69,16 @@ class ApprovalFlowStep extends Model
     /**
      * Get the potential approvers for this step given an approvable model.
      */
-    public function getPotentialApprovers($approvable): \Illuminate\Support\Collection
+    public function getPotentialApprovers($approvable): Collection
     {
         $query = User::query();
 
         // 0. Priority: Specific User
         if ($this->user_id) {
             $pinnedUser = $this->user;
+            if ($pinnedUser && ! $pinnedUser->is_active) {
+                return collect();
+            }
             if ($pinnedUser) {
                 $pinnedUser->loadMissing('divisions');
             }
@@ -99,6 +104,9 @@ class ApprovalFlowStep extends Model
                 $q->where('roles.id', $this->role_id);
             });
         }
+
+        // 3. Filter inactive users
+        $query->where('users.is_active', true);
 
         return $query->with('divisions')->get();
     }

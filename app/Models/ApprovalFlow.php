@@ -27,9 +27,10 @@ class ApprovalFlow extends Model
             if (empty($flow->division_ids)) {
                 // Global flow - check if one already exists
                 $exists = static::where('model_type', $flow->model_type)
-                    ->whereNull('division_ids')
-                    ->orWhereRaw('division_ids = "[]"')
-                    ->orWhereRaw('division_ids IS NULL')
+                    ->where(function ($query) {
+                        $query->whereNull('division_ids')
+                            ->orWhere('division_ids', '[]');
+                    })
                     ->exists();
 
                 if ($exists) {
@@ -56,7 +57,7 @@ class ApprovalFlow extends Model
                     ->where('id', '!=', $flow->id)
                     ->where(function ($query) {
                         $query->whereNull('division_ids')
-                            ->orWhereRaw('division_ids = "[]"');
+                            ->orWhere('division_ids', '[]');
                     })
                     ->exists();
 
