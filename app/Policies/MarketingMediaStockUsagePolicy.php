@@ -178,6 +178,11 @@ class MarketingMediaStockUsagePolicy
      */
     public function approve(User $user, MarketingMediaStockUsage $marketingMediaStockUsage): bool
     {
+        // Inactive users cannot approve
+        if (! $user->is_active) {
+            return false;
+        }
+
         // Check if user has 'admin' role and belongs to Marketing division
         if ($user->hasRole('Admin') && $user->divisions()->where('name', 'like', '%Marketing%')->exists()) {
             return true;

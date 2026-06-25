@@ -2,14 +2,21 @@
 
 namespace App\Services;
 
+use App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource;
+use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
+use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
+use App\Mail\AtkRequestFromFloatingStockMail;
 use App\Mail\AtkStockRequestMail;
 use App\Mail\AtkStockUsageMail;
 use App\Models\Approval;
+use App\Models\ApprovalFlow;
 use App\Models\ApprovalHistory;
+use App\Models\ApprovalStepApproval;
 use App\Models\AtkRequestFromFloatingStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
 use App\Models\User;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -62,7 +69,7 @@ class ApprovalProcessingService
             $status = $action === 'approve' ? 'approved' : 'rejected';
 
             // Create the approval step record
-            \App\Models\ApprovalStepApproval::create([
+            ApprovalStepApproval::create([
                 'approval_id' => $approval->id,
                 'step_id' => $step->id,
                 'user_id' => $user->id,
@@ -97,7 +104,7 @@ class ApprovalProcessingService
                     $this->notifyStockRequest($approvable, 'rejected', $user, $notes, $approval);
                 } elseif ($approvable instanceof AtkStockUsage) {
                     $this->notifyStockUsage($approvable, 'rejected', $user, $notes, $approval);
-                } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                } elseif ($approvable instanceof AtkRequestFromFloatingStock) {
                     $this->notifyFloatingStockRequest($approvable, 'rejected', $user, $notes, $approval);
                 }
 
@@ -146,7 +153,7 @@ class ApprovalProcessingService
                         $this->notifyStockRequest($approvable, 'approved', $user, $notes, $approval);
                     } elseif ($approvable instanceof AtkStockUsage) {
                         $this->notifyStockUsage($approvable, 'approved', $user, $notes, $approval);
-                    } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                    } elseif ($approvable instanceof AtkRequestFromFloatingStock) {
                         $this->notifyFloatingStockRequest($approvable, 'approved', $user, $notes, $approval);
                     }
 
@@ -178,7 +185,7 @@ class ApprovalProcessingService
                         $this->notifyStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
                     } elseif ($approvable instanceof AtkStockUsage) {
                         $this->notifyStockUsage($approvable, 'partially_approved', $user, $notes, $approval);
-                    } elseif ($approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+                    } elseif ($approvable instanceof AtkRequestFromFloatingStock) {
                         $this->notifyFloatingStockRequest($approvable, 'partially_approved', $user, $notes, $approval);
                     }
 
@@ -194,11 +201,11 @@ class ApprovalProcessingService
      * @param  mixed  $model  The model to create approval for
      * @param  string  $modelType  The model type
      */
-    public function createApproval($model, string $modelType): \App\Models\Approval
+    public function createApproval($model, string $modelType): Approval
     {
         // Find the active approval flow for this model type
         // Prioritize division-specific flow, then fall back to global flow (empty/null division_ids)
-        $approvalFlow = \App\Models\ApprovalFlow::where('model_type', get_class($model))
+        $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
             ->where('is_active', true)
             ->where(function ($query) use ($model) {
                 // Division-specific flow: check if model's division_id is in the array
@@ -230,7 +237,7 @@ class ApprovalProcessingService
         }
 
         // Log initial submission to history if it hasn't been logged yet
-        $hasHistory = \App\Models\ApprovalHistory::where('approvable_type', get_class($model))
+        $hasHistory = ApprovalHistory::where('approvable_type', get_class($model))
             ->where('approvable_id', $model->id)
             ->where('action', 'submitted')
             ->exists();
@@ -245,7 +252,7 @@ class ApprovalProcessingService
                 $this->notifyStockRequest($model, 'submitted', $currentUser);
             } elseif ($model instanceof AtkStockUsage) {
                 $this->notifyStockUsage($model, 'submitted', $currentUser);
-            } elseif ($model instanceof \App\Models\AtkRequestFromFloatingStock) {
+            } elseif ($model instanceof AtkRequestFromFloatingStock) {
                 $this->notifyFloatingStockRequest($model, 'submitted', $currentUser);
             }
         }
@@ -256,10 +263,10 @@ class ApprovalProcessingService
     /**
      * Cancel an approval
      *
-     * @param  \App\Models\Approval  $approval  The approval to cancel
-     * @param  \App\Models\User  $user  The user cancelling the approval
+     * @param  Approval  $approval  The approval to cancel
+     * @param  User  $user  The user cancelling the approval
      */
-    public function cancelApproval(\App\Models\Approval $approval, \App\Models\User $user): void
+    public function cancelApproval(Approval $approval, User $user): void
     {
         $approval->update([
             'status' => 'cancelled',
@@ -283,8 +290,8 @@ class ApprovalProcessingService
     /**
      * Resubmit a rejected approval to restart the approval flow from the beginning
      *
-     * @param  \App\Models\Approval  $approval  The approval to resubmit
-     * @param  \App\Models\User  $user  The user resubmitting the approval
+     * @param  Approval  $approval  The approval to resubmit
+     * @param  User  $user  The user resubmitting the approval
      */
     public function resubmitApproval(Approval $approval, User $user): void
     {
@@ -313,7 +320,7 @@ class ApprovalProcessingService
             $this->notifyStockRequest($approval->approvable, 'submitted', $user);
         } elseif ($approval->approvable instanceof AtkStockUsage) {
             $this->notifyStockUsage($approval->approvable, 'submitted', $user);
-        } elseif ($approval->approvable instanceof \App\Models\AtkRequestFromFloatingStock) {
+        } elseif ($approval->approvable instanceof AtkRequestFromFloatingStock) {
             $this->notifyFloatingStockRequest($approval->approvable, 'submitted', $user);
         }
     }
@@ -411,7 +418,7 @@ class ApprovalProcessingService
         $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
 
         if ($uniqueRecipients->isNotEmpty()) {
-            $viewUrl = \App\Filament\Resources\AtkStockRequests\AtkStockRequestResource::getUrl('view', ['record' => $stockRequest]);
+            $viewUrl = AtkStockRequestResource::getUrl('view', ['record' => $stockRequest]);
 
             foreach ($uniqueRecipients as $recipient) {
                 // Send Email
@@ -459,7 +466,7 @@ class ApprovalProcessingService
                     $notification->title($title)
                         ->body("Permintaan: {$stockRequest->request_number}")
                         ->actions([
-                            \Filament\Actions\Action::make('view')
+                            Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
                                 ->button()
@@ -514,11 +521,11 @@ class ApprovalProcessingService
         $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
 
         if ($uniqueRecipients->isNotEmpty()) {
-            $viewUrl = \App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource::getUrl('index');
+            $viewUrl = AtkRequestFromFloatingStockResource::getUrl('index');
 
             foreach ($uniqueRecipients as $recipient) {
                 // Send Email
-                $mailable = new \App\Mail\AtkRequestFromFloatingStockMail(
+                $mailable = new AtkRequestFromFloatingStockMail(
                     $request,
                     $actionStatus,
                     $actor,
@@ -562,7 +569,7 @@ class ApprovalProcessingService
                     $notification->title($title)
                         ->body("Permintaan: {$request->request_number}")
                         ->actions([
-                            \Filament\Actions\Action::make('view')
+                            Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
                                 ->button()
@@ -617,7 +624,7 @@ class ApprovalProcessingService
         $uniqueRecipients = $recipients->unique('email')->filter(fn ($r) => ! empty($r['email']));
 
         if ($uniqueRecipients->isNotEmpty()) {
-            $viewUrl = \App\Filament\Resources\AtkStockUsages\AtkStockUsageResource::getUrl('view', ['record' => $stockUsage]);
+            $viewUrl = AtkStockUsageResource::getUrl('view', ['record' => $stockUsage]);
 
             foreach ($uniqueRecipients as $recipient) {
                 // Send Email
@@ -665,7 +672,7 @@ class ApprovalProcessingService
                     $notification->title($title)
                         ->body("Pengeluaran: {$stockUsage->request_number}")
                         ->actions([
-                            \Filament\Actions\Action::make('view')
+                            Action::make('view')
                                 ->label('Lihat')
                                 ->url($viewUrl)
                                 ->button()
@@ -703,7 +710,9 @@ class ApprovalProcessingService
 
         // 0. Priority: Specific User
         if ($nextStep->user_id) {
-            return User::where('id', $nextStep->user_id)->get();
+            return User::where('id', $nextStep->user_id)
+                ->where('is_active', true)
+                ->get();
         }
 
         $approvers = User::query();
@@ -724,6 +733,9 @@ class ApprovalProcessingService
                 $query->where('id', $nextStep->role_id);
             });
         }
+
+        // Filter inactive users
+        $approvers->where('users.is_active', true);
 
         return $approvers->get();
     }

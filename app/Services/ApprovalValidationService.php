@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\AtkStockRequestStatus;
 use App\Models\ApprovalFlow;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
+use App\Models\AtkTransferStock;
 use App\Models\MarketingMediaStockRequest;
 use App\Models\MarketingMediaStockUsage;
 use App\Models\User;
@@ -17,12 +19,17 @@ class ApprovalValidationService
      */
     public function canUserApprove($model, User $user): bool
     {
+        // Inactive users cannot approve
+        if (! $user->is_active) {
+            return false;
+        }
+
         // Check if model has a draft status and prevent approval if it's still in draft
         if (method_exists($model, 'getStatusAttribute') || isset($model->getAttributes()['status'])) {
             $status = $model->status;
 
             // Check for known Draft statuses
-            if ($status instanceof \App\Enums\AtkStockRequestStatus && $status === \App\Enums\AtkStockRequestStatus::Draft) {
+            if ($status instanceof AtkStockRequestStatus && $status === AtkStockRequestStatus::Draft) {
                 return false;
             }
 
@@ -97,7 +104,7 @@ class ApprovalValidationService
 
         if (is_null($currentStep->division_id)) {
             // For null division_id steps, the logic depends on the model type
-            if (get_class($model) === \App\Models\AtkTransferStock::class) {
+            if (get_class($model) === AtkTransferStock::class) {
                 // For AtkTransferStock, check based on step name:
                 // - "Division Head": should match requesting division
                 // - "Source Division Head": should match source division
@@ -162,6 +169,11 @@ class ApprovalValidationService
      */
     public function getEligibleApprovalSteps($model, User $user): Collection
     {
+        // Inactive users have no eligible steps
+        if (! $user->is_active) {
+            return collect();
+        }
+
         // Find the active approval flow for this model type
         // Prioritize division-specific flow, then fall back to global flow
         $approvalFlow = ApprovalFlow::where('model_type', get_class($model))
@@ -222,7 +234,7 @@ class ApprovalValidationService
 
             if (is_null($currentStep->division_id)) {
                 // For null division_id steps, the logic depends on the model type
-                if (get_class($model) === \App\Models\AtkTransferStock::class) {
+                if (get_class($model) === AtkTransferStock::class) {
                     // For AtkTransferStock, check based on step name:
                     // - "Division Head": should match requesting division
                     // - "Source Division Head": should match source division
@@ -349,7 +361,7 @@ class ApprovalValidationService
      * Check if a specific AtkTransferStock can be approved by the logged-in user
      * For transfer stocks, approval logic is different as it involves source division
      */
-    public function canUserApproveTransferStock(\App\Models\AtkTransferStock $transferStock, User $user): bool
+    public function canUserApproveTransferStock(AtkTransferStock $transferStock, User $user): bool
     {
         return $this->canUserApprove($transferStock, $user);
     }
@@ -357,7 +369,7 @@ class ApprovalValidationService
     /**
      * Get eligible approval steps for a user to approve a specific AtkTransferStock
      */
-    public function getEligibleApprovalStepsForTransferStock(\App\Models\AtkTransferStock $transferStock, User $user): Collection
+    public function getEligibleApprovalStepsForTransferStock(AtkTransferStock $transferStock, User $user): Collection
     {
         return $this->getEligibleApprovalSteps($transferStock, $user);
     }

@@ -16,6 +16,7 @@ use App\Filament\Widgets\AtkStockUsageStatus;
 use App\Filament\Widgets\AtkTransferStockStatus;
 use App\Filament\Widgets\Budgeting;
 use App\Http\Middleware\CheckPasswordChanged;
+use App\Http\Middleware\EnsureUserIsActive;
 use App\Models\ApprovalFlowStep;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -157,6 +158,7 @@ class DashboardPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 CheckPasswordChanged::class,
+                EnsureUserIsActive::class,
             ]);
     }
 
