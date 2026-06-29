@@ -13,32 +13,27 @@ class Budgeting extends StatsOverviewWidget
 
     protected static ?int $sort = 1;
 
-    protected function getStats(): array
+    public static function canView(): bool
     {
         $user = Auth::user();
 
         if (! $user || $user->divisions->isEmpty()) {
-            return [
-                Stat::make(__('No Access'), __('Please log in or assign to a division to view budget information'))
-                    ->description(__('Budget data is only available for users assigned to divisions'))
-                    ->color('warning'),
-            ];
+            return false;
         }
 
+        return AtkBudgeting::whereIn('division_id', $user->divisions->pluck('id'))
+            ->where('fiscal_year', now()->year)
+            ->exists();
+    }
+
+    protected function getStats(): array
+    {
+        $user = Auth::user();
         $currentYear = now()->year;
 
-        // Get the budget for the user's divisions
         $budgetings = AtkBudgeting::whereIn('division_id', $user->divisions->pluck('id'))
             ->where('fiscal_year', $currentYear)
             ->get();
-
-        if ($budgetings->isEmpty()) {
-            return [
-                Stat::make(__('Budget Information'), __('No budget set for your divisions'))
-                    ->description(__('Contact administrator to set budget for :year', ['year' => $currentYear]))
-                    ->color('warning'),
-            ];
-        }
 
         $totalBudget = $budgetings->sum('budget_amount');
         $totalUsed = $budgetings->sum('used_amount');
