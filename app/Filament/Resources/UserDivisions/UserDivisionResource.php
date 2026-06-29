@@ -28,10 +28,7 @@ class UserDivisionResource extends Resource
         return __('filament.navigation.group.settings');
     }
 
-    public static function getNavigationParentItem(): ?string
-    {
-        return __('filament.navigation.parent_item.users');
-    }
+    // ponytail: removed non-existent parent item "Users", was hiding from sidebar
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
 
