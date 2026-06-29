@@ -437,7 +437,7 @@ class AtkStockRequestForm
                                     ->default('')
                                     ->extraInputAttributes(['class' => 'bg-green-50']),
                             ])
-                            ->columns(6)
+                            ->columns(3)
                             ->minItems(1)
                             ->addActionLabel('Add Item')
                             ->reorderableWithButtons()
