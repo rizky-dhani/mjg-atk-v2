@@ -395,10 +395,11 @@ class AtkStockRequestForm
                                     ]),
 
                                 TextInput::make('current_mac')
-                                    ->label('Current MAC')
+                                    ->label('Current Average')
                                     ->readOnly()
-                                    ->dehydrated(false) // Don't include in form data
-                                    ->live() // Make it live-update when dependencies change
+                                    ->dehydrated(false)
+                                    ->live()
+                                    ->hidden()
                                     ->formatStateUsing(function (callable $get) {
                                         $itemId = $get('item_id');
                                         if (! $itemId) {
@@ -423,15 +424,17 @@ class AtkStockRequestForm
                                 TextInput::make('item_price')
                                     ->label('Item Price')
                                     ->readOnly()
-                                    ->dehydrated(false) // Don't include in form data
-                                    ->default('') // Set default to empty string
+                                    ->dehydrated(false)
+                                    ->hidden()
+                                    ->default('')
                                     ->extraInputAttributes(['class' => 'bg-blue-50']),
 
                                 TextInput::make('new_mac_estimate')
-                                    ->label('New MAC Estimate')
+                                    ->label('New Average')
                                     ->readOnly()
-                                    ->dehydrated(false) // Don't include in form data
-                                    ->default('') // Set default to empty string
+                                    ->dehydrated(false)
+                                    ->hidden()
+                                    ->default('')
                                     ->extraInputAttributes(['class' => 'bg-green-50']),
                             ])
                             ->columns(6)
