@@ -2,11 +2,15 @@
 
 namespace App\Filament\Resources\AtkStockRequests\Schemas;
 
+use App\Enums\AtkStockRequestStatus;
+use App\Models\ApprovalHistory;
 use App\Models\AtkCategory;
 use App\Models\AtkDivisionStock;
 use App\Models\AtkDivisionStockSetting;
 use App\Models\AtkItem;
+use App\Models\UserDivision;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -14,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
 class AtkStockRequestForm
 {
@@ -30,7 +35,7 @@ class AtkStockRequestForm
                                     ->label('Divisi')
                                     ->options(function () {
                                         if (auth()->user()->isSuperAdmin()) {
-                                            return \App\Models\UserDivision::all()->pluck('name', 'id');
+                                            return UserDivision::all()->pluck('name', 'id');
                                         }
 
                                         return auth()->user()->divisions->pluck('name', 'id');
@@ -57,7 +62,7 @@ class AtkStockRequestForm
                         }
 
                         // Check if there are any rejection records in ApprovalHistory
-                        $hasRejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
+                        $hasRejection = ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                             ->where('approvable_id', $record->id)
                             ->where('action', 'rejected')
                             ->exists();
@@ -77,7 +82,7 @@ class AtkStockRequestForm
                                         }
 
                                         // Get the most recent rejection reason from ApprovalHistory
-                                        $rejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
+                                        $rejection = ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
@@ -95,7 +100,7 @@ class AtkStockRequestForm
                                         }
 
                                         // Get the most recent rejection's user from ApprovalHistory
-                                        $rejection = \App\Models\ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
+                                        $rejection = ApprovalHistory::where('approvable_type', 'App\Models\AtkStockRequest')
                                             ->where('approvable_id', $record->id)
                                             ->where('action', 'rejected')
                                             ->latest('performed_at')
@@ -264,7 +269,7 @@ class AtkStockRequestForm
                                         $maxLimit = $setting ? $setting->max_limit : 'No limit';
                                         $availableSpace = $setting ? ($maxLimit - $currentStock) : 'Unlimited';
 
-                                        return new \Illuminate\Support\HtmlString("
+                                        return new HtmlString("
                                             <div class='flex flex-wrap gap-x-4 gap-y-1 text-xs'>
                                                 <div class='bg-gray-100 px-2 py-0.5 rounded'><span class='text-gray-500'>Current:</span> <span class='font-medium'>{$currentStock}</span></div>
                                                 <div class='bg-gray-100 px-2 py-0.5 rounded'><span class='text-gray-500'>Max:</span> <span class='font-medium'>{$maxLimit}</span></div>
@@ -428,7 +433,6 @@ class AtkStockRequestForm
                                     ->dehydrated(false) // Don't include in form data
                                     ->default('') // Set default to empty string
                                     ->extraInputAttributes(['class' => 'bg-green-50']),
-                                \Filament\Forms\Components\Hidden::make('category_id'),
                             ])
                             ->columns(6)
                             ->minItems(1)
@@ -436,8 +440,8 @@ class AtkStockRequestForm
                             ->reorderableWithButtons()
                             ->collapsible(),
                     ]),
-                \Filament\Forms\Components\Hidden::make('status')
-                    ->default(\App\Enums\AtkStockRequestStatus::Draft),
+                Hidden::make('status')
+                    ->default(AtkStockRequestStatus::Draft),
             ]);
     }
 }
