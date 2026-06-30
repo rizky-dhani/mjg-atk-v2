@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\AtkStockRequestItemStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class AtkStockRequestItem extends Model
 {
@@ -23,7 +25,7 @@ class AtkStockRequestItem extends Model
     protected function casts(): array
     {
         return [
-            'status' => \App\Enums\AtkStockRequestItemStatus::class,
+            'status' => AtkStockRequestItemStatus::class,
         ];
     }
 
@@ -40,6 +42,15 @@ class AtkStockRequestItem extends Model
     public function category()
     {
         return $this->belongsTo(AtkCategory::class, 'category_id');
+    }
+
+    /**
+     * Get the requester division's stock for this item
+     */
+    public function divisionStock(): HasOne
+    {
+        return $this->hasOne(AtkDivisionStock::class, 'item_id', 'item_id')
+            ->whereIn('division_id', AtkStockRequest::select('division_id')->whereColumn('id', 'request_id'));
     }
 
     /**
@@ -64,5 +75,13 @@ class AtkStockRequestItem extends Model
     public function isPartiallyReceived(): bool
     {
         return $this->received_quantity > 0 && $this->received_quantity < $this->quantity;
+    }
+
+    /**
+     * Get the requester division's current stock for this item
+     */
+    public function getDivisionCurrentStock(): int
+    {
+        return $this->divisionStock?->current_stock ?? 0;
     }
 }

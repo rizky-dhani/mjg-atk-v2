@@ -24,6 +24,7 @@ class AtkStockRequestItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('id')
+            ->modifyQueryUsing(fn ($query) => $query->with(['request', 'item', 'divisionStock']))
             ->columns([
                 Tables\Columns\TextColumn::make('item.name')
                     ->label('Item')
@@ -46,6 +47,11 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                     ->numeric()
                     ->state(fn (AtkStockRequestItem $record): int => $record->remaining_quantity)
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'success'),
+                Tables\Columns\TextColumn::make('divisionCurrentStock')
+                    ->label('Stok Divisi')
+                    ->numeric()
+                    ->state(fn (AtkStockRequestItem $record): int => $record->getDivisionCurrentStock())
+                    ->color('info'),
                 Tables\Columns\TextColumn::make('status')
                     ->badge()
                     ->formatStateUsing(fn (AtkStockRequestItemStatus $state): string => $state->getLabel())
