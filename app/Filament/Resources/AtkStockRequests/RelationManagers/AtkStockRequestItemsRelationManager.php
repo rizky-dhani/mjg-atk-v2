@@ -24,7 +24,7 @@ class AtkStockRequestItemsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('id')
-            ->modifyQueryUsing(fn ($query) => $query->with(['request', 'item', 'divisionStock']))
+            ->modifyQueryUsing(fn ($query) => $query->with(['request', 'item']))
             ->columns([
                 Tables\Columns\TextColumn::make('item.name')
                     ->label('Item')
