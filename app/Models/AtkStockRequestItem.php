@@ -50,7 +50,7 @@ class AtkStockRequestItem extends Model
     public function divisionStock(): HasOne
     {
         return $this->hasOne(AtkDivisionStock::class, 'item_id', 'item_id')
-            ->whereIn('division_id', AtkStockRequest::select('division_id')->whereColumn('id', 'atk_stock_request_items.request_id'));
+            ->where('division_id', fn ($q) => $q->select('division_id')->from('atk_stock_requests')->where('id', $this->request_id));
     }
 
     /**
