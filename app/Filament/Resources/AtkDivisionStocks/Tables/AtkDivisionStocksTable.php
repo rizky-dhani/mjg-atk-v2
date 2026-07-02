@@ -4,7 +4,6 @@ namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 
 use App\Filament\Actions\BulkMoveToFloatingAction;
 use App\Models\AtkDivisionStockSetting;
-use App\Models\UserDivision;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -13,7 +12,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -23,7 +21,7 @@ class AtkDivisionStocksTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->when(! (auth()->user()->isGA() || auth()->user()->isSuperAdmin()), fn ($q) => $q->whereIn('division_id', auth()->user()->divisions->pluck('id')))->orderBy('current_stock', 'desc'))
+                fn (Builder $query) => $query->orderBy('current_stock', 'desc'))
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
@@ -79,12 +77,6 @@ class AtkDivisionStocksTable
                         'No setting' => 'gray',
                         default => 'gray',
                     }),
-            ])
-            ->filters([
-                SelectFilter::make('division_id')
-                    ->label('Division')
-                    ->options(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() ? UserDivision::pluck('name', 'id') : auth()->user()->divisions->pluck('name', 'id'))
-                    ->visible(fn () => auth()->user()->isGA() || auth()->user()->isSuperAdmin() || auth()->user()->divisions()->count() > 1),
             ])
             ->recordActions([
                 ViewAction::make(),
