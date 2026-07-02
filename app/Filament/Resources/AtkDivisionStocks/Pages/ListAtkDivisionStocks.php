@@ -39,6 +39,7 @@ class ListAtkDivisionStocks extends ListRecords
             AtkDivisionStock::getImportAction()
                 ->visible(fn () => auth()->user()->hasRole('Admin') && auth()->user()->isGA() || auth()->user()->hasRole('Super Admin')),
             CreateAction::make()
+                ->successRedirectUrl(fn () => AtkDivisionStockResource::getUrl('index', ['tab' => request('tab')]))
                 ->successNotificationTitle('ATK Division Stock created'),
         ];
     }

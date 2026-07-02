@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AtkDivisionStocks\Tables;
 
 use App\Filament\Actions\BulkMoveToFloatingAction;
+use App\Filament\Resources\AtkDivisionStocks\AtkDivisionStockResource;
 use App\Models\AtkDivisionStockSetting;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -81,6 +82,7 @@ class AtkDivisionStocksTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->successRedirectUrl(fn () => AtkDivisionStockResource::getUrl('index', ['tab' => request('tab')]))
                     ->successNotificationTitle('Stok Divisi ATK berhasil diperbarui')
                     ->hidden(fn () => auth()->user()->hasRole('Admin')),
                 Action::make('move_to_floating')
