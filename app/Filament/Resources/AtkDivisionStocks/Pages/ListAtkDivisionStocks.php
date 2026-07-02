@@ -21,9 +21,11 @@ class ListAtkDivisionStocks extends ListRecords
             ? UserDivision::all()
             : $user->divisions;
 
-        $tabs = [
-            'all' => Tab::make('Semua Divisi'),
-        ];
+        $tabs = [];
+
+        if ($user->isGA() || $user->isSuperAdmin()) {
+            $tabs['all'] = Tab::make('Semua Divisi');
+        }
 
         foreach ($divisions as $division) {
             $tabs["div_{$division->id}"] = Tab::make($division->name)
