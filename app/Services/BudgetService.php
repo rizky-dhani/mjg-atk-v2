@@ -39,7 +39,7 @@ class BudgetService
                 ->first();
 
             if (! $budgeting) {
-                throw new \Exception("No budget found for division ID {$divisionId} in fiscal year {$fiscalYear}");
+                return false; // No budget set, skip deduction
             }
 
             if (! $budgeting->hasSufficientBudget($amount)) {
@@ -67,7 +67,7 @@ class BudgetService
                 ->first();
 
             if (! $budgeting) {
-                throw new \Exception("No budget found for division ID {$divisionId} in fiscal year {$fiscalYear}");
+                return false; // No budget set, skip addition
             }
 
             $budgeting->used_amount -= $amount;
