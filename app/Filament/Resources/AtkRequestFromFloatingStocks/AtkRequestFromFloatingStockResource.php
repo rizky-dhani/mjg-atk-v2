@@ -4,7 +4,9 @@ namespace App\Filament\Resources\AtkRequestFromFloatingStocks;
 
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ListAtkRequestFromFloatingStocks;
+use App\Filament\Resources\AtkRequestFromFloatingStocks\RelationManagers\AtkRequestFromFloatingStockItemsRelationManager;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Schemas\AtkRequestFromFloatingStockForm;
+use App\Filament\Resources\AtkRequestFromFloatingStocks\Schemas\AtkRequestFromFloatingStockInfolist;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Tables\AtkRequestFromFloatingStocksTable;
 use App\Models\AtkRequestFromFloatingStock;
 use BackedEnum;
@@ -49,6 +51,11 @@ class AtkRequestFromFloatingStockResource extends Resource
         ];
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return AtkRequestFromFloatingStockInfolist::configure($schema);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AtkRequestFromFloatingStockForm::configure($schema);
@@ -62,7 +69,7 @@ class AtkRequestFromFloatingStockResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            AtkRequestFromFloatingStockItemsRelationManager::class,
         ];
     }
 
