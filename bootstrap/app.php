@@ -1,14 +1,16 @@
 <?php
 
-use App\Mail\ErrorLogMail;
-use App\Services\ErrorThrottleService;
+use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Notifications\DatabaseNotification;
+use Filament\Notifications\Notification;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Js;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
@@ -35,19 +37,45 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            $throttle = app(ErrorThrottleService::class);
-            if ($throttle->shouldSend($e, $request)) {
-                $email = config('error-logging.email');
-                if ($email) {
-                    Mail::to($email)->send(ErrorLogMail::fromThrowable($e, $request));
-                }
-            }
-
             Log::error('Exception occurred', [
                 'exception' => get_class($e),
                 'message' => $e->getMessage(),
                 'url' => $request->fullUrl(),
             ]);
+
+            $traceLines = array_slice(explode("\n", $e->getTraceAsString()), 0, 10);
+
+            $errorDetails = 'Exception: '.get_class($e)."\n"
+                .'Message: '.$e->getMessage()."\n"
+                .'URL: '.$request->fullUrl()."\n"
+                .'Method: '.$request->method()."\n"
+                .'IP: '.$request->ip()."\n"
+                .'Stack Trace:'."\n".implode("\n", $traceLines);
+
+            $errorDetailsJs = Js::from($errorDetails)->toHtml();
+
+            Notification::make()
+                ->title('Terjadi kesalahan')
+                ->body('Tekan tombol Copy Error untuk menyalin detail ke clipboard.')
+                ->persistent()
+                ->danger()
+                ->actions([
+                    Action::make('copyError')
+                        ->label('Copy Error')
+                        ->color('danger')
+                        ->alpineClickHandler('navigator.clipboard.writeText('.$errorDetailsJs.')'),
+                ])
+                ->send();
+
+            $databaseMessage = Notification::make()
+                ->title('Error: '.get_class($e))
+                ->body($errorDetails)
+                ->danger()
+                ->getDatabaseMessage();
+
+            User::role('Super Admin')->each(
+                fn ($admin) => $admin->notify(new DatabaseNotification($databaseMessage))
+            );
 
             return null;
         });

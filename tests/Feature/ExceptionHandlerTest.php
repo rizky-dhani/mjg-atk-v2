@@ -1,41 +1,84 @@
 <?php
 
-use App\Mail\ErrorLogMail;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
+use App\Models\User;
+use App\Models\UserDivision;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Spatie\Permission\Models\Role;
+
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    Cache::flush();
-    config(['error-logging.email' => 'admin@example.com']);
+    $this->division = UserDivision::create(['name' => 'IT', 'initial' => 'IT']);
+    Role::create(['name' => 'Super Admin']);
 });
 
-it('sends error email on uncaught exception', function () {
-    Mail::fake();
+it('sends database notification to super admins on exception', function () {
+    $superAdmin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'super@example.com',
+        'password' => bcrypt('password'),
+        'initial' => 'SA',
+        'division_id' => $this->division->id,
+    ]);
+    $superAdmin->assignRole('Super Admin');
 
-    Route::get('/test-throw-exception', fn () => throw new RuntimeException('test exception'));
+    $regularUser = User::create([
+        'name' => 'Regular User',
+        'email' => 'regular@example.com',
+        'password' => bcrypt('password'),
+        'initial' => 'RU',
+        'division_id' => $this->division->id,
+    ]);
 
-    $this->get('/test-throw-exception');
+    Route::get('/test-error-notify', function () {
+        throw new RuntimeException('Notify test');
+    });
 
-    Mail::assertQueued(ErrorLogMail::class);
+    $this->actingAs($regularUser)->get('/test-error-notify');
+
+    expect($superAdmin->notifications()->count())->toBe(1);
+    expect($regularUser->notifications()->count())->toBe(0);
+
+    $notification = $superAdmin->notifications()->first();
+    expect($notification->data['title'])->toContain('RuntimeException');
+    expect($notification->data['body'])->toContain('Notify test');
 });
 
-it('does not send email for 404 exceptions', function () {
-    Mail::fake();
+it('does not send database notification for excluded exceptions', function () {
+    $superAdmin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'super@example.com',
+        'password' => bcrypt('password'),
+        'initial' => 'SA',
+        'division_id' => $this->division->id,
+    ]);
+    $superAdmin->assignRole('Super Admin');
 
-    $this->get('/nonexistent-page');
+    $this->get('/nonexistent-page-'.uniqid());
 
-    Mail::assertNothingSent();
+    expect($superAdmin->notifications()->count())->toBe(0);
 });
 
-it('throttles duplicate error emails within window', function () {
-    Mail::fake();
+it('sends notification for different exceptions independently', function () {
+    $superAdmin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'super@example.com',
+        'password' => bcrypt('password'),
+        'initial' => 'SA',
+        'division_id' => $this->division->id,
+    ]);
+    $superAdmin->assignRole('Super Admin');
 
-    Route::get('/test-throw-twice', fn () => throw new RuntimeException('throttle test'));
+    Route::get('/test-error-a', function () {
+        throw new RuntimeException('Error A');
+    });
+    Route::get('/test-error-b', function () {
+        throw new InvalidArgumentException('Error B');
+    });
 
-    $this->get('/test-throw-twice');
-    Mail::assertQueued(ErrorLogMail::class, 1);
+    $this->get('/test-error-a');
+    $this->get('/test-error-b');
 
-    $this->get('/test-throw-twice');
-    Mail::assertQueued(ErrorLogMail::class, 1);
+    expect($superAdmin->notifications()->count())->toBe(2);
 });
