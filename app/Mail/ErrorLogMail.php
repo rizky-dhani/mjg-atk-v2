@@ -19,9 +19,42 @@ class ErrorLogMail extends Mailable
      * Create a new message instance.
      */
     public function __construct(
-        public Throwable $exception,
-        public Request $request
+        public string $exceptionClass,
+        public string $exceptionMessage,
+        public int|string $exceptionCode,
+        public string $stackTrace,
+        public string $requestMethod,
+        public string $requestUrl,
+        public string $clientIp,
+        public string $requestInput,
+        public array $requestHeaders,
+        public array $requestSession,
+        public array $requestServer,
+        public string $timestamp,
     ) {}
+
+    /**
+     * Build from an exception and request, extracting only serializable data.
+     */
+    public static function fromThrowable(Throwable $exception, Request $request): static
+    {
+        $traceLines = explode("\n", $exception->getTraceAsString());
+
+        return new static(
+            exceptionClass: get_class($exception),
+            exceptionMessage: $exception->getMessage(),
+            exceptionCode: $exception->getCode(),
+            stackTrace: implode("\n", array_slice($traceLines, 0, 20)),
+            requestMethod: $request->method(),
+            requestUrl: $request->fullUrl(),
+            clientIp: $request->ip(),
+            requestInput: json_encode($request->except(['password', 'password_confirmation', 'token']), JSON_PRETTY_PRINT),
+            requestHeaders: $request->headers->all(),
+            requestSession: $request->session()->all(),
+            requestServer: $request->server->all(),
+            timestamp: now()->toDateTimeString(),
+        );
+    }
 
     /**
      * Get the message envelope.
@@ -29,7 +62,7 @@ class ErrorLogMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '[ERROR] '.class_basename($this->exception).' at '.$this->request->url(),
+            subject: '[ERROR] '.$this->exceptionClass.' at '.$this->requestUrl,
         );
     }
 
@@ -38,20 +71,16 @@ class ErrorLogMail extends Mailable
      */
     public function content(): Content
     {
-        $trace = $this->exception->getTraceAsString();
-        $traceLines = explode("\n", $trace);
-        $traceFirst20 = implode("\n", array_slice($traceLines, 0, 20));
-
         return new Content(
             view: 'emails.error-log',
             with: [
-                'exceptionClass' => get_class($this->exception),
-                'exceptionMessage' => $this->exception->getMessage(),
-                'requestMethod' => $this->request->method(),
-                'requestUrl' => $this->request->fullUrl(),
-                'clientIp' => $this->request->ip(),
-                'stackTrace' => $traceFirst20,
-                'timestamp' => now()->toDateTimeString(),
+                'exceptionClass' => $this->exceptionClass,
+                'exceptionMessage' => $this->exceptionMessage,
+                'requestMethod' => $this->requestMethod,
+                'requestUrl' => $this->requestUrl,
+                'clientIp' => $this->clientIp,
+                'stackTrace' => $this->stackTrace,
+                'timestamp' => $this->timestamp,
             ],
         );
     }
@@ -63,48 +92,42 @@ class ErrorLogMail extends Mailable
      */
     public function attachments(): array
     {
+        $fullDump = <<<DUMP
+            === EXCEPTION ===
+            Class: {$this->exceptionClass}
+            Message: {$this->exceptionMessage}
+            Code: {$this->exceptionCode}
+
+            === STACK TRACE ===
+            {$this->stackTrace}
+
+            === REQUEST ===
+            Method: {$this->requestMethod}
+            URL: {$this->requestUrl}
+            IP: {$this->clientIp}
+            Input: {$this->requestInput}
+
+            === HEADERS ===
+            {$this->formatJson($this->requestHeaders)}
+
+            === SESSION ===
+            {$this->formatJson($this->requestSession)}
+
+            === SERVER ===
+            {$this->formatJson($this->requestServer)}
+
+            === TIMESTAMP ===
+            {$this->timestamp}
+            DUMP;
+
         return [
-            Attachment::fromData(fn () => $this->buildFullDump(), 'error-dump.txt')
+            Attachment::fromData(fn () => $fullDump, 'error-dump.txt')
                 ->withMime('text/plain'),
         ];
     }
 
-    protected function buildFullDump(): string
+    protected function formatJson(mixed $data): string
     {
-        $sections = [];
-
-        $sections[] = '=== EXCEPTION ===';
-        $sections[] = 'Class: '.get_class($this->exception);
-        $sections[] = 'Message: '.$this->exception->getMessage();
-        $sections[] = 'Code: '.$this->exception->getCode();
-        $sections[] = '';
-
-        $sections[] = '=== STACK TRACE ===';
-        $sections[] = $this->exception->getTraceAsString();
-        $sections[] = '';
-
-        $sections[] = '=== REQUEST ===';
-        $sections[] = 'Method: '.$this->request->method();
-        $sections[] = 'URL: '.$this->request->fullUrl();
-        $sections[] = 'IP: '.$this->request->ip();
-        $sections[] = 'Input: '.json_encode($this->request->except(['password', 'password_confirmation', 'token']), JSON_PRETTY_PRINT);
-        $sections[] = '';
-
-        $sections[] = '=== HEADERS ===';
-        $sections[] = json_encode($this->request->headers->all(), JSON_PRETTY_PRINT);
-        $sections[] = '';
-
-        $sections[] = '=== SESSION ===';
-        $sections[] = json_encode($this->request->session()->all(), JSON_PRETTY_PRINT);
-        $sections[] = '';
-
-        $sections[] = '=== SERVER ===';
-        $sections[] = json_encode($this->request->server->all(), JSON_PRETTY_PRINT);
-        $sections[] = '';
-
-        $sections[] = '=== TIMESTAMP ===';
-        $sections[] = now()->toDateTimeString();
-
-        return implode("\n", $sections);
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     }
 }

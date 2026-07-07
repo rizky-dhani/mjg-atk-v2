@@ -39,7 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($throttle->shouldSend($e, $request)) {
                 $email = config('error-logging.email');
                 if ($email) {
-                    Mail::to($email)->queue(new ErrorLogMail($e, $request));
+                    Mail::to($email)->send(ErrorLogMail::fromThrowable($e, $request));
                 }
             }
 
