@@ -3,6 +3,7 @@
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->renderable(function (Throwable $e, Request $request) {
             $excludedClasses = [
+                AuthenticationException::class,
                 NotFoundHttpException::class,
                 TokenMismatchException::class,
                 TooManyRequestsHttpException::class,
