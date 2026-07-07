@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Filament\Actions\Action;
-use Filament\Notifications\DatabaseNotification;
 use Filament\Notifications\Notification;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -67,14 +66,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 ])
                 ->send();
 
-            $databaseMessage = Notification::make()
-                ->title('Error: '.get_class($e))
-                ->body($errorDetails)
-                ->danger()
-                ->getDatabaseMessage();
-
             User::role('Super Admin')->each(
-                fn ($admin) => $admin->notify(new DatabaseNotification($databaseMessage))
+                fn ($admin) => Notification::make()
+                    ->title('Error: '.get_class($e))
+                    ->body($errorDetails)
+                    ->danger()
+                    ->actions([
+                        Action::make('copyError')
+                            ->label('Copy Error')
+                            ->color('danger')
+                            ->alpineClickHandler('navigator.clipboard.writeText('.$errorDetailsJs.')'),
+                    ])
+                    ->sendToDatabase($admin)
             );
 
             return null;
