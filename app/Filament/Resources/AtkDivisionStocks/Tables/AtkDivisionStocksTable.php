@@ -22,7 +22,7 @@ class AtkDivisionStocksTable
     {
         return $table
             ->modifyQueryUsing(
-                fn (Builder $query) => $query->orderBy('current_stock', 'desc'))
+                fn (Builder $query) => $query->orderBy('category_id'))
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
