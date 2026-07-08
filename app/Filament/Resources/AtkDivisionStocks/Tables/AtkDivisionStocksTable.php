@@ -83,6 +83,7 @@ class AtkDivisionStocksTable
             ->filters([
                 SelectFilter::make('stock_availability')
                     ->label('Stock Availability')
+                    ->multiple(false)
                     ->options([
                         'empty' => 'Empty (0)',
                         'not_empty' => 'Not Empty (>0)',
