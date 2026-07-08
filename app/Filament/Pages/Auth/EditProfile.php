@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Auth\Pages\EditProfile as BaseEditProfile;
 use Filament\Notifications\Notification;
+use Filament\Pages\Dashboard;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -36,6 +37,15 @@ class EditProfile extends BaseEditProfile
             ]);
     }
 
+    protected function getRedirectUrl(): ?string
+    {
+        if (! auth()->user()->has_changed_password) {
+            return Dashboard::getUrl(panel: 'dashboard');
+        }
+
+        return null;
+    }
+
     public function save(): void
     {
         parent::save();
@@ -52,8 +62,6 @@ class EditProfile extends BaseEditProfile
                 ->body('Terima kasih telah memperbarui kata sandi Anda. Sekarang Anda dapat menggunakan seluruh fitur website.')
                 ->success()
                 ->send();
-
-            $this->redirect(route('filament.dashboard.pages.dashboard'));
         }
     }
 }
