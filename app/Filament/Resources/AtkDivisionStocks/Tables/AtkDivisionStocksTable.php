@@ -87,18 +87,15 @@ class AtkDivisionStocksTable
                         'empty' => 'Empty (0)',
                         'not_empty' => 'Not Empty (>0)',
                     ])
-                    ->query(function (Builder $query, $state) {
-                        $value = is_array($state) ? ($state[0] ?? null) : $state;
-
-                        if ($value === 'empty') {
-                            return $query->where('current_stock', 0);
-                        }
-
-                        if ($value === 'not_empty') {
-                            return $query->where('current_stock', '>', 0);
-                        }
-
-                        return $query;
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'],
+                            fn (Builder $query, $value) => match ($value) {
+                                'empty' => $query->where('current_stock', 0),
+                                'not_empty' => $query->where('current_stock', '>', 0),
+                                default => $query,
+                            },
+                        );
                     }),
             ])
             ->recordActions([
