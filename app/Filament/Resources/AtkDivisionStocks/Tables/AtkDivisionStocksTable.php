@@ -13,6 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -77,6 +78,19 @@ class AtkDivisionStocksTable
                         'Empty' => 'danger',
                         'No setting' => 'gray',
                         default => 'gray',
+                    }),
+            ])
+            ->filters([
+                SelectFilter::make('stock_availability')
+                    ->label('Stock Availability')
+                    ->options([
+                        'empty' => 'Empty (0)',
+                        'not_empty' => 'Not Empty (>0)',
+                    ])
+                    ->query(fn (Builder $query, string $state) => match ($state) {
+                        'empty' => $query->where('current_stock', 0),
+                        'not_empty' => $query->where('current_stock', '>', 0),
+                        default => $query,
                     }),
             ])
             ->recordActions([
