@@ -6,6 +6,7 @@ use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -143,7 +144,7 @@ class UserResource extends Resource
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    Action::make('bulkActivate')
+                    BulkAction::make('bulkActivate')
                         ->label('Activate')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
@@ -161,7 +162,7 @@ class UserResource extends Resource
                                 ->success()
                                 ->send();
                         }),
-                    Action::make('bulkDeactivate')
+                    BulkAction::make('bulkDeactivate')
                         ->label('Deactivate')
                         ->icon('heroicon-o-no-symbol')
                         ->color('danger')
