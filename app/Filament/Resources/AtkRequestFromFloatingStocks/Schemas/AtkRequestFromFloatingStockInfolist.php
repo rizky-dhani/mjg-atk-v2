@@ -22,6 +22,21 @@ class AtkRequestFromFloatingStockInfolist
                 ])
                 ->columns(3)
                 ->columnSpanFull(),
+
+            Section::make('Requested Items')
+                ->schema([
+                    RepeatableEntry::make('items')
+                        ->label('Items')
+                        ->columns(3)
+                        ->schema([
+                            TextEntry::make('item.name')
+                                ->label('Item'),
+                            TextEntry::make('quantity')
+                                ->label('Quantity'),
+                        ]),
+                ])
+                ->columnSpanFull(),
+
             Section::make('Approval Progress')
                 ->schema([
                     RepeatableEntry::make('approvalProgress')
