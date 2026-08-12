@@ -27,7 +27,7 @@ class AtkRequestFromFloatingStockInfolist
                 ->schema([
                     RepeatableEntry::make('items')
                         ->label('Items')
-                        ->columns(3)
+                        ->columns(2)
                         ->schema([
                             TextEntry::make('item.name')
                                 ->label('Item'),
