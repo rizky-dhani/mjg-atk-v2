@@ -12,7 +12,7 @@ class AtkBudgetingPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->isSuperAdmin();
+        return $user->can('view-any atk-budgeting');
     }
 
     /**
@@ -20,11 +20,7 @@ class AtkBudgetingPolicy
      */
     public function view(User $user, AtkBudgeting $atkBudgeting): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $user->hasRole('Admin') && $user->belongsToDivision($atkBudgeting->division_id);
+        return $user->can('view atk-budgeting');
     }
 
     /**
@@ -32,7 +28,7 @@ class AtkBudgetingPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin') || $user->isSuperAdmin();
+        return $user->can('create atk-budgeting');
     }
 
     /**
@@ -40,11 +36,7 @@ class AtkBudgetingPolicy
      */
     public function update(User $user, AtkBudgeting $atkBudgeting): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $user->hasRole('Admin') && $user->belongsToDivision($atkBudgeting->division_id);
+        return $user->can('edit atk-budgeting');
     }
 
     /**
@@ -52,11 +44,7 @@ class AtkBudgetingPolicy
      */
     public function delete(User $user, AtkBudgeting $atkBudgeting): bool
     {
-        if ($user->isSuperAdmin()) {
-            return true;
-        }
-
-        return $user->hasRole('Admin') && $user->belongsToDivision($atkBudgeting->division_id);
+        return $user->can('delete atk-budgeting');
     }
 
     /**

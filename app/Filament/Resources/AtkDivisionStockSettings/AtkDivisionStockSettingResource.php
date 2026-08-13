@@ -23,6 +23,12 @@ class AtkDivisionStockSettingResource extends Resource
         return __('filament.navigation.group.settings');
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     protected static ?string $navigationLabel = 'Stock Limit - ATK';
 
     protected static ?string $modelLabel = 'Stock Limit';

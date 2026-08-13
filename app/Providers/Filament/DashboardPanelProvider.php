@@ -123,7 +123,7 @@ class DashboardPanelProvider extends PanelProvider
                     ->url(fn () => AtkItemResource::getUrl('index'))
                     ->group(__('filament.navigation.group.settings'))
                     ->isActiveWhen(fn () => request()->url() === AtkItemResource::getUrl('index'))
-                    ->visible(fn () => Auth::user()->hasRole('Admin') && Auth::user()->isGA()),
+                    ->visible(fn () => Auth::user()->can('view-any atk-item')),
                 NavigationItem::make('Item Inventaris - Marketing Media')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => MarketingMediaItemResource::getUrl('index'))

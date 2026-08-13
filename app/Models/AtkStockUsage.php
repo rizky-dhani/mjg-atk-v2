@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Traits\StockUsageModelTrait;
+use App\Traits\DivisionScoped;
 use Illuminate\Database\Eloquent\Model;
 
 class AtkStockUsage extends Model
 {
+    use DivisionScoped;
     use StockUsageModelTrait;
 
     protected $fillable = [

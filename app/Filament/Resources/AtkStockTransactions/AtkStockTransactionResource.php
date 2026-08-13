@@ -39,6 +39,12 @@ class AtkStockTransactionResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AtkStockTransactionForm::configure($schema);

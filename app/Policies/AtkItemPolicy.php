@@ -12,11 +12,6 @@ class AtkItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
-            return true;
-        }
-
         return $user->can('view-any atk-item');
     }
 
@@ -25,11 +20,6 @@ class AtkItemPolicy
      */
     public function view(User $user, AtkItem $atkItem): bool
     {
-        // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
-            return true;
-        }
-
         return $user->can('view atk-item');
     }
 
@@ -38,12 +28,7 @@ class AtkItemPolicy
      */
     public function create(User $user): bool
     {
-        // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
-            return true;
-        }
-
-        return false;
+        return $user->can('create atk-item');
     }
 
     /**
@@ -51,12 +36,7 @@ class AtkItemPolicy
      */
     public function update(User $user, AtkItem $atkItem): bool
     {
-        // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
-            return true;
-        }
-
-        return false;
+        return $user->can('edit atk-item');
     }
 
     /**
@@ -64,12 +44,7 @@ class AtkItemPolicy
      */
     public function delete(User $user, AtkItem $atkItem): bool
     {
-        // Check for Super Admin and Admin from GA roles
-        if ($user->hasRole('Super Admin') || ($user->hasRole('Admin') && $user->isGA())) {
-            return true;
-        }
-
-        return false;
+        return $user->can('delete atk-item');
     }
 
     /**

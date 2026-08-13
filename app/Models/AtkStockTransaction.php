@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use App\Traits\DivisionScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AtkStockTransaction extends Model
 {
+    use DivisionScoped;
     protected $table = 'atk_stock_trx';
 
     protected $fillable = [

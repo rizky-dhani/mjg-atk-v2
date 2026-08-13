@@ -11,6 +11,7 @@ use Database\Factories\UserFactory;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 uses(RefreshDatabase::class);
@@ -19,6 +20,18 @@ beforeEach(function () {
     Role::create(['name' => 'Super Admin']);
     Role::create(['name' => 'Admin']);
     Role::create(['name' => 'Staff']);
+
+    // Create permissions for budgeting
+    Permission::create(['name' => 'view-any atk-budgeting']);
+    Permission::create(['name' => 'view atk-budgeting']);
+    Permission::create(['name' => 'create atk-budgeting']);
+    Permission::create(['name' => 'edit atk-budgeting']);
+    Permission::create(['name' => 'delete atk-budgeting']);
+
+    // Assign permissions to roles
+    Role::where('name', 'Super Admin')->first()->givePermissionTo('view-any atk-budgeting', 'view atk-budgeting', 'create atk-budgeting', 'edit atk-budgeting', 'delete atk-budgeting');
+    Role::where('name', 'Admin')->first()->givePermissionTo('view-any atk-budgeting', 'view atk-budgeting', 'create atk-budgeting', 'edit atk-budgeting');
+    Role::where('name', 'Staff')->first()->givePermissionTo('view-any atk-budgeting', 'view atk-budgeting');
 
     Filament::setCurrentPanel(Filament::getPanel('dashboard'));
 });

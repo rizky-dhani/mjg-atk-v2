@@ -35,6 +35,12 @@ class AtkBudgetingResource extends Resource
         return __('filament.navigation.group.settings');
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AtkBudgetingForm::configure($schema);

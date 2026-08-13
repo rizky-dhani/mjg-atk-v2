@@ -4,12 +4,14 @@ namespace App\Models;
 
 use App\Services\FloatingStockService;
 use App\Services\StockTransactionService;
+use App\Traits\DivisionScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
 class AtkDivisionStock extends Model
 {
+    use DivisionScoped;
     protected $fillable = [
         'division_id',
         'item_id',

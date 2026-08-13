@@ -39,6 +39,12 @@ class AtkStockRequestResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     public static function getNavigationItems(): array
     {
         return [

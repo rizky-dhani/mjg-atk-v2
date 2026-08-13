@@ -34,6 +34,12 @@ class AtkDivisionStockResource extends Resource
         return __('filament.navigation.group.atk');
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     public static function form(Schema $form): Schema
     {
         return AtkDivisionStockForm::configure($form);

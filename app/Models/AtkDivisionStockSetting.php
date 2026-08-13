@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\DivisionScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AtkDivisionStockSetting extends Model
 {
+    use DivisionScoped;
     protected $fillable = [
         'division_id',
         'item_id',

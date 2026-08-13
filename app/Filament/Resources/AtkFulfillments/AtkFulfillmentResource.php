@@ -41,7 +41,8 @@ class AtkFulfillmentResource extends Resource
     {
         return parent::getEloquentQuery()
             ->whereHas('approval', fn ($query) => $query->where('status', 'approved'))
-            ->where('status', \App\Enums\AtkStockRequestStatus::Published);
+            ->where('status', \App\Enums\AtkStockRequestStatus::Published)
+            ->forUser(auth()->user());
     }
 
     public static function form(Schema $schema): Schema

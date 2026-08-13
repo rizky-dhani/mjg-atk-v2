@@ -12,7 +12,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isGA();
+        return $user->can('view-any atk-floating-stock-transaction-history');
     }
 
     /**
@@ -20,7 +20,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function view(User $user, AtkFloatingStockTransactionHistory $atkFloatingStockTransactionHistory): bool
     {
-        return $user->isGA();
+        return $user->can('view atk-floating-stock-transaction-history');
     }
 
     /**
@@ -28,7 +28,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isGA();
+        return $user->can('create atk-floating-stock-transaction-history');
     }
 
     /**
@@ -36,7 +36,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function update(User $user, AtkFloatingStockTransactionHistory $atkFloatingStockTransactionHistory): bool
     {
-        return $user->isGA();
+        return $user->can('edit atk-floating-stock-transaction-history');
     }
 
     /**
@@ -44,7 +44,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function delete(User $user, AtkFloatingStockTransactionHistory $atkFloatingStockTransactionHistory): bool
     {
-        return $user->isGA();
+        return $user->can('delete atk-floating-stock-transaction-history');
     }
 
     /**
@@ -52,7 +52,7 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function restore(User $user, AtkFloatingStockTransactionHistory $atkFloatingStockTransactionHistory): bool
     {
-        return $user->isGA();
+        return false;
     }
 
     /**
@@ -60,6 +60,6 @@ class AtkFloatingStockTransactionHistoryPolicy
      */
     public function forceDelete(User $user, AtkFloatingStockTransactionHistory $atkFloatingStockTransactionHistory): bool
     {
-        return $user->isGA();
+        return false;
     }
 }

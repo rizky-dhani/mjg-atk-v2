@@ -12,7 +12,7 @@ class AtkFloatingStockPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isGA();
+        return $user->can('view-any atk-floating-stock');
     }
 
     /**
@@ -20,7 +20,7 @@ class AtkFloatingStockPolicy
      */
     public function view(User $user, AtkFloatingStock $atkFloatingStock): bool
     {
-        return $user->isGA();
+        return $user->can('view atk-floating-stock');
     }
 
     /**
@@ -28,7 +28,7 @@ class AtkFloatingStockPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isGA();
+        return $user->can('create atk-floating-stock');
     }
 
     /**
@@ -36,7 +36,7 @@ class AtkFloatingStockPolicy
      */
     public function update(User $user, AtkFloatingStock $atkFloatingStock): bool
     {
-        return $user->isGA();
+        return $user->can('edit atk-floating-stock');
     }
 
     /**
@@ -44,7 +44,7 @@ class AtkFloatingStockPolicy
      */
     public function delete(User $user, AtkFloatingStock $atkFloatingStock): bool
     {
-        return $user->isGA();
+        return $user->can('delete atk-floating-stock');
     }
 
     /**
@@ -52,7 +52,7 @@ class AtkFloatingStockPolicy
      */
     public function restore(User $user, AtkFloatingStock $atkFloatingStock): bool
     {
-        return $user->isSuperAdmin();
+        return false;
     }
 
     /**
@@ -60,6 +60,6 @@ class AtkFloatingStockPolicy
      */
     public function forceDelete(User $user, AtkFloatingStock $atkFloatingStock): bool
     {
-        return $user->isSuperAdmin();
+        return false;
     }
 }

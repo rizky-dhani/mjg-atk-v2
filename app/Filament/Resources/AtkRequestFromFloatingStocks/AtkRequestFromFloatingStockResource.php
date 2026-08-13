@@ -39,6 +39,12 @@ class AtkRequestFromFloatingStockResource extends Resource
 
     protected static ?int $navigationSort = 5;
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->forUser(auth()->user());
+    }
+
     public static function getNavigationItems(): array
     {
         return [
