@@ -31,7 +31,8 @@ class ImportStockAction
 
                 FileUpload::make('excel_file')
                     ->label('Excel File')
-                    ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'])
+                    ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
+                    ->rules(['mimes:xlsx'])
                     ->required()
                     ->disk('local')
                     ->directory('imports')
