@@ -22,10 +22,6 @@ class DatabaseSeeder extends Seeder
             // AtkItemPriceSeeder::class,
             AtkDivisionStockSettingSeeder::class,
             // AtkDivisionStockSeeder::class,
-            // MarketingMediaCategorySeeder::class,
-            // MarketingMediaItemSeeder::class,
-            // MarketingMediaDivisionStockSettingSeeder::class,
-            // MarketingMediaDivisionStockSeeder::class,
             ApprovalFlowSeeder::class,
             // MovingAverageCostDemoSeeder::class, // Add this line
         ]);

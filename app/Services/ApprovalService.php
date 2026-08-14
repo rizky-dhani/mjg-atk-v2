@@ -40,29 +40,14 @@ class ApprovalService
         return $this->validationService->canUserApproveStockRequest($stockRequest, $user);
     }
 
-    public function canUserApproveMarketingMediaStockRequest(\App\Models\MarketingMediaStockRequest $marketingMediaStockRequest, \App\Models\User $user): bool
-    {
-        return $this->validationService->canUserApproveMarketingMediaStockRequest($marketingMediaStockRequest, $user);
-    }
-
     public function getMatchingApprovalStepsForStockRequest(\App\Models\AtkStockRequest $stockRequest, \App\Models\User $user): \Illuminate\Support\Collection
     {
         return $this->validationService->getMatchingApprovalStepsForStockRequest($stockRequest, $user);
     }
 
-    public function getMatchingApprovalStepsForMarketingMediaStockRequest(\App\Models\MarketingMediaStockRequest $marketingMediaStockRequest, \App\Models\User $user): \Illuminate\Support\Collection
-    {
-        return $this->validationService->getMatchingApprovalStepsForMarketingMediaStockRequest($marketingMediaStockRequest, $user);
-    }
-
     public function canUserApproveStockUsage(\App\Models\AtkStockUsage $stockUsage, \App\Models\User $user): bool
     {
         return $this->validationService->canUserApproveStockUsage($stockUsage, $user);
-    }
-
-    public function canUserApproveMarketingMediaStockUsage(\App\Models\MarketingMediaStockUsage $marketingMediaStockUsage, \App\Models\User $user): bool
-    {
-        return $this->validationService->canUserApproveMarketingMediaStockUsage($marketingMediaStockUsage, $user);
     }
 
     public function getMatchingApprovalStepsForStockUsage(\App\Models\AtkStockUsage $stockUsage, \App\Models\User $user): \Illuminate\Support\Collection

@@ -7,10 +7,6 @@ use App\Models\AtkFloatingStock;
 use App\Models\AtkRequestFromFloatingStock;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
-use App\Models\MarketingMediaDivisionStock;
-use App\Models\MarketingMediaStockRequest;
-use App\Models\MarketingMediaStockUsage;
-
 class StockUpdateService
 {
     protected BudgetService $budgetService;
@@ -46,7 +42,6 @@ class StockUpdateService
             // For the current separate models, use the existing logic
             switch ($modelClass) {
                 case AtkStockRequest::class:
-                case MarketingMediaStockRequest::class:
                     $this->updateStockForAddition($model);
                     break;
 
@@ -99,7 +94,7 @@ class StockUpdateService
     }
 
     /**
-     * Update division stock for stock addition (e.g., AtkStockRequest, MarketingMediaStockRequest)
+     * Update division stock for stock addition (e.g., AtkStockRequest)
      *
      * @param  mixed  $stockRequest  The approved stock request
      */
@@ -108,7 +103,6 @@ class StockUpdateService
         // Skip automatic updates for these models as they now use manual partial fulfillment
         if (in_array(get_class($stockRequest), [
             AtkStockRequest::class,
-            MarketingMediaStockRequest::class,
         ])) {
             \Log::info('StockUpdateService: Skipping automatic stock update for manual fulfillment model', [
                 'model_id' => $stockRequest->id,
@@ -130,7 +124,6 @@ class StockUpdateService
         // Determine the correct division stock model based on the request type
         $divisionStockModel = match (get_class($stockRequest)) {
             AtkStockRequest::class => AtkDivisionStock::class,
-            MarketingMediaStockRequest::class => MarketingMediaDivisionStock::class,
             default => AtkDivisionStock::class, // Default fallback
         };
 
@@ -160,36 +153,21 @@ class StockUpdateService
                 'item_details' => $requestItem->item->name ?? 'unknown',
             ]);
 
-            // For MarketingMedia models, we need to include category_id in defaults
-            if ($divisionStockModel === MarketingMediaDivisionStock::class) {
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $stockRequest->division_id,
-                        'item_id' => $requestItem->item_id,
-                    ],
-                    [
-                        'current_stock' => 0,
-                        'max_stock_limit' => 0, // MarketingMediaDivisionStock has this field
-                        'category_id' => $requestItem->category_id,  // Include category_id for MarketingMedia models
-                    ]
-                );
-            } else {
-                // Get category_id from the item itself for AtkDivisionStock
-                $item = $requestItem->item;
-                $categoryId = $item ? $item->category_id : null;
+            // Get category_id from the item itself for AtkDivisionStock
+            $item = $requestItem->item;
+            $categoryId = $item ? $item->category_id : null;
 
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $stockRequest->division_id,
-                        'item_id' => $requestItem->item_id,
-                    ],
-                    [
-                        'current_stock' => 0,
-                        'moving_average_cost' => 0, // Initialize MAC to 0
-                        'category_id' => $categoryId,
-                    ]
-                );
-            }
+            $divisionStock = $divisionStockModel::firstOrCreate(
+                [
+                    'division_id' => $stockRequest->division_id,
+                    'item_id' => $requestItem->item_id,
+                ],
+                [
+                    'current_stock' => 0,
+                    'moving_average_cost' => 0, // Initialize MAC to 0
+                    'category_id' => $categoryId,
+                ]
+            );
 
             // Determine unit cost for the item
             $incomingUnitCost = 0;
@@ -292,7 +270,7 @@ class StockUpdateService
     }
 
     /**
-     * Update division stock for stock reduction (e.g., AtkStockUsage, MarketingMediaStockUsage)
+     * Update division stock for stock reduction (e.g., AtkStockUsage)
      * This also handles budget deduction for ATK usage
      *
      * @param  mixed  $stockUsage  The approved stock usage
@@ -305,7 +283,6 @@ class StockUpdateService
         // Determine the correct division stock model based on the request type
         $divisionStockModel = match (get_class($stockUsage)) {
             AtkStockUsage::class => AtkDivisionStock::class,
-            MarketingMediaStockUsage::class => MarketingMediaDivisionStock::class,
             default => AtkDivisionStock::class, // Default fallback
         };
 
@@ -324,36 +301,20 @@ class StockUpdateService
 
         // Loop through each item in the stock usage and update the division stock
         foreach ($stockUsage->items as $usageItem) {
-            // For MarketingMedia models, we need to include category_id in defaults
-            if ($divisionStockModel === MarketingMediaDivisionStock::class) {
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $stockUsage->division_id,
-                        'item_id' => $usageItem->item_id,
-                    ],
-                    [
-                        'current_stock' => 0,
-                        'max_stock_limit' => 0,
-                        'category_id' => $usageItem->category_id,  // Include category_id for MarketingMedia models
-                    ]
-                );
-            } else {
-                // Get category_id from the item itself for AtkDivisionStock
-                $item = $usageItem->item;
-                $categoryId = $item ? $item->category_id : null;
+            // Get category_id from the item itself for AtkDivisionStock
+            $item = $usageItem->item;
+            $categoryId = $item ? $item->category_id : null;
 
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $stockUsage->division_id,
-                        'item_id' => $usageItem->item_id,
-                    ],
-                    [
-                        'current_stock' => 0,
-                        'category_id' => $categoryId,
-                        // AtkDivisionStock doesn't have max_stock_limit field
-                    ]
-                );
-            }
+            $divisionStock = $divisionStockModel::firstOrCreate(
+                [
+                    'division_id' => $stockUsage->division_id,
+                    'item_id' => $usageItem->item_id,
+                ],
+                [
+                    'current_stock' => 0,
+                    'category_id' => $categoryId,
+                ]
+            );
 
             // Get the moving average cost for the item
             $unitCost = 0;
@@ -429,7 +390,6 @@ class StockUpdateService
         // Skip automatic updates for these models as they now use manual partial fulfillment
         if (in_array(get_class($model), [
             AtkStockRequest::class,
-            MarketingMediaStockRequest::class,
         ])) {
             \Log::info('StockUpdateService: Skipping automatic stock update by request type for manual fulfillment model', [
                 'model_id' => $model->id,
@@ -452,19 +412,13 @@ class StockUpdateService
         // Determine the correct division stock model based on the model type
         $divisionStockModel = match (get_class($model)) {
             AtkStockRequest::class, AtkStockUsage::class => AtkDivisionStock::class,
-            MarketingMediaStockRequest::class, MarketingMediaStockUsage::class => MarketingMediaDivisionStock::class,
             default => AtkDivisionStock::class, // Default fallback
         };
 
         // Determine default attributes based on the model type
         $defaultAttributes = match (get_class($model)) {
-            MarketingMediaStockRequest::class, MarketingMediaStockUsage::class => [
-                'current_stock' => 0,
-                'max_limit' => 0, // MarketingMediaDivisionStock has this field
-            ],
             default => [
                 'current_stock' => 0,
-                // AtkDivisionStock doesn't have max_limit field
             ],
         };
 
@@ -503,34 +457,19 @@ class StockUpdateService
                 continue;
             }
 
-            // For MarketingMedia models, we need to include category_id in defaults
-            if ($divisionStockModel === MarketingMediaDivisionStock::class) {
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $model->division_id,
-                        'item_id' => $item->item_id,
-                    ],
-                    [
-                        'current_stock' => 0,
-                        'max_stock_limit' => 0,
-                        'category_id' => $item->category_id,  // Include category_id for MarketingMedia models
-                    ]
-                );
-            } else {
-                // Get category_id from the item itself for AtkDivisionStock
-                $itemModel = $item->item;
-                $categoryId = $itemModel ? $itemModel->category_id : null;
+            // Get category_id from the item itself for AtkDivisionStock
+            $itemModel = $item->item;
+            $categoryId = $itemModel ? $itemModel->category_id : null;
 
-                $divisionStock = $divisionStockModel::firstOrCreate(
-                    [
-                        'division_id' => $model->division_id,
-                        'item_id' => $item->item_id,
-                    ],
-                    array_merge($defaultAttributes, [
-                        'category_id' => $categoryId,
-                    ])
-                );
-            }
+            $divisionStock = $divisionStockModel::firstOrCreate(
+                [
+                    'division_id' => $model->division_id,
+                    'item_id' => $item->item_id,
+                ],
+                array_merge($defaultAttributes, [
+                    'category_id' => $categoryId,
+                ])
+            );
 
             $currentStockBefore = $divisionStock->current_stock;
 

@@ -7,8 +7,6 @@ use App\Models\ApprovalFlow;
 use App\Models\AtkStockRequest;
 use App\Models\AtkStockUsage;
 use App\Models\AtkTransferStock;
-use App\Models\MarketingMediaStockRequest;
-use App\Models\MarketingMediaStockUsage;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -310,14 +308,6 @@ class ApprovalValidationService
     }
 
     /**
-     * Check if a specific marketing media stock request can be approved by the logged-in user
-     */
-    public function canUserApproveMarketingMediaStockRequest(MarketingMediaStockRequest $marketingMediaStockRequest, User $user): bool
-    {
-        return $this->canUserApprove($marketingMediaStockRequest, $user);
-    }
-
-    /**
      * Check if a specific stock usage can be approved by the logged-in user
      */
     public function canUserApproveStockUsage(AtkStockUsage $stockUsage, User $user): bool
@@ -326,27 +316,11 @@ class ApprovalValidationService
     }
 
     /**
-     * Check if a specific marketing media stock usage can be approved by the logged-in user
-     */
-    public function canUserApproveMarketingMediaStockUsage(MarketingMediaStockUsage $marketingMediaStockUsage, User $user): bool
-    {
-        return $this->canUserApprove($marketingMediaStockUsage, $user);
-    }
-
-    /**
      * Get approval steps that match both the stock request division and user's division
      */
     public function getMatchingApprovalStepsForStockRequest(AtkStockRequest $stockRequest, User $user): Collection
     {
         return $this->getEligibleApprovalSteps($stockRequest, $user);
-    }
-
-    /**
-     * Get approval steps that match both the marketing media stock request division and user's division
-     */
-    public function getMatchingApprovalStepsForMarketingMediaStockRequest(MarketingMediaStockRequest $marketingMediaStockRequest, User $user): Collection
-    {
-        return $this->getEligibleApprovalSteps($marketingMediaStockRequest, $user);
     }
 
     /**

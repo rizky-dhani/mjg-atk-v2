@@ -48,24 +48,6 @@ class ApprovalFlowSeeder extends Seeder
             ],
         );
 
-        $mmRequestFlow = ApprovalFlow::firstOrCreate(
-            ['model_type' => 'App\Models\MarketingMediaStockRequest', 'division_ids' => null],
-            [
-                'name' => 'Marketing Media Stock Request',
-                'description' => 'Approval flow for Marketing Media Stock Request (Penambahan stock Marketing Media)',
-                'is_active' => true,
-            ],
-        );
-
-        $mmUsageFlow = ApprovalFlow::firstOrCreate(
-            ['model_type' => 'App\Models\MarketingMediaStockUsage', 'division_ids' => null],
-            [
-                'name' => 'Marketing Media Stock Usage',
-                'description' => 'Approval flow for Marketing Media Stock Usage (Pengeluaran stock Marketing Media)',
-                'is_active' => true,
-            ],
-        );
-
         $transferFlow = ApprovalFlow::firstOrCreate(
             ['model_type' => 'App\Models\AtkTransferStock', 'division_ids' => null],
             [
@@ -180,103 +162,6 @@ class ApprovalFlowSeeder extends Seeder
                 'allow_resubmission' => true,
             ],
         ]);
-        // Marketing Media Stock Request
-        ApprovalFlowStep::insert([
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'Division Head',
-                'step_number' => 1,
-                'role_id' => $roleDivHead,
-                'division_id' => null,
-                'description' => 'Division Head approval',
-                'allow_resubmission' => true,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'GA Admin',
-                'step_number' => 2,
-                'role_id' => $roleAdmin,
-                'division_id' => $divGA,
-                'description' => '',
-                'allow_resubmission' => true,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'GA Head',
-                'step_number' => 3,
-                'role_id' => $roleDivHead,
-                'division_id' => $divGA,
-                'description' => '',
-                'allow_resubmission' => true,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'IPC Admin',
-                'step_number' => 4,
-                'role_id' => $roleAdmin,
-                'division_id' => $divIPC,
-                'description' => '',
-                'allow_resubmission' => false,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'IPC Head',
-                'step_number' => 5,
-                'role_id' => $roleDivHead,
-                'division_id' => $divIPC,
-                'description' => '',
-                'allow_resubmission' => false,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'GA Admin',
-                'step_number' => 6,
-                'role_id' => $roleAdmin,
-                'division_id' => $divGA,
-                'description' => '',
-                'allow_resubmission' => false,
-            ],
-            [
-                'flow_id' => $mmRequestFlow->id,
-                'step_name' => 'Marketing Support Head',
-                'step_number' => 7,
-                'role_id' => $roleDivHead,
-                'division_id' => $divHCG,
-                'description' => '',
-                'allow_resubmission' => false,
-            ],
-        ]);
-        // Marketing Media Stock Usage
-        ApprovalFlowStep::insert([
-            [
-                'flow_id' => $mmUsageFlow->id,
-                'step_name' => 'Division Head',
-                'step_number' => 1,
-                'role_id' => $roleDivHead,
-                'division_id' => null,
-                'description' => 'Division Head approval',
-                'allow_resubmission' => true,
-            ],
-            [
-                'flow_id' => $mmUsageFlow->id,
-                'step_name' => 'GA Admin',
-                'step_number' => 2,
-                'role_id' => $roleAdmin,
-                'division_id' => $divGA,
-                'description' => '',
-                'allow_resubmission' => true,
-            ],
-            [
-                'flow_id' => $mmUsageFlow->id,
-                'step_name' => 'GA Head',
-                'step_number' => 3,
-                'role_id' => $roleDivHead,
-                'division_id' => $divGA,
-                'description' => '',
-                'allow_resubmission' => true,
-            ],
-        ]);
-
         // Transfer Stock
         ApprovalFlowStep::insert([
             [

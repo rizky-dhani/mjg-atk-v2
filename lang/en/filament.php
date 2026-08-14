@@ -4,7 +4,6 @@ return [
     'navigation' => [
         'group' => [
             'atk' => 'ATK',
-            'marketing_media' => 'Marketing Media',
             'approval_management' => 'Approval Management',
             'settings' => 'Settings',
             'request_approval' => 'Request Approval',

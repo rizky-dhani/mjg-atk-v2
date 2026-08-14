@@ -6,8 +6,6 @@ use App\Helpers\StockNumberGenerator;
 use App\Models\Approval;
 use App\Models\ApprovalHistory;
 use App\Models\AtkStockUsage;
-use App\Models\MarketingMediaStockUsage;
-
 trait StockUsageModelTrait
 {
     protected static function booted()
@@ -21,8 +19,6 @@ trait StockUsageModelTrait
 
                 if ($modelClass === AtkStockUsage::class) {
                     $model->request_number = StockNumberGenerator::generateOfficeStationeryUsageNumber($model->division_id);
-                } elseif ($modelClass === MarketingMediaStockUsage::class) {
-                    $model->request_number = StockNumberGenerator::generateMarketingMediaUsageNumber($model->division_id);
                 }
             }
         });
