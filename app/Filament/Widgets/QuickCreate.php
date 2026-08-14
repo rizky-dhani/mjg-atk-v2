@@ -9,7 +9,7 @@ use Filament\Widgets\Widget;
 
 class QuickCreate extends Widget
 {
-    protected static string $view = 'filament.widgets.quick-create';
+    protected string $view = 'filament.widgets.quick-create';
 
     protected static ?int $sort = 0;
 
