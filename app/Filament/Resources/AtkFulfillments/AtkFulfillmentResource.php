@@ -35,7 +35,7 @@ class AtkFulfillmentResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'request_number';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
