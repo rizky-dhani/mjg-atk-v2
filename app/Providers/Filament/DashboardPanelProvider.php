@@ -9,6 +9,7 @@ use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
 use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
 use App\Filament\Resources\AtkTransferStocks\AtkTransferStockResource;
 
+use App\Filament\Widgets\QuickCreate;
 use App\Filament\Widgets\AtkStockRequestStatus;
 use App\Filament\Widgets\AtkStockUsageStatus;
 use App\Filament\Widgets\AtkTransferStockStatus;
@@ -103,6 +104,7 @@ class DashboardPanelProvider extends PanelProvider
             ->profile(EditProfile::class)
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
+                QuickCreate::class,
                 AtkStockRequestStatus::class,
                 AtkStockUsageStatus::class,
                 AtkTransferStockStatus::class,

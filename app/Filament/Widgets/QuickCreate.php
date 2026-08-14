@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Filament\Resources\AtkRequestFromFloatingStocks\AtkRequestFromFloatingStockResource;
+use App\Filament\Resources\AtkStockRequests\AtkStockRequestResource;
+use App\Filament\Resources\AtkStockUsages\AtkStockUsageResource;
+use Filament\Widgets\Widget;
+
+class QuickCreate extends Widget
+{
+    protected static string $view = 'filament.widgets.quick-create';
+
+    protected static ?int $sort = 0;
+
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user && (
+            $user->can('create atk-stock-request') ||
+            $user->can('create atk-stock-usage') ||
+            $user->can('create atk-request-from-floating-stock')
+        );
+    }
+
+    public function getActions(): array
+    {
+        $user = auth()->user();
+
+        $actions = [];
+
+        if ($user->can('create atk-stock-request')) {
+            $actions[] = [
+                'label' => 'Permintaan ATK',
+                'description' => 'Buat permintaan stok ATK baru',
+                'url' => AtkStockRequestResource::getUrl('index'),
+                'icon' => 'heroicon-o-arrow-down-tray',
+                'color' => 'primary',
+            ];
+        }
+
+        if ($user->can('create atk-stock-usage')) {
+            $actions[] = [
+                'label' => 'Pengeluaran ATK',
+                'description' => 'Catat pengeluaran stok ATK',
+                'url' => AtkStockUsageResource::getUrl('index'),
+                'icon' => 'heroicon-o-arrow-up-tray',
+                'color' => 'warning',
+            ];
+        }
+
+        if ($user->can('create atk-request-from-floating-stock')) {
+            $actions[] = [
+                'label' => 'Minta Stok Umum',
+                'description' => 'Minta stok dari gudang umum',
+                'url' => AtkRequestFromFloatingStockResource::getUrl('index'),
+                'icon' => 'heroicon-o-arrow-top-right-on-square',
+                'color' => 'success',
+            ];
+        }
+
+        return $actions;
+    }
+}
