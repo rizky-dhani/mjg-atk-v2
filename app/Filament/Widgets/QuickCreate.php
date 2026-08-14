@@ -33,7 +33,6 @@ class QuickCreate extends Widget
         if ($user->can('create atk-stock-request')) {
             $actions[] = [
                 'label' => 'Permintaan ATK',
-                'description' => 'Buat permintaan stok ATK baru',
                 'url' => AtkStockRequestResource::getUrl('index'),
                 'icon' => 'heroicon-o-arrow-down-tray',
                 'color' => 'primary',
@@ -43,7 +42,6 @@ class QuickCreate extends Widget
         if ($user->can('create atk-stock-usage')) {
             $actions[] = [
                 'label' => 'Pengeluaran ATK',
-                'description' => 'Catat pengeluaran stok ATK',
                 'url' => AtkStockUsageResource::getUrl('index'),
                 'icon' => 'heroicon-o-arrow-up-tray',
                 'color' => 'warning',
@@ -53,7 +51,6 @@ class QuickCreate extends Widget
         if ($user->can('create atk-request-from-floating-stock')) {
             $actions[] = [
                 'label' => 'Minta Stok Umum',
-                'description' => 'Minta stok dari gudang umum',
                 'url' => AtkRequestFromFloatingStockResource::getUrl('index'),
                 'icon' => 'heroicon-o-arrow-top-right-on-square',
                 'color' => 'success',
