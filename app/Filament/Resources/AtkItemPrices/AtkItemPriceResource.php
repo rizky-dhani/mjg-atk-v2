@@ -30,7 +30,7 @@ class AtkItemPriceResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament.navigation.group.atk');
+        return __('filament.navigation.group.settings');
     }
 
     public static function form(Schema $schema): Schema
