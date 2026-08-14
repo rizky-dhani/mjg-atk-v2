@@ -1,6 +1,6 @@
 <x-filament-widgets::widget>
     <x-filament::section heading="Quick Create">
-        <div class="flex flex-wrap justify-center gap-4 px-4 py-2">
+        <div class="flex flex-wrap justify-center items-center px-4 py-2 [&>*:not(:last-child)]:mr-6">
             @foreach($this->getActions() as $action)
                 <x-filament::button
                     tag="a"
