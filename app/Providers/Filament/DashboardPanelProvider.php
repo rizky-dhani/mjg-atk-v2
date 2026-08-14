@@ -88,7 +88,7 @@ class DashboardPanelProvider extends PanelProvider
                     ->isActiveWhen(fn () => request()->url() === AtkTransferStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
                 // Inventory Stock Management
-                NavigationItem::make('Item Inventaris')
+                NavigationItem::make('Item Inventaris ATK')
                     ->icon(fn () => Heroicon::ArchiveBox)
                     ->url(fn () => AtkItemResource::getUrl('index'))
                     ->group(__('filament.navigation.group.settings'))

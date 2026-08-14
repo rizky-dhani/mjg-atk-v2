@@ -29,7 +29,7 @@ class AtkDivisionStockSettingResource extends Resource
             ->forUser(auth()->user());
     }
 
-    protected static ?string $navigationLabel = 'Stock Limit - ATK';
+    protected static ?string $navigationLabel = 'Stock Limit ATK';
 
     protected static ?string $modelLabel = 'Stock Limit';
 
