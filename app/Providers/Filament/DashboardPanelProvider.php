@@ -63,25 +63,25 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 // Approval Permintaan
-                NavigationItem::make('Persetujuan Permintaan ATK')
+                NavigationItem::make('Approval Permintaan ATK')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Persetujuan Permintaan Stok Umum ATK')
+                NavigationItem::make('Approval Permintaan Stok Umum ATK')
                     ->icon(fn () => Heroicon::ArrowTopRightOnSquare)
                     ->url(fn () => AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Persetujuan Pengeluaran ATK')
+                NavigationItem::make('Approval Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Persetujuan Transfer Stok ATK')
+                NavigationItem::make('Approval Transfer Stok ATK')
                     ->icon(fn () => Heroicon::ArrowsRightLeft)
                     ->url(fn () => AtkTransferStockResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))

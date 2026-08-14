@@ -23,7 +23,7 @@ class ApprovalAtkTransferStock extends ListRecords
 
     protected static ?string $slug = 'atk/transfer-stocks/approval';
 
-    protected static ?string $navigationLabel = 'Persetujuan Transfer Stok ATK';
+    protected static ?string $navigationLabel = 'Approval Transfer Stok ATK';
 
     public static function getNavigationGroup(): ?string
     {
@@ -32,7 +32,7 @@ class ApprovalAtkTransferStock extends ListRecords
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::ArrowsRightLeft;
 
-    protected static ?string $title = 'Persetujuan Transfer Stok ATK';
+    protected static ?string $title = 'Approval Transfer Stok ATK';
 
     public static function getNavigationBadge(): ?string
     {
