@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AtkRequestFromFloatingStocks;
 
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ApprovalAtkRequestFromFloatingStock;
+use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\CreateAtkRequestFromFloatingStock;
+use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\EditAtkRequestFromFloatingStock;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Pages\ListAtkRequestFromFloatingStocks;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\RelationManagers\AtkRequestFromFloatingStockItemsRelationManager;
 use App\Filament\Resources\AtkRequestFromFloatingStocks\Schemas\AtkRequestFromFloatingStockForm;
@@ -83,6 +85,8 @@ class AtkRequestFromFloatingStockResource extends Resource
     {
         return [
             'index' => ListAtkRequestFromFloatingStocks::route('/'),
+            'create' => CreateAtkRequestFromFloatingStock::route('/create'),
+            'edit' => EditAtkRequestFromFloatingStock::route('/{record}/edit'),
             'approval' => ApprovalAtkRequestFromFloatingStock::route('/approval'),
         ];
     }

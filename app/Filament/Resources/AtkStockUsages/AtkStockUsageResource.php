@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AtkStockUsages;
 
 use App\Filament\Resources\AtkStockUsages\Pages\ApprovalAtkStockUsage;
+use App\Filament\Resources\AtkStockUsages\Pages\CreateAtkStockUsage;
+use App\Filament\Resources\AtkStockUsages\Pages\EditAtkStockUsage;
 use App\Filament\Resources\AtkStockUsages\Pages\ListAtkStockUsages;
 use App\Filament\Resources\AtkStockUsages\Pages\ViewAtkStockUsage;
 use App\Filament\Resources\AtkStockUsages\Schemas\AtkStockUsageForm;
@@ -83,6 +85,8 @@ class AtkStockUsageResource extends Resource
     {
         return [
             'index' => ListAtkStockUsages::route('/'),
+            'create' => CreateAtkStockUsage::route('/create'),
+            'edit' => EditAtkStockUsage::route('/{record}/edit'),
             'approval' => ApprovalAtkStockUsage::route('/approval'),
             'view' => ViewAtkStockUsage::route('/view/{record}'),
         ];

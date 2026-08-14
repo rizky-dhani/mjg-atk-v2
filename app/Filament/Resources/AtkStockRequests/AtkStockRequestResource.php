@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\AtkStockRequests;
 
 use App\Filament\Resources\AtkStockRequests\Pages\ApprovalAtkStockRequest;
+use App\Filament\Resources\AtkStockRequests\Pages\CreateAtkStockRequest;
+use App\Filament\Resources\AtkStockRequests\Pages\EditAtkStockRequest;
 use App\Filament\Resources\AtkStockRequests\Pages\ListAtkStockRequests;
 use App\Filament\Resources\AtkStockRequests\Pages\ViewAtkStockRequest;
 use App\Filament\Resources\AtkStockRequests\Schemas\AtkStockRequestForm;
@@ -83,6 +85,8 @@ class AtkStockRequestResource extends Resource
     {
         return [
             'index' => ListAtkStockRequests::route('/'),
+            'create' => CreateAtkStockRequest::route('/create'),
+            'edit' => EditAtkStockRequest::route('/{record}/edit'),
             'view' => ViewAtkStockRequest::route('/view/{record}'),
             'approval' => ApprovalAtkStockRequest::route('/approval'),
         ];
