@@ -19,7 +19,7 @@ class AtkFloatingStockResource extends Resource
 {
     protected static ?string $model = AtkFloatingStock::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::ArchiveBox;
 
     public static function getNavigationGroup(): ?string
     {
