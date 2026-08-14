@@ -37,7 +37,7 @@ class AtkRequestFromFloatingStockResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'request_number';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {

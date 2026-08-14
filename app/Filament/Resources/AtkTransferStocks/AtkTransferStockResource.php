@@ -37,7 +37,7 @@ class AtkTransferStockResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'transfer_number';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function getNavigationItems(): array
     {
