@@ -23,7 +23,7 @@ class ApprovalAtkStockRequest extends ListRecords
 
     protected static ?string $slug = 'atk/stock-requests/approval';
 
-    protected static ?string $navigationLabel = 'Approval Permintaan ATK';
+    protected static ?string $navigationLabel = 'Permintaan ATK';
 
     public static function getNavigationGroup(): ?string
     {
@@ -32,7 +32,7 @@ class ApprovalAtkStockRequest extends ListRecords
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::DocumentCheck;
 
-    protected static ?string $title = 'Approval Permintaan ATK';
+    protected static ?string $title = 'Permintaan ATK';
 
     public static function getNavigationBadge(): ?string
     {

@@ -22,7 +22,7 @@ class ApprovalAtkStockUsage extends ListRecords
 
     protected static ?string $slug = 'atk/stock-usages/approval';
 
-    protected static ?string $navigationLabel = 'Approval Pengeluaran ATK';
+    protected static ?string $navigationLabel = 'Pengeluaran ATK';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::CheckBadge;
 
@@ -31,7 +31,7 @@ class ApprovalAtkStockUsage extends ListRecords
         return __('filament.navigation.group.atk');
     }
 
-    protected static ?string $title = 'Approval Pengeluaran ATK';
+    protected static ?string $title = 'Pengeluaran ATK';
 
     public static function getNavigationBadge(): ?string
     {

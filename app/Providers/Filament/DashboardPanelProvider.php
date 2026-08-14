@@ -63,25 +63,25 @@ class DashboardPanelProvider extends PanelProvider
             ])
             ->navigationItems([
                 // Approval Permintaan
-                NavigationItem::make('Approval Permintaan ATK')
+                NavigationItem::make('Permintaan ATK')
                     ->icon(fn () => Heroicon::ArrowDownTray)
                     ->url(fn () => AtkStockRequestResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockRequestResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Approval Permintaan Stok Umum ATK')
+                NavigationItem::make('Permintaan Stok Umum ATK')
                     ->icon(fn () => Heroicon::ArrowTopRightOnSquare)
                     ->url(fn () => AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkRequestFromFloatingStockResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Approval Pengeluaran ATK')
+                NavigationItem::make('Pengeluaran ATK')
                     ->icon(fn () => Heroicon::ArrowUpTray)
                     ->url(fn () => AtkStockUsageResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))
                     ->isActiveWhen(fn () => request()->url() === AtkStockUsageResource::getUrl('approval'))
                     ->visible(fn () => $this->canUserSeeApprovalNav()),
-                NavigationItem::make('Approval Transfer Stok ATK')
+                NavigationItem::make('Transfer Stok ATK')
                     ->icon(fn () => Heroicon::ArrowsRightLeft)
                     ->url(fn () => AtkTransferStockResource::getUrl('approval'))
                     ->group(__('filament.navigation.group.request_approval'))

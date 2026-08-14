@@ -20,9 +20,9 @@ class ApprovalAtkRequestFromFloatingStock extends ListRecords
 {
     protected static string $resource = AtkRequestFromFloatingStockResource::class;
 
-    protected static ?string $title = 'Approval Permintaan Stok Umum';
+    protected static ?string $title = 'Permintaan Stok Umum';
 
-    protected static ?string $navigationLabel = 'Approval Permintaan Stok Umum';
+    protected static ?string $navigationLabel = 'Permintaan Stok Umum';
 
     public static function getNavigationGroup(): ?string
     {
