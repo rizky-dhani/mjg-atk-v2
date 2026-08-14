@@ -3,7 +3,7 @@
 return [
     'navigation' => [
         'group' => [
-            'atk' => 'Office Stationery',
+            'atk' => 'ATK',
             'marketing_media' => 'Marketing Media',
             'approval_management' => 'Approval Management',
             'settings' => 'Settings',
