@@ -26,6 +26,39 @@ class AtkFulfillmentInfolist
                 ->columns(4)
                 ->columnSpanFull(),
 
+            Section::make('Riwayat Pemenuhan')
+                ->schema([
+                    RepeatableEntry::make('fulfillmentHistories')
+                        ->label('Riwayat Penerimaan Stok')
+                        ->columns(4)
+                        ->schema([
+                            TextEntry::make('item.name')
+                                ->label('Item'),
+                            TextEntry::make('quantity')
+                                ->label('Jumlah Diterima')
+                                ->numeric(),
+                            TextEntry::make('user.name')
+                                ->label('Diterima Oleh')
+                                ->placeholder('—'),
+                            TextEntry::make('created_at')
+                                ->label('Waktu')
+                                ->dateTime(),
+                            TextEntry::make('notes')
+                                ->label('Catatan')
+                                ->placeholder('—')
+                                ->columnSpanFull(),
+                        ])
+                        ->state(function ($record) {
+                            return $record->fulfillmentHistories()
+                                ->with(['item', 'user'])
+                                ->orderByDesc('created_at')
+                                ->get();
+                        })
+                        ->columnSpanFull(),
+                ])
+                ->columnSpanFull()
+                ->collapsed(),
+
             Section::make('Progress Approval')
                 ->schema([
                     RepeatableEntry::make('approvalProgress')

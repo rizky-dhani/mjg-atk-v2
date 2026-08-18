@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Enums\AtkStockRequestItemStatus;
 use App\Models\AtkStockRequestItem;
+use App\Models\FulfillmentHistory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class FulfillmentService
@@ -61,7 +63,16 @@ class FulfillmentService
                 $notes ?? "Partial fulfillment from Request {$request->request_number}"
             );
 
-            // 4. Update parent request status (derived, but we might want to trigger any logic)
+            // 4. Record fulfillment history (audit trail: who received what, when)
+            FulfillmentHistory::create([
+                'request_id' => $request->id,
+                'item_id' => $item->item_id,
+                'quantity' => $receivedQuantity,
+                'notes' => $notes,
+                'user_id' => Auth::id(),
+            ]);
+
+            // 5. Update parent request status (derived, but we might want to trigger any logic)
             // The overall fulfillment status is dynamically calculated via accessor in our model,
             // but we ensure the request record is touched if needed.
             $request->touch();
@@ -86,4 +97,5 @@ class FulfillmentService
             return true;
         });
     }
+
 }

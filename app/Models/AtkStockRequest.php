@@ -56,6 +56,11 @@ class AtkStockRequest extends Model
         return $this->hasMany(AtkStockRequestItem::class, 'request_id');
     }
 
+    public function fulfillmentHistories(): HasMany
+    {
+        return $this->hasMany(FulfillmentHistory::class, 'request_id');
+    }
+
     public function approval(): MorphOne
     {
         return $this->morphOne(Approval::class, 'approvable');
