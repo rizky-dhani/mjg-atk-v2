@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Enums\AtkStockRequestItemStatus;
+use App\Models\AtkStockRequest;
 use App\Models\AtkStockRequestItem;
 use App\Models\FulfillmentHistory;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -98,4 +101,34 @@ class FulfillmentService
         });
     }
 
+    /**
+     * Notify the requester that stock for their request has been received.
+     */
+    public function notifyRequester(AtkStockRequest $request, int $totalQuantity, ?string $itemName = null, ?string $notes = null): void
+    {
+        $requester = $request->requester;
+
+        if (! $requester) {
+            return;
+        }
+
+        $viewUrl = \App\Filament\Resources\AtkFulfillments\AtkFulfillmentResource::getUrl('view', ['record' => $request]);
+
+        $detail = $itemName
+            ? "{$totalQuantity} {$itemName} telah diterima."
+            : "Stok sebanyak {$totalQuantity} unit telah diterima.";
+
+        Notification::make()
+            ->title('Stok ATK Diterima')
+            ->body("Permintaan {$request->request_number}: {$detail}".($notes ? " Catatan: {$notes}" : ''))
+            ->success()
+            ->actions([
+                Action::make('view')
+                    ->label('Lihat')
+                    ->url($viewUrl)
+                    ->button()
+                    ->markAsRead(),
+            ])
+            ->sendToDatabase($requester);
+    }
 }

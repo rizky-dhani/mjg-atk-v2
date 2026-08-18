@@ -88,6 +88,7 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                         try {
                             $fulfillmentService = app(FulfillmentService::class);
                             $fulfillmentService->receiveItem($record, $data['qty'], $data['notes'] ?? null);
+                            $fulfillmentService->notifyRequester($record->request, $data['qty'], $record->item?->name, $data['notes'] ?? null);
                             Notification::make()
                                 ->title('Stok Berhasil Disimpan')
                                 ->success()
@@ -113,12 +114,22 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                         ->action(function (Collection $records): void {
                             $fulfillmentService = app(FulfillmentService::class);
                             $successCount = 0;
+                            $totalsByRequest = [];
 
                             foreach ($records as $record) {
                                 if (! $record->isFullyReceived()) {
                                     $fulfillmentService->receiveItem($record, $record->remaining_quantity);
+                                    $requestId = $record->request_id;
+                                    $totalsByRequest[$requestId] = ($totalsByRequest[$requestId] ?? 0) + $record->remaining_quantity;
                                     $successCount++;
                                 }
+                            }
+
+                            foreach ($totalsByRequest as $requestId => $totalQuantity) {
+                                $fulfillmentService->notifyRequester(
+                                    $records->firstWhere('request_id', $requestId)->request,
+                                    $totalQuantity
+                                );
                             }
 
                             if ($successCount > 0) {
