@@ -70,7 +70,8 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                     ->icon(Heroicon::ArchiveBoxArrowDown)
                     ->color('success')
                     ->visible(fn (AtkStockRequestItem $record): bool => $record->request->approval?->status === 'approved' &&
-                        ! $record->isFullyReceived()
+                        ! $record->isFullyReceived() &&
+                        auth()->user()->can('edit atk-fulfillment')
                     )
                     ->form(fn (AtkStockRequestItem $record) => [
                         TextInput::make('qty')
@@ -79,10 +80,14 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                             ->required()
                             ->maxValue($record->remaining_quantity)
                             ->minValue(1),
+                        TextInput::make('notes')
+                            ->label('Catatan')
+                            ->placeholder('Catatan penerimaan stok (opsional)'),
                     ])
                     ->action(function (AtkStockRequestItem $record, array $data): void {
                         try {
-                            app(FulfillmentService::class)->receiveItem($record, $data['qty']);
+                            $fulfillmentService = app(FulfillmentService::class);
+                            $fulfillmentService->receiveItem($record, $data['qty'], $data['notes'] ?? null);
                             Notification::make()
                                 ->title('Stok Berhasil Disimpan')
                                 ->success()
@@ -102,7 +107,8 @@ class AtkStockRequestItemsRelationManager extends RelationManager
                         ->label('Simpan Stok Terpilih')
                         ->icon(Heroicon::ArchiveBoxArrowDown)
                         ->color('success')
-                        ->visible(fn (RelationManager $livewire): bool => $livewire->getOwnerRecord()->approval?->status === 'approved'
+                        ->visible(fn (RelationManager $livewire): bool => $livewire->getOwnerRecord()->approval?->status === 'approved' &&
+                            auth()->user()->can('edit atk-fulfillment')
                         )
                         ->action(function (Collection $records): void {
                             $fulfillmentService = app(FulfillmentService::class);
