@@ -2,7 +2,17 @@
 
 namespace App\Filament\Resources\AtkFulfillments\Tables;
 
+use App\Enums\FulfillmentStatus;
+use App\Models\AtkFulfillment;
+use App\Models\AtkStockRequestItem;
+use App\Services\FulfillmentService;
+use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
+use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -15,7 +25,7 @@ class AtkFulfillmentsTable
         return $table
             ->modifyQueryUsing(
                 fn (Builder $query) => $query
-                    ->with(['requester', 'division', 'approval'])
+                    ->with(['requester', 'division', 'approval', 'atkStockRequestItems.item'])
                     ->orderByDesc('created_at'),
             )
             ->columns([
@@ -77,6 +87,104 @@ class AtkFulfillmentsTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('fulfill')
+                    ->label('Fulfill')
+                    ->icon(Heroicon::ArchiveBoxArrowDown)
+                    ->color('success')
+                    ->visible(fn (AtkFulfillment $record): bool => $record->approval?->status === 'approved' &&
+                        $record->fulfillment_status !== FulfillmentStatus::Fulfilled &&
+                        auth()->user()->can('edit atk-fulfillment')
+                    )
+                    ->modalWidth(Width::SevenExtraLarge)
+                    ->form(fn (AtkFulfillment $record) => [
+                        Repeater::make('items')
+                            ->label('Items')
+                            ->schema([
+                                \Filament\Forms\Components\Hidden::make('item_id'),
+                                TextInput::make('item_name')
+                                    ->label('Item')
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('requested')
+                                    ->label('Requested')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('received')
+                                    ->label('Received')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(false),
+                                TextInput::make('qty')
+                                    ->label('Qty to Receive')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(1)
+                                    ->maxValue(function (callable $get) use ($record) {
+                                        $item = $record->atkStockRequestItems->firstWhere('id', $get('item_id'));
+
+                                        return $item ? $item->remaining_quantity : 0;
+                                    }),
+                                TextInput::make('remaining')
+                                    ->label('Remaining')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(false),
+                            ])
+                            ->columns(5)
+                            ->default(fn () => $record->atkStockRequestItems
+                                ->filter(fn (AtkStockRequestItem $item) => ! $item->isFullyReceived())
+                                ->map(fn (AtkStockRequestItem $item) => [
+                                    'item_id' => $item->id,
+                                    'item_name' => $item->item?->name,
+                                    'requested' => $item->quantity,
+                                    'received' => $item->received_quantity,
+                                    'remaining' => $item->remaining_quantity,
+                                    'qty' => $item->remaining_quantity,
+                                ])
+                                ->values()
+                                ->toArray()),
+                        TextInput::make('notes')
+                            ->label('Catatan')
+                            ->placeholder('Catatan penerimaan stok (opsional)'),
+                    ])
+                    ->action(function (AtkFulfillment $record, array $data): void {
+                        $fulfillmentService = app(FulfillmentService::class);
+                        $successCount = 0;
+                        $totalQuantity = 0;
+
+                        try {
+                            foreach ($data['items'] as $itemData) {
+                                $item = $record->atkStockRequestItems->firstWhere('id', $itemData['item_id']);
+                                if (! $item || $item->isFullyReceived() || $itemData['qty'] <= 0) {
+                                    continue;
+                                }
+
+                                $fulfillmentService->receiveItem($item, $itemData['qty'], $data['notes'] ?? null);
+                                $totalQuantity += $itemData['qty'];
+                                $successCount++;
+                            }
+
+                            if ($successCount > 0) {
+                                $fulfillmentService->notifyRequester($record, $totalQuantity, null, $data['notes'] ?? null);
+                                Notification::make()
+                                    ->title("$successCount Item Berhasil Disimpan")
+                                    ->success()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('Tidak Ada Item yang Diproses')
+                                    ->warning()
+                                    ->send();
+                            }
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Gagal Menyimpan Stok')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ])
             ->toolbarActions([
                 // No bulk actions needed for now
