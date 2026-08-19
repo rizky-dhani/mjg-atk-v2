@@ -22,8 +22,7 @@ class AtkDivisionStocksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(
-                fn (Builder $query) => $query->orderBy('category_id'))
+            ->defaultSort('category_id')
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
