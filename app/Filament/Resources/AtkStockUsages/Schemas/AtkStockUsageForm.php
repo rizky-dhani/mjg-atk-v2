@@ -314,7 +314,6 @@ class AtkStockUsageForm
 
                                     return $total;
                                 }),
-                            \Filament\Forms\Components\Hidden::make('category_id'),
                         ])
                         ->minItems(1)
                         ->addActionLabel('Add Item')
