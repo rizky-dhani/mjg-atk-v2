@@ -22,7 +22,8 @@ class AtkDivisionStocksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('current_stock', 'desc')
+            ->modifyQueryUsing(
+                fn (Builder $query) => $query->orderByDesc('current_stock'))
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
