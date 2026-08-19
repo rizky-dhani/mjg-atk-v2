@@ -22,7 +22,7 @@ class AtkDivisionStocksTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->defaultSort('category_id')
+            ->defaultSort('current_stock', 'desc')
             ->columns([
                 TextColumn::make('item.name')
                     ->searchable()
